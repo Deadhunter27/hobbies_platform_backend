@@ -16,7 +16,7 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json",
-    "start": "node dist/main.js",
+    "start": "TS_NODE_BASEURL=./dist node -r tsconfig-paths/register dist/main.js",
     "start:dev": "ts-node -r dotenv/config -r tsconfig-paths/register src/main.ts",
     "test": "jest --selectProjects unit",
     "test:unit": "jest --selectProjects unit",
@@ -24,7 +24,7 @@
     "test:e2e": "jest --selectProjects e2e",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "openapi:generate": "ts-node -r tsconfig-paths/register scripts/generate-openapi.ts"
+    "openapi:generate": "ts-node -r dotenv/config -r tsconfig-paths/register scripts/generate-openapi.ts"
   },
   "prisma": {
     "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts"
