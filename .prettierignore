@@ -1,0 +1,12 @@
+dist
+node_modules
+pnpm-lock.yaml
+openapi/openapi.json
+
+# Pre-existing docs predate Prettier tooling and are out of scope to reformat
+# (ADRs 0001-0014, architecture, guides are frozen per CLAUDE.md). Only the
+# docs this milestone actually authors/edits are checked.
+docs/**
+!docs/adr/0015-id-strategy-ulid.md
+!docs/adr/0016-hobby-taxonomy-data-model.md
+!docs/adr/README.md
