@@ -8,9 +8,11 @@ import {
   ListHobbyCategoriesUseCase,
 } from './application';
 import { PrismaHobbyCategoryRepository, PrismaHobbyRepository } from './infrastructure';
+import { HobbiesController, HobbyCategoriesController } from './interface';
 
 @Module({
   imports: [PrismaModule],
+  controllers: [HobbyCategoriesController, HobbiesController],
   providers: [
     ListHobbyCategoriesUseCase,
     ListHobbiesUseCase,
