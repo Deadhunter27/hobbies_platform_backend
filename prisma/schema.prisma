@@ -6,3 +6,79 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum HobbyDifficulty {
+  beginner_friendly
+  moderate
+  demanding
+
+  @@map("hobby_difficulty")
+}
+
+enum HobbyCostLevel {
+  free
+  low
+  medium
+  high
+
+  @@map("hobby_cost_level")
+}
+
+enum HobbySetting {
+  indoor
+  outdoor
+  both
+
+  @@map("hobby_setting")
+}
+
+enum HobbyStatus {
+  draft
+  active
+  archived
+
+  @@map("hobby_status")
+}
+
+// ADR-0016: hierarchical hobby taxonomy. Categories carry no status/facets —
+// only hobbies are filterable/facet-bearing.
+model CatalogHobbyCategory {
+  id          String                 @id @db.Char(26)
+  parentId    String?                @db.Char(26)
+  parent      CatalogHobbyCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  children    CatalogHobbyCategory[] @relation("CategoryHierarchy")
+  name        String                 @db.VarChar(120)
+  slug        String                 @unique @db.VarChar(140)
+  description String?                @db.Text
+  sortOrder   Int                    @default(0)
+  hobbies     CatalogHobby[]
+  createdAt   DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime               @updatedAt @db.Timestamptz(3)
+
+  @@index([parentId])
+  @@index([sortOrder, id])
+  @@map("catalog_hobby_category")
+}
+
+model CatalogHobby {
+  id          String               @id @db.Char(26)
+  categoryId  String               @db.Char(26)
+  category    CatalogHobbyCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  name        String               @db.VarChar(120)
+  slug        String               @unique @db.VarChar(140)
+  description String?              @db.Text
+  difficulty  HobbyDifficulty
+  costLevel   HobbyCostLevel
+  setting     HobbySetting
+  status      HobbyStatus          @default(draft)
+  createdAt   DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime             @updatedAt @db.Timestamptz(3)
+
+  // Backs the public list's WHERE status = 'active' + ORDER BY name, id.
+  @@index([status, name, id])
+  @@index([categoryId, status])
+  @@index([difficulty])
+  @@index([costLevel])
+  @@index([setting])
+  @@map("catalog_hobby")
+}

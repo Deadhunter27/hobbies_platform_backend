@@ -11,8 +11,8 @@
   },
   "scripts": {
     "prepare": "husky",
-    "format": "prettier --write \"{src,test}/**/*.ts\" \"docs/**/*.md\"",
-    "format:check": "prettier --check \"{src,test}/**/*.ts\" \"docs/**/*.md\"",
+    "format": "prettier --write \"{src,test,prisma,scripts}/**/*.ts\" \"docs/**/*.md\"",
+    "format:check": "prettier --check \"{src,test,prisma,scripts}/**/*.ts\" \"docs/**/*.md\"",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json",
