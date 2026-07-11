@@ -3,6 +3,7 @@ import { envSchema } from './env.schema';
 export interface AppConfig {
   readonly nodeEnv: 'development' | 'test' | 'production';
   readonly port: number;
+  readonly databaseUrl: string;
   readonly logLevel: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
   readonly isDevelopment: boolean;
 }
@@ -27,6 +28,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   return Object.freeze({
     nodeEnv: parsed.NODE_ENV,
     port: parsed.PORT,
+    databaseUrl: parsed.DATABASE_URL,
     logLevel: parsed.LOG_LEVEL,
     isDevelopment: parsed.NODE_ENV === 'development',
   });
