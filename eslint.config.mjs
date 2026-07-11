@@ -42,8 +42,10 @@ export default [
   },
   {
     // ADR-0008: process.env is only read here, everywhere else must go
-    // through the typed config object.
-    files: ['src/config/**/*.ts'],
+    // through the typed config object. Test harnesses are the one other
+    // legitimate exception (e.g. DATABASE_URL to decide whether a DB-gated
+    // suite runs) since they aren't application runtime code.
+    files: ['src/config/**/*.ts', 'test/**/*.ts'],
     rules: {
       'n/no-process-env': 'off',
     },
