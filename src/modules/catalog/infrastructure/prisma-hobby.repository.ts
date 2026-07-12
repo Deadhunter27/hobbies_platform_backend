@@ -14,6 +14,12 @@ import { toDomainHobby } from './mappers/hobby.mapper';
  * yield an empty page, not "no category filter applied". */
 const NO_SUCH_CATEGORY = '00000000000000000000000000';
 
+/** Prisma's `contains` passes % and _ through to LIKE unescaped, so a query
+ * of "%" would match every row instead of names containing a literal "%". */
+function escapeLikeWildcards(value: string): string {
+  return value.replace(/[\\%_]/g, '\\$&');
+}
+
 @Injectable()
 export class PrismaHobbyRepository implements HobbyRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -34,7 +40,7 @@ export class PrismaHobbyRepository implements HobbyRepository {
     }
 
     if (query.filter.q) {
-      where.name = { contains: query.filter.q, mode: 'insensitive' };
+      where.name = { contains: escapeLikeWildcards(query.filter.q), mode: 'insensitive' };
     }
 
     if (query.cursor) {

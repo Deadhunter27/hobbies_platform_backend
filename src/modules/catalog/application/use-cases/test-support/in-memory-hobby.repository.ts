@@ -35,8 +35,12 @@ export class InMemoryHobbyRepository implements HobbyRepository {
 
     if (query.cursor) {
       const { name, id } = query.cursor;
+      // Same comparator as the sort above — mixing localeCompare ordering
+      // with code-point > comparisons would skew pages for non-ASCII names.
       filtered = filtered.filter(
-        (record) => record.name > name || (record.name === name && record.id > id),
+        (record) =>
+          record.name.localeCompare(name) > 0 ||
+          (record.name === name && record.id.localeCompare(id) > 0),
       );
     }
 

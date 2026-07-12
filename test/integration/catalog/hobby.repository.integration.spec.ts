@@ -96,6 +96,17 @@ describeIfDb('PrismaHobbyRepository (integration)', () => {
     expect(result.hasMore).toBe(false);
   });
 
+  it('treats LIKE wildcards in q as literal characters', async () => {
+    await createHobby({ name: 'Alpha', slug: 'alpha' });
+    await createHobby({ name: '100% Cotton Crafts', slug: 'cotton-crafts' });
+
+    const wildcardOnly = await repository.list({ filter: { q: '%' }, limit: 10 });
+    const literalMatch = await repository.list({ filter: { q: '100%' }, limit: 10 });
+
+    expect(wildcardOnly.items.map((hobby) => hobby.name)).toEqual(['100% Cotton Crafts']);
+    expect(literalMatch.items.map((hobby) => hobby.name)).toEqual(['100% Cotton Crafts']);
+  });
+
   it('rejects a duplicate slug at the database level', async () => {
     await createHobby({ slug: 'duplicate-slug' });
 
