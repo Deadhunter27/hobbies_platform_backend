@@ -118,6 +118,41 @@ jobs:
       - run: pnpm openapi:generate
       - run: git diff --exit-code -- openapi/openapi.json
 
+  docker:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: hobbies
+          POSTGRES_PASSWORD: hobbies
+          POSTGRES_DB: hobbies_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U hobbies -d hobbies_dev"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t hobbies-backend:ci .
+      - name: Boot the image and probe health endpoints
+        run: |
+          docker run -d --name api --network host \
+            -e NODE_ENV=production -e PORT=3000 -e LOG_LEVEL=info \
+            -e DATABASE_URL=postgresql://hobbies:hobbies@localhost:5432/hobbies_dev \
+            hobbies-backend:ci
+          live=""
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/health/live > /dev/null; then live=1; break; fi
+            sleep 2
+          done
+          if [ -z "$live" ]; then echo "::error::API never became live"; docker logs api; exit 1; fi
+          curl -fsS http://localhost:3000/health/live
+          curl -fsS http://localhost:3000/health/ready || { docker logs api; exit 1; }
+          docker logs api
+
   commitlint:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'

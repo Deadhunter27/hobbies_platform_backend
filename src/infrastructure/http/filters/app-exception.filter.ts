@@ -31,8 +31,10 @@ export class AppExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
-    const requestId = request.headers['x-request-id'] ?? 'unknown';
+    const request = ctx.getRequest<Request & { id?: string | number }>();
+    // pino-http assigns req.id (echoed to the client as x-request-id); the
+    // raw header alone is empty whenever the id was server-generated.
+    const requestId = request.id ?? request.headers['x-request-id'] ?? 'unknown';
 
     if (exception instanceof AppError) {
       const status = statusForAppError(exception);

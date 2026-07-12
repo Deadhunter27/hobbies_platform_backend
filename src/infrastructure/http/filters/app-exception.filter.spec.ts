@@ -11,11 +11,15 @@ import {
   ValidationError,
 } from '@shared/errors';
 
-function makeHost(): { host: ArgumentsHost; json: jest.Mock; status: jest.Mock } {
+function makeHost(requestId?: string): {
+  host: ArgumentsHost;
+  json: jest.Mock;
+  status: jest.Mock;
+} {
   const json = jest.fn();
   const status = jest.fn().mockReturnValue({ json });
   const response = { status };
-  const request = { method: 'GET', url: '/test', headers: {} };
+  const request = { method: 'GET', url: '/test', headers: {}, id: requestId };
 
   const host = {
     switchToHttp: () => ({
@@ -74,5 +78,23 @@ describe('AppExceptionFilter', () => {
     expect(json).toHaveBeenCalledWith({
       error: { code: 'INTERNAL', message: 'An internal error occurred.', details: [] },
     });
+  });
+
+  it('logs unhandled errors with the pino-assigned request id', () => {
+    const filter = new AppExceptionFilter();
+    const { host } = makeHost('req-abc-123');
+    const errorSpy = jest
+      .spyOn(
+        (filter as unknown as { logger: { error: (...args: unknown[]) => void } }).logger,
+        'error',
+      )
+      .mockImplementation(() => undefined);
+
+    filter.catch(new Error('boom'), host);
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('requestId=req-abc-123'),
+      expect.any(String),
+    );
   });
 });
