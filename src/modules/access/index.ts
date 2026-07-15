@@ -1,0 +1,13 @@
+export { AccessModule } from './access.module';
+export { PolicyService } from './application/policy.service';
+export { AuthGuard } from './interface/auth.guard';
+export { RequiresAuth, CurrentUser } from './interface/auth.decorators';
+export type { RequestWithActor } from './interface/auth.decorators';
+export { TOKEN_VERIFIER } from './application/ports/token-verifier.port';
+export type { TokenVerifier, VerifiedTokenClaims } from './application/ports/token-verifier.port';
+export { ACTOR_DIRECTORY } from './application/ports/actor-directory.port';
+export type { ActorDirectory, ActorRecord } from './application/ports/actor-directory.port';
+export { GRANTS_REPOSITORY } from './application/ports/grants.repository.port';
+export type { GrantsRepository } from './application/ports/grants.repository.port';
+export type { Actor, PolicyDecision, ResourceRef } from './domain';
+export { PLATFORM_RESOURCE } from './domain';
