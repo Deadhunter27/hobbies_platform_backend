@@ -1,12 +1,11 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { cleanupOpenApiDoc } from 'nestjs-zod';
+import { SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
-import { configureApp } from './bootstrap';
+import { buildOpenApiDocument, configureApp } from './bootstrap';
 import { APP_CONFIG, type AppConfig } from '@config/index';
 
 async function bootstrap(): Promise<void> {
@@ -23,13 +22,7 @@ async function bootstrap(): Promise<void> {
   // Swagger UI is served outside production only (docs/guides/openapi.md);
   // production consumers use the committed openapi/openapi.json contract.
   if (config.nodeEnv !== 'production') {
-    const swaggerConfig = new DocumentBuilder()
-      .setTitle('Hobbies Platform API')
-      .setDescription('Public API for the Hobbies Platform backend.')
-      .setVersion('1.0')
-      .build();
-    const document = cleanupOpenApiDoc(SwaggerModule.createDocument(app, swaggerConfig));
-    SwaggerModule.setup('api/docs', app, document);
+    SwaggerModule.setup('api/docs', app, buildOpenApiDocument(app));
   }
 
   await app.listen(config.port);

@@ -82,6 +82,7 @@ jobs:
       PORT: 3000
       LOG_LEVEL: info
       DATABASE_URL: postgresql://hobbies:hobbies@localhost:5432/hobbies_dev
+      JWT_SECRET: ci-only-test-secret-not-used-anywhere-real-0000
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -106,6 +107,7 @@ jobs:
       # app can construct (and the OpenAPI doc can be generated) with only
       # a syntactically valid, unreachable DATABASE_URL. Verified locally.
       DATABASE_URL: postgresql://hobbies:hobbies@localhost:5432/hobbies_dev
+      JWT_SECRET: ci-only-test-secret-not-used-anywhere-real-0000
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -142,6 +144,7 @@ jobs:
           docker run -d --name api --network host \
             -e NODE_ENV=production -e PORT=3000 -e LOG_LEVEL=info \
             -e DATABASE_URL=postgresql://hobbies:hobbies@localhost:5432/hobbies_dev \
+            -e JWT_SECRET=ci-only-test-secret-not-used-anywhere-real-0000 \
             hobbies-backend:ci
           live=""
           for i in $(seq 1 30); do
