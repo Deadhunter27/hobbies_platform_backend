@@ -40,6 +40,86 @@ enum HobbyStatus {
   @@map("hobby_status")
 }
 
+enum UserStatus {
+  active
+  suspended
+  deleted
+
+  @@map("user_status")
+}
+
+enum GlobalRole {
+  user
+  staff
+
+  @@map("global_role")
+}
+
+// ADR-0017: user aggregate. Email is stored lowercase (normalized at the
+// boundary); uniqueness on the normalized form is case-insensitive.
+model IdentityUser {
+  id           String            @id @db.Char(26)
+  email        String            @unique @db.VarChar(320)
+  passwordHash String            @db.VarChar(255)
+  displayName  String            @db.VarChar(120)
+  status       UserStatus        @default(active)
+  globalRole   GlobalRole        @default(user)
+  sessions     IdentitySession[]
+  createdAt    DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime          @updatedAt @db.Timestamptz(3)
+
+  @@map("identity_user")
+}
+
+// ADR-0017: sessions are their own aggregate. familyId groups rotation
+// chains; reuse of a rotated token revokes the whole family.
+model IdentitySession {
+  id               String       @id @db.Char(26)
+  userId           String       @db.Char(26)
+  user             IdentityUser @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  refreshTokenHash String       @unique @db.Char(64)
+  familyId         String       @db.Char(26)
+  deviceLabel      String?      @db.VarChar(120)
+  expiresAt        DateTime     @db.Timestamptz(3)
+  revokedAt        DateTime?    @db.Timestamptz(3)
+  replacedById     String?      @db.Char(26)
+  createdAt        DateTime     @default(now()) @db.Timestamptz(3)
+
+  @@index([userId])
+  @@index([familyId])
+  @@map("identity_session")
+}
+
+// ADR-0018: relationship-scoped grants. Platform scope uses
+// resourceType='platform', resourceId='platform'. One role per user per
+// resource.
+model AccessResourceRole {
+  id           String   @id @db.Char(26)
+  userId       String   @db.Char(26)
+  resourceType String   @db.VarChar(40)
+  resourceId   String   @db.VarChar(40)
+  role         String   @db.VarChar(40)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([userId, resourceType, resourceId])
+  @@map("access_resource_role")
+}
+
+// ADR-0019: append-only audit trail. No update/delete code path exists.
+model AuditEntry {
+  id           String   @id @db.Char(26)
+  actorId      String?  @db.Char(26)
+  action       String   @db.VarChar(80)
+  resourceType String   @db.VarChar(40)
+  resourceId   String?  @db.VarChar(40)
+  metadata     Json     @default("{}")
+  requestId    String?  @db.VarChar(80)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([resourceType, resourceId, createdAt])
+  @@map("audit_entry")
+}
+
 // ADR-0016: hierarchical hobby taxonomy. Categories carry no status/facets —
 // only hobbies are filterable/facet-bearing.
 model CatalogHobbyCategory {
