@@ -6,6 +6,9 @@ export interface AppConfig {
   readonly databaseUrl: string;
   readonly logLevel: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
   readonly isDevelopment: boolean;
+  readonly jwtSecret: string;
+  readonly accessTokenTtlSeconds: number;
+  readonly refreshTokenTtlDays: number;
 }
 
 /**
@@ -31,5 +34,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     databaseUrl: parsed.DATABASE_URL,
     logLevel: parsed.LOG_LEVEL,
     isDevelopment: parsed.NODE_ENV === 'development',
+    jwtSecret: parsed.JWT_SECRET,
+    accessTokenTtlSeconds: parsed.ACCESS_TOKEN_TTL_SECONDS,
+    refreshTokenTtlDays: parsed.REFRESH_TOKEN_TTL_DAYS,
   });
 }
