@@ -34,13 +34,14 @@ Lightweight Nygard style — see the [template](0000-template.md). Number sequen
 | [0014](0014-observability-and-health.md) | Observability & health checks | Accepted | Liveness/readiness, staged observability |
 | [0015](0015-id-strategy-ulid.md) | ID strategy — ULID | Accepted | Time-ordered, non-enumerable, app-generated primary keys |
 | [0016](0016-hobby-taxonomy-data-model.md) | Hobby taxonomy — structured, data-driven | Accepted | Catalog schema shape, no EAV, no hardcoded content |
+| [0017](0017-authentication-tokens-and-sessions.md) | Authentication — JWT + rotating refresh tokens | Accepted | Token model, session families, argon2id, timing safety |
+| [0018](0018-authorization-policy-layer.md) | Authorization — policy layer, default deny | Accepted | can() entry point, grants table, guard, global roles |
+| [0019](0019-audit-trail.md) | Audit trail — append-only, in-transaction | Accepted | audit_entry table, UnitOfWork, privacy rules |
 
 > **Numbering note.** Some externally circulated topic lists number these decisions differently (e.g. "ADR-0001 Why NestJS, 0004 Why PostgreSQL"). The numbers above are canonical: 0001–0003 were accepted earlier and ADRs are never renumbered. Every topic from that list is covered — NestJS (0001), modular monolith (0002), PostgreSQL and Redis (0003), Prisma (0004), OpenAPI (0005), Docker (0006), GitHub Actions (0007), configuration (0008), errors (0009), logging (0010), validation (0011), versioning (0012), jobs (0013), observability (0014).
 
 ## Open decisions (record before implementation touches them)
 
-- Authentication mechanism details (token model, session strategy) — owned by the identity phase
-- Relationship-scoped RBAC model
 - Geo & discovery/search approach (PostGIS query patterns, ranking)
 - Deployment target / infrastructure provider
 - Realtime transport (WebSockets/SSE) — deferred until a feature needs it
