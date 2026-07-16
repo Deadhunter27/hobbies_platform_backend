@@ -1,6 +1,6 @@
 {
   "name": "hobbies-platform-backend",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Backend for the Hobbies Platform — a platform for real-world hobby participation.",
   "private": true,
   "license": "UNLICENSED",
