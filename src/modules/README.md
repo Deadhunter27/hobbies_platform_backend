@@ -25,4 +25,4 @@ Each folder here is **one bounded context** and the only unit of the domain that
 - **Synchronous:** call the other module's exported service (from its `index.ts`).
 - **Asynchronous / decoupled:** publish a **domain event**; interested modules subscribe. Prefer this when the caller shouldn't depend on the callee's outcome.
 
-No business logic exists yet. When a task adds a context, it follows this anatomy exactly.
+Implemented contexts: **catalog** (M1 — the normative reference for this anatomy), **identity** and **access** (M2 — access declares ports that identity implements; the composition root binds them, see ADR-0018). When a task adds a context, it follows this anatomy exactly.

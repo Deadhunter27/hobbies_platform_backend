@@ -8,11 +8,13 @@ This backend exists for one reason: to help people **participate in real-world h
 
 ## Current phase — READ THIS
 
-**Phase 1 (repository foundation) is complete and under review.** Do **not** implement authentication, user/profile modules, events, communities, feeds, chat, notifications, database schemas, Prisma models, or API endpoints until Phase 2 is explicitly approved. Foundation-level tasks only.
+**Complete and frozen:** M1 — platform kernel + `catalog` module (v0.1.0), and M2 — `identity` + `access` modules with the audit trail (v0.2.0). The `catalog` module is the normative reference for module anatomy; the auth stack (JWT + rotating refresh tokens, policy layer, audit) is live. See `docs/roadmap.md` for milestone status.
+
+**Do not** implement M3+ features (communities, events, feeds, chat, notifications, media, admin CMS) until the next milestone is explicitly approved. Frozen code (`src/modules/catalog/**`, `src/modules/identity/**`, `src/modules/access/**`, existing migrations, kernel behavior contracts) is modified only under an explicit remediation or milestone instruction.
 
 ## Locked stack (ADRs are binding)
 
-TypeScript strict + NestJS (0001) · Modular monolith (0002) · PostgreSQL + PostGIS, Redis, S3-compatible storage (0003) · Prisma + Prisma Migrate (0004) · OpenAPI generated from code, committed to `openapi/` (0005) · Docker + Compose (0006) · GitHub Actions (0007) · Zod-validated env config, fail-closed (0008) · `AppError` hierarchy + global filter (0009) · Pino structured logs + correlation IDs (0010) · Zod at every boundary (0011) · URI versioning `/api/v1` (0012) · BullMQ + `PROCESS_ROLE` flag (0013) · Terminus health checks + staged observability (0014)
+TypeScript strict + NestJS (0001) · Modular monolith (0002) · PostgreSQL + PostGIS, Redis, S3-compatible storage (0003) · Prisma + Prisma Migrate (0004) · OpenAPI generated from code, committed to `openapi/` (0005) · Docker + Compose (0006) · GitHub Actions (0007) · Zod-validated env config, fail-closed (0008) · `AppError` hierarchy + global filter (0009) · Pino structured logs + correlation IDs (0010) · Zod at every boundary (0011) · URI versioning `/api/v1` (0012) · BullMQ + `PROCESS_ROLE` flag (0013) · Terminus health checks + staged observability (0014) · ULID `CHAR(26)` ids, app-generated (0015) · Data-driven hobby taxonomy (0016) · JWT + rotating refresh tokens, argon2id (0017) · Relationship-scoped policy layer, default deny (0018) · Append-only in-transaction audit trail (0019)
 
 ## Before you write code
 
