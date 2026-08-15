@@ -9,6 +9,9 @@ export interface AppConfig {
   readonly jwtSecret: string;
   readonly accessTokenTtlSeconds: number;
   readonly refreshTokenTtlDays: number;
+  /** Parsed from CORS_ORIGINS (comma-separated). Empty in production means
+   * no cross-origin browser access at all — fail-closed, not fail-open. */
+  readonly corsOrigins: string[];
 }
 
 /**
@@ -37,5 +40,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     jwtSecret: parsed.JWT_SECRET,
     accessTokenTtlSeconds: parsed.ACCESS_TOKEN_TTL_SECONDS,
     refreshTokenTtlDays: parsed.REFRESH_TOKEN_TTL_DAYS,
+    corsOrigins: (parsed.CORS_ORIGINS ?? '')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter((origin) => origin.length > 0),
   });
 }

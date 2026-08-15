@@ -26,6 +26,7 @@ describe('loadConfig', () => {
       jwtSecret: TEST_SECRET,
       accessTokenTtlSeconds: 900,
       refreshTokenTtlDays: 14,
+      corsOrigins: [],
     });
     expect(Object.isFrozen(config)).toBe(true);
   });
@@ -56,6 +57,14 @@ describe('loadConfig', () => {
     const config = loadConfig(baseEnv());
     expect(config.accessTokenTtlSeconds).toBe(900);
     expect(config.refreshTokenTtlDays).toBe(14);
+  });
+
+  it('parses CORS_ORIGINS into a trimmed array; unset means no allowed origins', () => {
+    expect(loadConfig(baseEnv()).corsOrigins).toEqual([]);
+    expect(
+      loadConfig(baseEnv({ CORS_ORIGINS: ' http://localhost:8081 ,https://app.example.com,' }))
+        .corsOrigins,
+    ).toEqual(['http://localhost:8081', 'https://app.example.com']);
   });
 
   it('defaults NODE_ENV to development and marks isDevelopment true', () => {

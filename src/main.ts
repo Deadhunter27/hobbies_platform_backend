@@ -15,6 +15,9 @@ async function bootstrap(): Promise<void> {
   app.useLogger(app.get(Logger));
   app.use(helmet());
   app.disable('x-powered-by');
+  // security-guidelines.md: strict CORS allowlist. Empty CORS_ORIGINS means
+  // no browser origin is allowed — fail-closed, not a permissive default.
+  app.enableCors({ origin: config.corsOrigins, credentials: true });
   configureApp(app);
   // SIGTERM/SIGINT trigger onModuleDestroy so Prisma disconnects cleanly.
   app.enableShutdownHooks();
