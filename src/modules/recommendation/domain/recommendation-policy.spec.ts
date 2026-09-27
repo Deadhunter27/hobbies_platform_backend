@@ -1,56 +1,53 @@
 import type { ActivityView } from '@modules/activity';
-import { Activity } from '@modules/activity/domain';
-import { HobbyContext } from '@modules/profile/domain';
+import type { HobbyContext } from '@modules/profile';
 import { rankActivities } from './recommendation-policy';
 
-const NOW = new Date('2026-09-27T12:00:00.000Z');
 const HOBBY_ID = '01J00000000000000000000200';
 
-function context(overrides: Partial<Parameters<typeof HobbyContext.create>[0]> = {}) {
-  return HobbyContext.create({
-    id: '01J00000000000000000000201',
-    userId: '01J00000000000000000000202',
-    hobbyId: HOBBY_ID,
+function context(
+  overrides: Partial<{
+    experienceLevel: 'exploring' | 'beginner' | 'returning' | 'regular' | 'experienced';
+    primaryIntent: 'start' | 'improve' | 'social' | 'explore';
+    socialPreference: 'solo' | 'mixed' | 'social';
+  }> = {},
+): HobbyContext {
+  return {
     experienceLevel: 'returning',
     primaryIntent: 'start',
-    secondaryIntents: [],
-    goal: null,
     socialPreference: 'mixed',
     ...overrides,
-  });
+  } as unknown as HobbyContext;
 }
 
 function activity(
   id: string,
-  overrides: Partial<Parameters<typeof Activity.reconstitute>[0]> = {},
+  overrides: Partial<{
+    hobbyId: string;
+    title: string;
+    activityType: string;
+    startsAt: Date;
+    hostName: string | null;
+    communityReferenceId: string | null;
+    effortLevel: 'easy' | 'moderate' | 'challenging' | 'open';
+    preparation: string;
+    expectations: string;
+  }> = {},
   availability: ActivityView['availability'] = 'available',
 ): ActivityView {
-  const entity = Activity.reconstitute({
+  const entity = {
     id,
     hobbyId: HOBBY_ID,
     title: `Activity ${id.slice(-2)}`,
-    description: null,
     activityType: 'easy_run',
     startsAt: new Date('2026-09-28T00:00:00.000Z'),
-    endsAt: new Date('2026-09-28T01:00:00.000Z'),
-    timezone: 'Asia/Jakarta',
-    placeName: 'GBK',
-    addressLabel: 'Jakarta',
-    latitude: null,
-    longitude: null,
     hostName: null,
-    hostType: null,
-    hostReferenceId: null,
     communityReferenceId: null,
     effortLevel: 'easy',
-    capacity: null,
-    status: 'published',
     preparation: 'Keep it comfortable.',
     expectations: 'Walking breaks are fine.',
-    createdAt: NOW,
-    updatedAt: NOW,
     ...overrides,
-  });
+  } as ActivityView['activity'];
+
   return { activity: entity, committedCount: 0, spotsRemaining: null, availability };
 }
 
