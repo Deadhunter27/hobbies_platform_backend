@@ -1,0 +1,42 @@
+name: W4 generated artifacts
+
+on:
+  push:
+    branches: [feat/wayfinder-w4-activities]
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      PORT: 3000
+      LOG_LEVEL: info
+      DATABASE_URL: postgresql://hobbies:hobbies@localhost:5432/hobbies_dev
+      JWT_SECRET: ci-only-test-secret-not-used-anywhere-real-0000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma generate
+      - run: pnpm format
+      - run: pnpm openapi:generate
+      - uses: actions/upload-artifact@v4
+        with:
+          name: w4-generated
+          path: |
+            openapi/openapi.json
+            prisma/seed-data/activities.ts
+            src/modules/activity/domain/activity-commitment.entity.ts
+            src/modules/activity/domain/index.ts
+            src/modules/activity/infrastructure/prisma-activity.repository.ts
+            src/modules/activity/interface/activity.controller.ts
+            src/modules/activity/interface/dto/activity.dto.ts
+            src/modules/activity/interface/presenters/activity.presenter.ts
+          retention-days: 1
