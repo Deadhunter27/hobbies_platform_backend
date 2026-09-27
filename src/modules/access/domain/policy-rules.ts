@@ -11,6 +11,8 @@ import { allow, deny, type Actor, type PolicyDecision, type ResourceRef } from '
 const USER_SELF_ACTIONS: ReadonlySet<string> = new Set([
   'identity.user.read',
   'identity.user.change_password',
+  'profile.context.read',
+  'profile.context.update',
 ]);
 
 /** Rule 2 — global role: platform-scoped actions satisfied by
@@ -20,7 +22,7 @@ const PLATFORM_ACTIONS_BY_ROLE: Readonly<Record<string, ReadonlySet<string>>> = 
 };
 
 /** Rule 3 — grants table: `${resourceType}:${action}` → roles that satisfy
- * it. M2 ships platform-scope entries only; M4 adds community rows here
+ * it. M2 ships platform-scope entries only; later modules add scoped rows
  * without touching the engine. */
 const GRANT_ROLE_REQUIREMENTS: Readonly<Record<string, ReadonlySet<string>>> = {
   'platform:catalog.manage': new Set(['staff']),
