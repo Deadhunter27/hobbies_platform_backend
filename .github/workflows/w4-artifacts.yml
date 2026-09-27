@@ -1,14 +1,14 @@
-name: W4 generated artifacts
+name: W4 finalize generated files
 
 on:
   push:
     branches: [feat/wayfinder-w4-activities]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  generate:
+  finalize:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: test
@@ -18,6 +18,8 @@ jobs:
       JWT_SECRET: ci-only-test-secret-not-used-anywhere-real-0000
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: feat/wayfinder-w4-activities
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -27,16 +29,11 @@ jobs:
       - run: pnpm prisma generate
       - run: pnpm format
       - run: pnpm openapi:generate
-      - uses: actions/upload-artifact@v4
-        with:
-          name: w4-generated
-          path: |
-            openapi/openapi.json
-            prisma/seed-data/activities.ts
-            src/modules/activity/domain/activity-commitment.entity.ts
-            src/modules/activity/domain/index.ts
-            src/modules/activity/infrastructure/prisma-activity.repository.ts
-            src/modules/activity/interface/activity.controller.ts
-            src/modules/activity/interface/dto/activity.dto.ts
-            src/modules/activity/interface/presenters/activity.presenter.ts
-          retention-days: 1
+      - name: Commit generated and formatted W4 files
+        run: |
+          rm .github/workflows/w4-artifacts.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore(activity): format and refresh OpenAPI contract"
+          git push origin HEAD:feat/wayfinder-w4-activities
