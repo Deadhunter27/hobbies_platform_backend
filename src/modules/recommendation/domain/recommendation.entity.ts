@@ -61,10 +61,18 @@ export class Recommendation extends Entity {
   }
 
   static create(
-    input: Omit<RecommendationProps, 'status' | 'rejectionReason' | 'rejectionNote' | 'selectedActivityId' | 'createdAt' | 'updatedAt'>,
+    input: Omit<
+      RecommendationProps,
+      | 'status'
+      | 'rejectionReason'
+      | 'rejectionNote'
+      | 'selectedActivityId'
+      | 'createdAt'
+      | 'updatedAt'
+    >,
     now = new Date(),
   ): Recommendation {
-    return new Recommendation({
+    const props: RecommendationProps = {
       ...input,
       status: 'active',
       rejectionReason: null,
@@ -72,7 +80,9 @@ export class Recommendation extends Entity {
       selectedActivityId: null,
       createdAt: now,
       updatedAt: now,
-    });
+    };
+    assertRules(props);
+    return new Recommendation(props);
   }
 
   static reconstitute(props: RecommendationProps): Recommendation {
@@ -80,7 +90,11 @@ export class Recommendation extends Entity {
     return new Recommendation(props);
   }
 
-  reject(reason: RecommendationRejectionReason, note: string | null, now = new Date()): Recommendation {
+  reject(
+    reason: RecommendationRejectionReason,
+    note: string | null,
+    now = new Date(),
+  ): Recommendation {
     if (this.status !== 'active') {
       throw new DomainRuleViolation(
         'Only an active recommendation can be rejected.',
@@ -118,17 +132,43 @@ export class Recommendation extends Entity {
     return Recommendation.reconstitute({ ...this.props, status: 'superseded', updatedAt: now });
   }
 
-  get userId(): string { return this.props.userId; }
-  get hobbyId(): string { return this.props.hobbyId; }
-  get activityId(): string { return this.props.activityId; }
-  get title(): string { return this.props.title; }
-  get rationale(): string { return this.props.rationale; }
-  get fitSignals(): string[] { return [...this.props.fitSignals]; }
-  get intent(): string { return this.props.intent; }
-  get status(): RecommendationStatus { return this.props.status; }
-  get rejectionReason(): RecommendationRejectionReason | null { return this.props.rejectionReason; }
-  get rejectionNote(): string | null { return this.props.rejectionNote; }
-  get selectedActivityId(): string | null { return this.props.selectedActivityId; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get userId(): string {
+    return this.props.userId;
+  }
+  get hobbyId(): string {
+    return this.props.hobbyId;
+  }
+  get activityId(): string {
+    return this.props.activityId;
+  }
+  get title(): string {
+    return this.props.title;
+  }
+  get rationale(): string {
+    return this.props.rationale;
+  }
+  get fitSignals(): string[] {
+    return [...this.props.fitSignals];
+  }
+  get intent(): string {
+    return this.props.intent;
+  }
+  get status(): RecommendationStatus {
+    return this.props.status;
+  }
+  get rejectionReason(): RecommendationRejectionReason | null {
+    return this.props.rejectionReason;
+  }
+  get rejectionNote(): string | null {
+    return this.props.rejectionNote;
+  }
+  get selectedActivityId(): string | null {
+    return this.props.selectedActivityId;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 }
