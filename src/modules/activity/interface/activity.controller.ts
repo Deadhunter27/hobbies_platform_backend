@@ -77,9 +77,7 @@ export class MyActivityCommitmentsController {
     @CurrentUser() actor: Actor,
     @Param() params: ActivityIdParamDto,
   ): Promise<ActivityCommitmentResponseDto> {
-    return toActivityCommitmentResponse(
-      await this.getCommitment.execute(actor, params.activityId),
-    );
+    return toActivityCommitmentResponse(await this.getCommitment.execute(actor, params.activityId));
   }
 
   @Put(':activityId')

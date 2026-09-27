@@ -1,9 +1,6 @@
 import type { ActivityView } from '../../application';
 import type { ActivityCommitment } from '../../domain';
-import type {
-  ActivityCommitmentResponseDto,
-  ActivityResponseDto,
-} from '../dto/activity.dto';
+import type { ActivityCommitmentResponseDto, ActivityResponseDto } from '../dto/activity.dto';
 
 export function toActivityResponse(view: ActivityView): ActivityResponseDto {
   const activity = view.activity;

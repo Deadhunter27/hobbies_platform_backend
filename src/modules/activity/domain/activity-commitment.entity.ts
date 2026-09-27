@@ -1,7 +1,12 @@
 import { Entity } from '@shared/domain';
 import { DomainRuleViolation } from '@shared/errors';
 
-export const ACTIVITY_COMMITMENT_STATES = ['interested', 'committed', 'cancelled', 'missed'] as const;
+export const ACTIVITY_COMMITMENT_STATES = [
+  'interested',
+  'committed',
+  'cancelled',
+  'missed',
+] as const;
 export type ActivityCommitmentState = (typeof ACTIVITY_COMMITMENT_STATES)[number];
 
 export interface ActivityCommitmentProps {
@@ -76,8 +81,18 @@ export class ActivityCommitment extends Entity {
             ? this.props.committedAt
             : now
           : this.props.committedAt,
-      cancelledAt: state === 'cancelled' ? now : state === 'interested' || state === 'committed' ? null : this.props.cancelledAt,
-      missedAt: state === 'missed' ? now : state === 'interested' || state === 'committed' ? null : this.props.missedAt,
+      cancelledAt:
+        state === 'cancelled'
+          ? now
+          : state === 'interested' || state === 'committed'
+            ? null
+            : this.props.cancelledAt,
+      missedAt:
+        state === 'missed'
+          ? now
+          : state === 'interested' || state === 'committed'
+            ? null
+            : this.props.missedAt,
       updatedAt: now,
     });
   }

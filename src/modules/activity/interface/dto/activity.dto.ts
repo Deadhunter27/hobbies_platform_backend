@@ -64,9 +64,7 @@ export const activityCommitmentResponseSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
 });
-export class ActivityCommitmentResponseDto extends createZodDto(
-  activityCommitmentResponseSchema,
-) {}
+export class ActivityCommitmentResponseDto extends createZodDto(activityCommitmentResponseSchema) {}
 
 export const activityCommitmentListResponseSchema = z.object({
   data: z.array(activityCommitmentResponseSchema),

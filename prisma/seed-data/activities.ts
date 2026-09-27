@@ -38,7 +38,8 @@ export const activitySeeds: ActivitySeed[] = [
     effortLevel: 'easy',
     capacity: 40,
     preparation: 'Wear comfortable running shoes and bring water. Walking breaks are welcome.',
-    expectations: 'Easy conversational pace, newcomer-friendly host, and a short regroup after the run.',
+    expectations:
+      'Easy conversational pace, newcomer-friendly host, and a short regroup after the run.',
   },
   {
     id: '01K6A000000000000000000002',
@@ -77,7 +78,8 @@ export const activitySeeds: ActivitySeed[] = [
     hostType: null,
     effortLevel: 'easy',
     capacity: null,
-    preparation: 'Choose a familiar nearby route. Alternate easy running and walking whenever needed.',
+    preparation:
+      'Choose a familiar nearby route. Alternate easy running and walking whenever needed.',
     expectations: 'No pace target. The win is finding a version you can actually do.',
   },
 ];

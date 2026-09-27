@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, type Activity as ActivityRecord, type ActivityCommitment as CommitmentRecord } from '@prisma/client';
+import {
+  Prisma,
+  type Activity as ActivityRecord,
+  type ActivityCommitment as CommitmentRecord,
+} from '@prisma/client';
 import { PrismaService } from '@infra/database';
 import type { ActivityRepository, ActivitySnapshot } from '../application';
 import {
