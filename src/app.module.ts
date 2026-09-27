@@ -9,6 +9,7 @@ import { AppExceptionFilter, AppZodValidationPipe } from '@infra/http';
 import { CatalogModule } from '@modules/catalog';
 import { AccessModule, AuthGuard } from '@modules/access';
 import { IdentityModule } from '@modules/identity';
+import { ProfileModule } from '@modules/profile';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { IdentityModule } from '@modules/identity';
     CatalogModule,
     AccessModule,
     IdentityModule,
+    ProfileModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AppExceptionFilter },

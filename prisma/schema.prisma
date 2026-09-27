@@ -55,6 +55,33 @@ enum GlobalRole {
   @@map("global_role")
 }
 
+enum ProfileExperienceLevel {
+  exploring
+  beginner
+  returning
+  regular
+  experienced
+
+  @@map("profile_experience_level")
+}
+
+enum ProfileIntent {
+  start
+  improve
+  social
+  explore
+
+  @@map("profile_intent")
+}
+
+enum ProfileSocialPreference {
+  solo
+  mixed
+  social
+
+  @@map("profile_social_preference")
+}
+
 // ADR-0017: user aggregate. Email is stored lowercase (normalized at the
 // boundary); uniqueness on the normalized form is case-insensitive.
 model IdentityUser {
@@ -154,11 +181,42 @@ model CatalogHobby {
   createdAt   DateTime             @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime             @updatedAt @db.Timestamptz(3)
 
-  // Backs the public list's WHERE status = 'active' + ORDER BY name, id.
   @@index([status, name, id])
   @@index([categoryId, status])
   @@index([difficulty])
   @@index([costLevel])
   @@index([setting])
   @@map("catalog_hobby")
+}
+
+// ADR-0020: private, lightweight product context. Cross-context user ownership
+// is enforced by authenticated application logic rather than a DB foreign key.
+model ProfileUserContext {
+  userId      String   @id @db.Char(26)
+  city        String?  @db.VarChar(120)
+  countryCode String?  @db.Char(2)
+  timezone    String?  @db.VarChar(64)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("profile_user_context")
+}
+
+// ADR-0020: one evolving relationship/context record per user + hobby.
+// userId/hobbyId are logical cross-context references, deliberately not DB FKs.
+model ProfileHobbyContext {
+  id               String                  @id @db.Char(26)
+  userId           String                  @db.Char(26)
+  hobbyId          String                  @db.Char(26)
+  experienceLevel  ProfileExperienceLevel
+  primaryIntent    ProfileIntent
+  secondaryIntents ProfileIntent[]         @default([])
+  goal             String?                 @db.VarChar(280)
+  socialPreference ProfileSocialPreference @default(mixed)
+  createdAt        DateTime                @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime                @updatedAt @db.Timestamptz(3)
+
+  @@unique([userId, hobbyId])
+  @@index([userId, updatedAt])
+  @@map("profile_hobby_context")
 }
