@@ -17,8 +17,8 @@ around the directional real-world loop:
 | M1        | Platform kernel + catalog (read-only)        | ✅ Complete    | v0.1.0  |
 | M2        | Identity & access + audit trail              | ✅ Complete    | v0.2.0  |
 | W3        | Profile + hobby relationship / context       | ✅ Complete    | —       |
-| W4        | Activities + commitments                     | 🟡 In progress | —       |
-| W5        | What's Next + recovery                       | ⬜ Planned     | —       |
+| W4        | Activities + commitments                     | ✅ Complete    | —       |
+| W5        | What's Next + recovery                       | 🟡 In progress | —       |
 | W6        | Progress + Journey                           | ⬜ Planned     | —       |
 | W7        | Communities + people context                 | ⬜ Planned     | —       |
 | W8        | Notifications / check-ins                    | ⬜ Planned     | —       |
@@ -54,32 +54,38 @@ ownership remains logical rather than DB-coupled, protected operations call the
 existing policy layer explicitly, OpenAPI and migration artifacts are committed,
 and the main-branch CI + CodeQL runs are green.
 
-## Current
-
 ### W4 — Activities + commitments
 
-Approved scope is defined by ADR-0021. W4 introduces the stable real-world
-opportunity and decision primitives that later recommendation, progress, and
-notification milestones depend on.
+ADR-0021 is implemented on `main`. Published activities expose hobby, time/place,
+host, effort, preparation, capacity/availability, and status context. Authenticated
+users can persist interested/committed/cancelled/missed states without treating
+commitment as completion. Capacity is enforced on writes, running fixtures cover
+the current Alpha branches, and the mobile Alpha is wired to the W4 APIs.
+
+## Current
+
+### W5 — What's Next + recovery
+
+Approved scope is defined by ADR-0022. W5 moves recommendation and recovery policy
+out of seeded mobile copy into a durable, explainable server-side decision context.
 
 Acceptance criteria:
 
-- published activities can be listed and read with hobby, place/time, host,
-  effort, preparation, availability/capacity, and status context;
-- authenticated users can read and mutate only their own activity commitments;
-- commitment lifecycle supports interested/committed/cancelled/missed without
-  treating commitment as completion;
-- known capacity is enforced deterministically on commitment writes;
-- activity hobby references are verified through the catalog public seam;
-- cross-context user/hobby/host/community references remain logical, not DB FKs;
-- all input boundaries are Zod-validated and endpoints are represented in OpenAPI;
+- authenticated users can request one current What's Next recommendation for an active hobby context;
+- recommendations are generated from W3 context + W4 viable activity inventory using deterministic rules;
+- every recommendation includes human-readable rationale and fit signals matching the actual rules used;
+- unavailable/full/cancelled/ended activities are never returned as viable next steps;
+- users can reject a recommendation with a stable reason vocabulary and receive a meaningfully different alternative when one exists;
+- the original recommendation and later selected activity remain distinct durable concepts;
+- recovery preserves the actual chosen path rather than snapping back to the original recommendation;
+- protected operations call the existing policy layer explicitly and default-deny;
+- W5 imports only public seams from Profile and Activity, never their infrastructure repositories;
 - persistence is introduced by a reviewed Prisma migration;
+- all input boundaries are Zod-validated and all endpoints are represented in OpenAPI;
 - unit/integration/e2e coverage and CI remain green.
 
 ## Planned
 
-- **W5 What's Next + Recovery** — deterministic recommendations, rationale,
-  rejection reasons, alternatives, and preservation of the actual chosen path.
 - **W6 Progress + Journey** — reflections, qualitative progress, optional metrics,
   recognition context, and Journey moments without competitive gamification.
 - **W7 Communities + People Context** — the minimum membership/host/trust context
