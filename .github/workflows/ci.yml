@@ -8,9 +8,6 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -106,12 +103,13 @@ jobs:
       NODE_ENV: test
       PORT: 3000
       LOG_LEVEL: info
+      # No Postgres service needed: PrismaService connects lazily, so the
+      # app can construct (and the OpenAPI doc can be generated) with only
+      # a syntactically valid, unreachable DATABASE_URL. Verified locally.
       DATABASE_URL: postgresql://hobbies:hobbies@localhost:5432/hobbies_dev
       JWT_SECRET: ci-only-test-secret-not-used-anywhere-real-0000
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: wayfinder-w5-recommendation
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -120,17 +118,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm prisma generate
       - run: pnpm openapi:generate
-      - name: Commit generated OpenAPI
-        run: |
-          if git diff --quiet -- openapi/openapi.json; then
-            echo "OpenAPI is already current."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add openapi/openapi.json
-          git commit -m "docs(openapi): regenerate W5 contract"
-          git push origin HEAD:wayfinder-w5-recommendation
+      - run: git diff --exit-code -- openapi/openapi.json
 
   docker:
     runs-on: ubuntu-latest
