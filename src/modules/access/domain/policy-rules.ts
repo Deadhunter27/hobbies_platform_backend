@@ -13,6 +13,8 @@ const USER_SELF_ACTIONS: ReadonlySet<string> = new Set([
   'identity.user.change_password',
   'profile.context.read',
   'profile.context.update',
+  'activity.commitment.read',
+  'activity.commitment.update',
 ]);
 
 /** Rule 2 — global role: platform-scoped actions satisfied by

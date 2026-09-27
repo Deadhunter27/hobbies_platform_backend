@@ -1051,6 +1051,229 @@
           "profile"
         ]
       }
+    },
+    "/api/v1/activities": {
+      "get": {
+        "operationId": "ActivitiesController_list_v1",
+        "parameters": [
+          {
+            "name": "hobbyId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List upcoming published real-world activities",
+        "tags": [
+          "activities"
+        ]
+      }
+    },
+    "/api/v1/activities/{activityId}": {
+      "get": {
+        "operationId": "ActivitiesController_get_v1",
+        "parameters": [
+          {
+            "name": "activityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ACTIVITY_NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get one visible activity with current availability",
+        "tags": [
+          "activities"
+        ]
+      }
+    },
+    "/api/v1/me/activity-commitments": {
+      "get": {
+        "operationId": "MyActivityCommitmentsController_list_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityCommitmentListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the authenticated user activity commitments",
+        "tags": [
+          "activity commitments"
+        ]
+      }
+    },
+    "/api/v1/me/activity-commitments/{activityId}": {
+      "get": {
+        "operationId": "MyActivityCommitmentsController_get_v1",
+        "parameters": [
+          {
+            "name": "activityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityCommitmentResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ACTIVITY_COMMITMENT_NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the authenticated user commitment for one activity",
+        "tags": [
+          "activity commitments"
+        ]
+      },
+      "put": {
+        "operationId": "MyActivityCommitmentsController_put_v1",
+        "parameters": [
+          {
+            "name": "activityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertActivityCommitmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityCommitmentResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ACTIVITY_UNAVAILABLE or ACTIVITY_CAPACITY_FULL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create or replace the authenticated user decision state for one activity",
+        "tags": [
+          "activity commitments"
+        ]
+      }
     }
   },
   "info": {
@@ -1756,6 +1979,435 @@
         "required": [
           "experienceLevel",
           "primaryIntent"
+        ],
+        "additionalProperties": false
+      },
+      "ActivityListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "hobbyId": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "activityType": {
+                  "type": "string"
+                },
+                "startsAt": {
+                  "type": "string"
+                },
+                "endsAt": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "timezone": {
+                  "type": "string"
+                },
+                "placeName": {
+                  "type": "string"
+                },
+                "addressLabel": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "latitude": {
+                  "type": "number",
+                  "nullable": true
+                },
+                "longitude": {
+                  "type": "number",
+                  "nullable": true
+                },
+                "hostName": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "hostType": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "hostReferenceId": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "communityReferenceId": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "effortLevel": {
+                  "type": "string",
+                  "enum": [
+                    "easy",
+                    "moderate",
+                    "challenging",
+                    "open"
+                  ]
+                },
+                "capacity": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991,
+                  "nullable": true
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "draft",
+                    "published",
+                    "cancelled",
+                    "completed"
+                  ]
+                },
+                "preparation": {
+                  "type": "string"
+                },
+                "expectations": {
+                  "type": "string"
+                },
+                "committedCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "spotsRemaining": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991,
+                  "nullable": true
+                },
+                "availability": {
+                  "type": "string",
+                  "enum": [
+                    "available",
+                    "full",
+                    "cancelled",
+                    "ended"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "hobbyId",
+                "title",
+                "description",
+                "activityType",
+                "startsAt",
+                "endsAt",
+                "timezone",
+                "placeName",
+                "addressLabel",
+                "latitude",
+                "longitude",
+                "hostName",
+                "hostType",
+                "hostReferenceId",
+                "communityReferenceId",
+                "effortLevel",
+                "capacity",
+                "status",
+                "preparation",
+                "expectations",
+                "committedCount",
+                "spotsRemaining",
+                "availability"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ActivityResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "hobbyId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "activityType": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string"
+          },
+          "endsAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "placeName": {
+            "type": "string"
+          },
+          "addressLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "hostName": {
+            "type": "string",
+            "nullable": true
+          },
+          "hostType": {
+            "type": "string",
+            "nullable": true
+          },
+          "hostReferenceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "communityReferenceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "effortLevel": {
+            "type": "string",
+            "enum": [
+              "easy",
+              "moderate",
+              "challenging",
+              "open"
+            ]
+          },
+          "capacity": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "cancelled",
+              "completed"
+            ]
+          },
+          "preparation": {
+            "type": "string"
+          },
+          "expectations": {
+            "type": "string"
+          },
+          "committedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "spotsRemaining": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "nullable": true
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "available",
+              "full",
+              "cancelled",
+              "ended"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "hobbyId",
+          "title",
+          "description",
+          "activityType",
+          "startsAt",
+          "endsAt",
+          "timezone",
+          "placeName",
+          "addressLabel",
+          "latitude",
+          "longitude",
+          "hostName",
+          "hostType",
+          "hostReferenceId",
+          "communityReferenceId",
+          "effortLevel",
+          "capacity",
+          "status",
+          "preparation",
+          "expectations",
+          "committedCount",
+          "spotsRemaining",
+          "availability"
+        ]
+      },
+      "ActivityCommitmentListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "activityId": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "interested",
+                    "committed",
+                    "cancelled",
+                    "missed"
+                  ]
+                },
+                "committedAt": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "cancelledAt": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "missedAt": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "note": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "activityId",
+                "state",
+                "committedAt",
+                "cancelledAt",
+                "missedAt",
+                "note",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ActivityCommitmentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "activityId": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "interested",
+              "committed",
+              "cancelled",
+              "missed"
+            ]
+          },
+          "committedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "missedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "activityId",
+          "state",
+          "committedAt",
+          "cancelledAt",
+          "missedAt",
+          "note",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpsertActivityCommitmentDto": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "interested",
+              "committed",
+              "cancelled",
+              "missed"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 280,
+            "default": null,
+            "nullable": true
+          }
+        },
+        "required": [
+          "state"
         ],
         "additionalProperties": false
       }

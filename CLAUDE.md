@@ -8,15 +8,15 @@ This backend exists for one reason: to help people **participate in real-world h
 
 ## Current phase — READ THIS
 
-**Complete and frozen:** M1 — platform kernel + `catalog` module (v0.1.0), and M2 — `identity` + `access` modules with the audit trail (v0.2.0). The `catalog` module is the normative reference for module anatomy; the auth stack (JWT + rotating refresh tokens, policy layer, audit) is live.
+**Complete and frozen:** M1 — platform kernel + `catalog` module (v0.1.0), M2 — `identity` + `access` modules with the audit trail (v0.2.0), and **W3 — Profile + Hobby Relationship / Context** (ADR-0020). W3 landed on `main` with green CI/CodeQL.
 
-**Approved and in progress:** **W3 — Profile + Hobby Relationship / Context**, the first Wayfinder loop-first milestone. W3 may add the `profile` bounded context, the minimum schema/API changes required by ADR-0020, and narrowly-scoped public exports from existing modules needed for collaboration. Existing M1/M2 behavior remains frozen unless W3 explicitly requires a compatible integration seam.
+**Approved and in progress:** **W4 — Activities + Commitments**, defined by ADR-0021. W4 may add the `activity` bounded context, Prisma migration, public activity reads, authenticated self commitment lifecycle, capacity enforcement, OpenAPI updates, tests, and the minimum catalog/access collaboration seams required by ADR-0021. Existing M1–W3 behavior remains frozen unless W4 explicitly requires a compatible integration seam.
 
-**Do not** implement W4+ features (activities/commitments, recommendation/recovery, progress/journey, communities, notifications, feed/chat, media, admin CMS) until the next milestone is explicitly approved. See `docs/roadmap.md` and `docs/wayfinder-v1-backend-plan.md` for delivery order.
+**Do not** implement W5+ features (recommendation/recovery, progress/journey, communities/people, notifications, feed/chat, media, admin CMS) until the next milestone is explicitly approved. See `docs/roadmap.md` and `docs/wayfinder-v1-backend-plan.md` for delivery order.
 
 ## Locked stack (ADRs are binding)
 
-TypeScript strict + NestJS (0001) · Modular monolith (0002) · PostgreSQL + PostGIS, Redis, S3-compatible storage (0003) · Prisma + Prisma Migrate (0004) · OpenAPI generated from code, committed to `openapi/` (0005) · Docker + Compose (0006) · GitHub Actions (0007) · Zod-validated env config, fail-closed (0008) · `AppError` hierarchy + global filter (0009) · Pino structured logs + correlation IDs (0010) · Zod at every boundary (0011) · URI versioning `/api/v1` (0012) · BullMQ + `PROCESS_ROLE` flag (0013) · Terminus health checks + staged observability (0014) · ULID `CHAR(26)` ids, app-generated (0015) · Data-driven hobby taxonomy (0016) · JWT + rotating refresh tokens, argon2id (0017) · Relationship-scoped policy layer, default deny (0018) · Append-only in-transaction audit trail (0019)
+TypeScript strict + NestJS (0001) · Modular monolith (0002) · PostgreSQL + PostGIS, Redis, S3-compatible storage (0003) · Prisma + Prisma Migrate (0004) · OpenAPI generated from code, committed to `openapi/` (0005) · Docker + Compose (0006) · GitHub Actions (0007) · Zod-validated env config, fail-closed (0008) · `AppError` hierarchy + global filter (0009) · Pino structured logs + correlation IDs (0010) · Zod at every boundary (0011) · URI versioning `/api/v1` (0012) · BullMQ + `PROCESS_ROLE` flag (0013) · Terminus health checks + staged observability (0014) · ULID `CHAR(26)` ids, app-generated (0015) · Data-driven hobby taxonomy (0016) · JWT + rotating refresh tokens, argon2id (0017) · Relationship-scoped policy layer, default deny (0018) · Append-only in-transaction audit trail (0019) · Profile/hobby context boundary (0020) · Activities/commitments boundary (0021)
 
 ## Before you write code
 
