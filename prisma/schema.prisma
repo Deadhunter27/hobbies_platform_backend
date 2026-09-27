@@ -109,6 +109,26 @@ enum ActivityCommitmentState {
   @@map("activity_commitment_state")
 }
 
+enum RecommendationStatus {
+  active
+  rejected
+  superseded
+  selected
+
+  @@map("recommendation_status")
+}
+
+enum RecommendationRejectionReason {
+  timing
+  too_difficult
+  prefer_solo
+  learn_first
+  social_comfort
+  other
+
+  @@map("recommendation_rejection_reason")
+}
+
 // ADR-0017: user aggregate. Email is stored lowercase (normalized at the
 // boundary); uniqueness on the normalized form is case-insensitive.
 model IdentityUser {
@@ -298,4 +318,28 @@ model ActivityCommitment {
   @@index([userId, updatedAt])
   @@index([activityId, state])
   @@map("activity_commitment")
+}
+
+// ADR-0022: durable directional decision state. Cross-context references are
+// logical and intentionally do not use foreign keys to Profile/Activity tables.
+model RecommendationDecision {
+  id                 String                          @id @db.Char(26)
+  userId             String                          @db.Char(26)
+  hobbyId            String                          @db.Char(26)
+  activityId         String                          @db.Char(26)
+  title              String                          @db.VarChar(160)
+  rationale          String                          @db.Text
+  fitSignals         String[]                        @default([])
+  intent             String                          @db.VarChar(40)
+  status             RecommendationStatus            @default(active)
+  rejectionReason    RecommendationRejectionReason?
+  rejectionNote      String?                         @db.VarChar(280)
+  selectedActivityId String?                         @db.Char(26)
+  createdAt          DateTime                        @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime                        @updatedAt @db.Timestamptz(3)
+
+  @@index([userId, hobbyId, status, updatedAt])
+  @@index([activityId])
+  @@index([selectedActivityId])
+  @@map("recommendation_decision")
 }
