@@ -46,7 +46,9 @@ function scoreCandidate(
   if (context.primaryIntent === 'improve') {
     if (activity.effortLevel === 'moderate') {
       score += 6;
-      signals.push('A moderate, structured effort supports improvement without defaulting to all-out pace.');
+      signals.push(
+        'A moderate, structured effort supports improvement without defaulting to all-out pace.',
+      );
     }
     if (includesAny(activity.activityType, ['pace', 'interval', 'technique', 'structured'])) {
       score += 4;
@@ -89,14 +91,24 @@ function scoreCandidate(
   if (rejectionReason === 'prefer_solo' || rejectionReason === 'social_comfort') {
     if (!activity.communityReferenceId) {
       score += 8;
-      signals.push('You asked for less social pressure, so this does not depend on joining a community.');
+      signals.push(
+        'You asked for less social pressure, so this does not depend on joining a community.',
+      );
     } else {
       score -= 8;
     }
   }
 
   if (rejectionReason === 'learn_first') {
-    if (includesAny(`${activity.activityType} ${activity.preparation} ${activity.expectations}`, ['learn', 'intro', 'guided', 'technique', 'walk'])) {
+    if (
+      includesAny(`${activity.activityType} ${activity.preparation} ${activity.expectations}`, [
+        'learn',
+        'intro',
+        'guided',
+        'technique',
+        'walk',
+      ])
+    ) {
       score += 6;
       signals.push('This option gives you a more guided or learning-friendly way in.');
     }
