@@ -8,9 +8,11 @@ This backend exists for one reason: to help people **participate in real-world h
 
 ## Current phase — READ THIS
 
-**Complete and frozen:** M1 — platform kernel + `catalog` module (v0.1.0), and M2 — `identity` + `access` modules with the audit trail (v0.2.0). The `catalog` module is the normative reference for module anatomy; the auth stack (JWT + rotating refresh tokens, policy layer, audit) is live. See `docs/roadmap.md` for milestone status.
+**Complete and frozen:** M1 — platform kernel + `catalog` module (v0.1.0), and M2 — `identity` + `access` modules with the audit trail (v0.2.0). The `catalog` module is the normative reference for module anatomy; the auth stack (JWT + rotating refresh tokens, policy layer, audit) is live.
 
-**Do not** implement M3+ features (communities, events, feeds, chat, notifications, media, admin CMS) until the next milestone is explicitly approved. Frozen code (`src/modules/catalog/**`, `src/modules/identity/**`, `src/modules/access/**`, existing migrations, kernel behavior contracts) is modified only under an explicit remediation or milestone instruction.
+**Approved and in progress:** **W3 — Profile + Hobby Relationship / Context**, the first Wayfinder loop-first milestone. W3 may add the `profile` bounded context, the minimum schema/API changes required by ADR-0020, and narrowly-scoped public exports from existing modules needed for collaboration. Existing M1/M2 behavior remains frozen unless W3 explicitly requires a compatible integration seam.
+
+**Do not** implement W4+ features (activities/commitments, recommendation/recovery, progress/journey, communities, notifications, feed/chat, media, admin CMS) until the next milestone is explicitly approved. See `docs/roadmap.md` and `docs/wayfinder-v1-backend-plan.md` for delivery order.
 
 ## Locked stack (ADRs are binding)
 
