@@ -140,7 +140,8 @@ export function rankActivities(
     .filter((candidate) => Number.isFinite(candidate.score))
     .sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
-      const timeDifference = a.view.activity.startsAt.getTime() - b.view.activity.startsAt.getTime();
+      const timeDifference =
+        a.view.activity.startsAt.getTime() - b.view.activity.startsAt.getTime();
       if (timeDifference !== 0) return timeDifference;
       return a.view.activity.id.localeCompare(b.view.activity.id);
     });
