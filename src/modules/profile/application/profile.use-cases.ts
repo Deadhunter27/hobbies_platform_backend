@@ -90,7 +90,11 @@ export class UpsertMyHobbyContextUseCase {
     @Inject(PROFILE_REPOSITORY) private readonly repository: ProfileRepository,
   ) {}
 
-  async execute(actor: Actor, hobbyId: string, input: UpsertMyHobbyContextInput): Promise<HobbyContext> {
+  async execute(
+    actor: Actor,
+    hobbyId: string,
+    input: UpsertMyHobbyContextInput,
+  ): Promise<HobbyContext> {
     await this.authorization.assertCanUpdate(actor);
     await this.getHobby.execute({ slugOrId: hobbyId });
 

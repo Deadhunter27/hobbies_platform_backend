@@ -36,7 +36,11 @@ export class ProfileController {
   @ApiOperation({ summary: 'Get private Wayfinder profile context for the authenticated user' })
   @ApiOkResponse({ type: ProfileContextResponseDto })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED', type: ErrorEnvelopeDto })
-  @ApiResponse({ status: 403, description: 'USER_SUSPENDED or PROFILE_ACCESS_DENIED', type: ErrorEnvelopeDto })
+  @ApiResponse({
+    status: 403,
+    description: 'USER_SUSPENDED or PROFILE_ACCESS_DENIED',
+    type: ErrorEnvelopeDto,
+  })
   async getProfileContext(@CurrentUser() actor: Actor): Promise<ProfileContextResponseDto> {
     return toProfileContextResponse(await this.getProfile.execute(actor));
   }
@@ -46,7 +50,11 @@ export class ProfileController {
   @ApiOkResponse({ type: ProfileContextResponseDto })
   @ApiResponse({ status: 400, description: 'VALIDATION_FAILED', type: ErrorEnvelopeDto })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED', type: ErrorEnvelopeDto })
-  @ApiResponse({ status: 403, description: 'USER_SUSPENDED or PROFILE_ACCESS_DENIED', type: ErrorEnvelopeDto })
+  @ApiResponse({
+    status: 403,
+    description: 'USER_SUSPENDED or PROFILE_ACCESS_DENIED',
+    type: ErrorEnvelopeDto,
+  })
   async putProfileContext(
     @CurrentUser() actor: Actor,
     @Body() body: UpsertProfileContextDto,

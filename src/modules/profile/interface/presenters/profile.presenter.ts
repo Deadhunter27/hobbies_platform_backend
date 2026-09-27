@@ -1,7 +1,9 @@
 import type { HobbyContext, ProfileContext } from '../../domain';
 import type { HobbyContextResponseDto, ProfileContextResponseDto } from '../dto/profile.dto';
 
-export function toProfileContextResponse(context: ProfileContext | null): ProfileContextResponseDto {
+export function toProfileContextResponse(
+  context: ProfileContext | null,
+): ProfileContextResponseDto {
   return context
     ? {
         city: context.city,

@@ -17,7 +17,11 @@ export class ProfileAuthorization {
   private async assert(actor: Actor, action: string): Promise<void> {
     const decision = await this.policy.can(actor, action, { type: 'user', id: actor.id });
     if (!decision.allow) {
-      throw new ForbiddenError('You cannot access this profile context.', undefined, 'PROFILE_ACCESS_DENIED');
+      throw new ForbiddenError(
+        'You cannot access this profile context.',
+        undefined,
+        'PROFILE_ACCESS_DENIED',
+      );
     }
   }
 }

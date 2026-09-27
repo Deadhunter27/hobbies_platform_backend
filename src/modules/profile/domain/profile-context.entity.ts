@@ -18,14 +18,34 @@ export class ProfileContext extends Entity {
     return new ProfileContext(props);
   }
 
-  static create(input: Omit<ProfileContextProps, 'createdAt' | 'updatedAt'>, now = new Date()): ProfileContext {
+  static create(
+    input: Omit<ProfileContextProps, 'createdAt' | 'updatedAt'>,
+    now = new Date(),
+  ): ProfileContext {
     return new ProfileContext({ ...input, createdAt: now, updatedAt: now });
   }
 
-  get userId(): string { return this.props.userId; }
-  get city(): string | null { return this.props.city; }
-  get countryCode(): string | null { return this.props.countryCode; }
-  get timezone(): string | null { return this.props.timezone; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get userId(): string {
+    return this.props.userId;
+  }
+
+  get city(): string | null {
+    return this.props.city;
+  }
+
+  get countryCode(): string | null {
+    return this.props.countryCode;
+  }
+
+  get timezone(): string | null {
+    return this.props.timezone;
+  }
+
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 }

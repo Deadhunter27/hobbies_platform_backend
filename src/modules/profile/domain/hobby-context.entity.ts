@@ -1,7 +1,13 @@
 import { Entity } from '@shared/domain';
 import { DomainRuleViolation } from '@shared/errors';
 
-export const EXPERIENCE_LEVELS = ['exploring', 'beginner', 'returning', 'regular', 'experienced'] as const;
+export const EXPERIENCE_LEVELS = [
+  'exploring',
+  'beginner',
+  'returning',
+  'regular',
+  'experienced',
+] as const;
 export type ExperienceLevel = (typeof EXPERIENCE_LEVELS)[number];
 
 export const PROFILE_INTENTS = ['start', 'improve', 'social', 'explore'] as const;
@@ -50,18 +56,47 @@ export class HobbyContext extends Entity {
     return new HobbyContext(props);
   }
 
-  static create(input: Omit<HobbyContextProps, 'createdAt' | 'updatedAt'>, now = new Date()): HobbyContext {
+  static create(
+    input: Omit<HobbyContextProps, 'createdAt' | 'updatedAt'>,
+    now = new Date(),
+  ): HobbyContext {
     assertIntentRules(input.primaryIntent, input.secondaryIntents);
     return new HobbyContext({ ...input, createdAt: now, updatedAt: now });
   }
 
-  get userId(): string { return this.props.userId; }
-  get hobbyId(): string { return this.props.hobbyId; }
-  get experienceLevel(): ExperienceLevel { return this.props.experienceLevel; }
-  get primaryIntent(): ProfileIntent { return this.props.primaryIntent; }
-  get secondaryIntents(): ProfileIntent[] { return [...this.props.secondaryIntents]; }
-  get goal(): string | null { return this.props.goal; }
-  get socialPreference(): SocialPreference { return this.props.socialPreference; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get userId(): string {
+    return this.props.userId;
+  }
+
+  get hobbyId(): string {
+    return this.props.hobbyId;
+  }
+
+  get experienceLevel(): ExperienceLevel {
+    return this.props.experienceLevel;
+  }
+
+  get primaryIntent(): ProfileIntent {
+    return this.props.primaryIntent;
+  }
+
+  get secondaryIntents(): ProfileIntent[] {
+    return [...this.props.secondaryIntents];
+  }
+
+  get goal(): string | null {
+    return this.props.goal;
+  }
+
+  get socialPreference(): SocialPreference {
+    return this.props.socialPreference;
+  }
+
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 }
