@@ -4,18 +4,26 @@ Single source of truth for milestone status. A milestone is **done** only
 when its acceptance criteria are proven by tests and a green CI run on
 `main`, and the architect has signed off.
 
+The product direction was realigned after the Wayfinder research prototype.
+M1 and M2 remain complete and frozen. From W3 onward, delivery is organized
+around the directional real-world loop:
+
+**Context → What's Next → Guidance → Activity → Commitment → Real-world action → Progress → Next → Journey**
+
 ## Status
 
-| Milestone | Scope                                        | Status      | Version |
-| --------- | -------------------------------------------- | ----------- | ------- |
-| M1        | Platform kernel + catalog (read-only)        | ✅ Complete | v0.1.0  |
-| M2        | Identity & access + audit trail              | ✅ Complete | v0.2.0  |
-| M3        | Communities                                  | ⬜ Planned  | —       |
-| M4        | Events (incl. community-scoped roles)        | ⬜ Planned  | —       |
-| M5        | Social feed                                  | ⬜ Planned  | —       |
-| M6        | Chat                                         | ⬜ Planned  | —       |
-| M7        | Notifications                                | ⬜ Planned  | —       |
-| M8        | Admin CMS (staff tooling, taxonomy writes)   | ⬜ Planned  | —       |
+| Milestone | Scope                                        | Status         | Version |
+| --------- | -------------------------------------------- | -------------- | ------- |
+| M1        | Platform kernel + catalog (read-only)        | ✅ Complete    | v0.1.0  |
+| M2        | Identity & access + audit trail              | ✅ Complete    | v0.2.0  |
+| W3        | Profile + hobby relationship / context       | 🟡 In progress | —       |
+| W4        | Activities + commitments                     | ⬜ Planned     | —       |
+| W5        | What's Next + recovery                       | ⬜ Planned     | —       |
+| W6        | Progress + Journey                           | ⬜ Planned     | —       |
+| W7        | Communities + people context                 | ⬜ Planned     | —       |
+| W8        | Notifications / check-ins                    | ⬜ Planned     | —       |
+| W9        | Conversations / feed                         | ⬜ Planned     | —       |
+| W10       | Admin / moderation / seeding                 | ⬜ Planned     | —       |
 
 ## Completed
 
@@ -33,22 +41,46 @@ reference for module anatomy.
 ADRs 0017–0019 executed: argon2id passwords with timing-safe login,
 15-minute HS256 JWTs carrying only `sub`/`sid`, rotating opaque refresh
 tokens with family revocation on reuse, default-deny `can()` policy layer
-with a grants table ready for M4's community roles, global `AuthGuard`
-with opt-in `@RequiresAuth()`, and an append-only audit trail written
-in-transaction across the whole auth lifecycle.
+with a grants table ready for scoped roles, global `AuthGuard` with opt-in
+`@RequiresAuth()`, and an append-only audit trail written in-transaction
+across the auth lifecycle.
 
-## Upcoming (scope sketches — each milestone gets its own instruction)
+## Current
 
-- **M3 Communities** — community aggregate, membership, geo discovery
-  (PostGIS enters real use), community-scoped audit actions.
-- **M4 Events** — event lifecycle, RSVPs, community-scoped roles landing in
-  `access_resource_role` (the policy interface already accepts them).
-- **M5 Social feed** — activity read models; first heavy read-path work.
-- **M6 Chat** — realtime transport decision required first (open ADR).
-- **M7 Notifications** — BullMQ workers go live (`PROCESS_ROLE` split,
-  ADR-0013); Redis wiring lands here at the latest.
-- **M8 Admin CMS** — staff tooling; catalog taxonomy write endpoints
-  (staff-gated per ADR-0016) and moderation surfaces.
+### W3 — Profile + hobby relationship / context
+
+Approved scope is defined by ADR-0020. W3 gives Wayfinder persistent product
+context without expanding into recommendations or activities yet.
+
+Acceptance criteria:
+
+- authenticated users can read/update their own lightweight profile context;
+- authenticated users can create/read/update their own context for an active hobby;
+- hobby context captures experience level, primary intent, optional secondary intents,
+  optional goal, and social preference;
+- protected operations call the existing policy layer explicitly and default-deny;
+- the profile module does not own identity or catalog data and does not add cross-context DB foreign keys;
+- all input boundaries are Zod-validated and all endpoints are represented in OpenAPI;
+- persistence is introduced by a reviewed Prisma migration;
+- unit/integration/e2e coverage and CI remain green.
+
+## Planned
+
+- **W4 Activities + Commitments** — Activity aggregate, place/time/host context,
+  availability/capacity, preparation/expectations, and commitment lifecycle.
+- **W5 What's Next + Recovery** — deterministic recommendations, rationale,
+  rejection reasons, alternatives, and preservation of the actual chosen path.
+- **W6 Progress + Journey** — reflections, qualitative progress, optional metrics,
+  recognition context, and Journey moments without competitive gamification.
+- **W7 Communities + People Context** — the minimum membership/host/trust context
+  required to support real-world activity decisions.
+- **W8 Notifications / Check-ins** — reminders, post-activity check-ins, and
+  missed-plan check-ins; BullMQ/Redis activation as required.
+- **W9 Conversations / Feed** — only after the directional loop is coherent.
+- **W10 Admin / Moderation / Seeding** — staff tooling, curation, moderation,
+  taxonomy writes, and seeded supply management.
+
+See `docs/wayfinder-v1-backend-plan.md` for the product rationale and sequencing.
 
 ## Standing pre-launch items (tracked, not milestone-bound)
 
