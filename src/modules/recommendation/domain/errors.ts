@@ -1,25 +1,29 @@
-import { AppError } from '@shared/errors';
+import { ConflictError, ForbiddenError, NotFoundError } from '@shared/errors';
 
-export class RecommendationNotFoundError extends AppError {
+export class RecommendationNotFoundError extends NotFoundError {
   constructor(id: string) {
-    super('RECOMMENDATION_NOT_FOUND', `Recommendation "${id}" was not found.`, 404);
+    super(`Recommendation "${id}" was not found.`, undefined, 'RECOMMENDATION_NOT_FOUND');
   }
 }
 
-export class NoViableRecommendationError extends AppError {
+export class NoViableRecommendationError extends NotFoundError {
   constructor(hobbyId: string) {
-    super('NO_VIABLE_RECOMMENDATION', `No viable next step is available for hobby "${hobbyId}".`, 404);
+    super(
+      `No viable next step is available for hobby "${hobbyId}".`,
+      undefined,
+      'NO_VIABLE_RECOMMENDATION',
+    );
   }
 }
 
-export class RecommendationStaleError extends AppError {
+export class RecommendationStaleError extends ConflictError {
   constructor(id: string) {
-    super('RECOMMENDATION_STALE', `Recommendation "${id}" can no longer be acted on.`, 409);
+    super(`Recommendation "${id}" can no longer be acted on.`, undefined, 'RECOMMENDATION_STALE');
   }
 }
 
-export class RecommendationAccessDeniedError extends AppError {
+export class RecommendationAccessDeniedError extends ForbiddenError {
   constructor() {
-    super('RECOMMENDATION_ACCESS_DENIED', 'Recommendation access denied.', 403);
+    super('Recommendation access denied.', undefined, 'RECOMMENDATION_ACCESS_DENIED');
   }
 }
