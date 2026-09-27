@@ -82,6 +82,33 @@ enum ProfileSocialPreference {
   @@map("profile_social_preference")
 }
 
+enum ActivityEffortLevel {
+  easy
+  moderate
+  challenging
+  open
+
+  @@map("activity_effort_level")
+}
+
+enum ActivityStatus {
+  draft
+  published
+  cancelled
+  completed
+
+  @@map("activity_status")
+}
+
+enum ActivityCommitmentState {
+  interested
+  committed
+  cancelled
+  missed
+
+  @@map("activity_commitment_state")
+}
+
 // ADR-0017: user aggregate. Email is stored lowercase (normalized at the
 // boundary); uniqueness on the normalized form is case-insensitive.
 model IdentityUser {
@@ -219,4 +246,56 @@ model ProfileHobbyContext {
   @@unique([userId, hobbyId])
   @@index([userId, updatedAt])
   @@map("profile_hobby_context")
+}
+
+// ADR-0021: a real-world opportunity. hobby/host/community references are logical
+// cross-context references; only commitment has a same-context DB relation.
+model Activity {
+  id                   String               @id @db.Char(26)
+  hobbyId              String               @db.Char(26)
+  title                String               @db.VarChar(160)
+  description          String?              @db.Text
+  activityType         String               @db.VarChar(80)
+  startsAt             DateTime             @db.Timestamptz(3)
+  endsAt               DateTime?            @db.Timestamptz(3)
+  timezone             String               @db.VarChar(64)
+  placeName            String               @db.VarChar(160)
+  addressLabel         String?              @db.VarChar(240)
+  latitude             Float?               @db.DoublePrecision
+  longitude            Float?               @db.DoublePrecision
+  hostName             String?              @db.VarChar(160)
+  hostType             String?              @db.VarChar(40)
+  hostReferenceId      String?              @db.Char(26)
+  communityReferenceId String?              @db.Char(26)
+  effortLevel          ActivityEffortLevel
+  capacity             Int?
+  status               ActivityStatus       @default(draft)
+  preparation          String               @db.Text
+  expectations         String               @db.Text
+  commitments          ActivityCommitment[]
+  createdAt            DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime             @updatedAt @db.Timestamptz(3)
+
+  @@index([status, startsAt, id])
+  @@index([hobbyId, status, startsAt])
+  @@map("activity")
+}
+
+model ActivityCommitment {
+  id          String                  @id @db.Char(26)
+  userId      String                  @db.Char(26)
+  activityId  String                  @db.Char(26)
+  activity    Activity                @relation(fields: [activityId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  state       ActivityCommitmentState
+  committedAt DateTime?               @db.Timestamptz(3)
+  cancelledAt DateTime?               @db.Timestamptz(3)
+  missedAt    DateTime?               @db.Timestamptz(3)
+  note        String?                 @db.VarChar(280)
+  createdAt   DateTime                @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime                @updatedAt @db.Timestamptz(3)
+
+  @@unique([userId, activityId])
+  @@index([userId, updatedAt])
+  @@index([activityId, state])
+  @@map("activity_commitment")
 }

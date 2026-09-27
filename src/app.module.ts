@@ -10,6 +10,7 @@ import { CatalogModule } from '@modules/catalog';
 import { AccessModule, AuthGuard } from '@modules/access';
 import { IdentityModule } from '@modules/identity';
 import { ProfileModule } from '@modules/profile';
+import { ActivityModule } from '@modules/activity';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ProfileModule } from '@modules/profile';
     AccessModule,
     IdentityModule,
     ProfileModule,
+    ActivityModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AppExceptionFilter },
