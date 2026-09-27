@@ -4,9 +4,7 @@ import { RECOMMENDATION_STATUSES, REJECTION_REASONS } from '../../domain';
 
 const ulid = z.string().regex(/^[0-9A-HJKMNP-TV-Z]{26}$/);
 
-export const whatsNextParamSchema = z
-  .object({ hobbyId: ulid })
-  .strict();
+export const whatsNextParamSchema = z.object({ hobbyId: ulid }).strict();
 export class WhatsNextParamDto extends createZodDto(whatsNextParamSchema) {}
 
 export const recommendationActionParamSchema = z
@@ -22,9 +20,7 @@ export const rejectRecommendationSchema = z
   .strict();
 export class RejectRecommendationDto extends createZodDto(rejectRecommendationSchema) {}
 
-export const selectRecommendationSchema = z
-  .object({ activityId: ulid })
-  .strict();
+export const selectRecommendationSchema = z.object({ activityId: ulid }).strict();
 export class SelectRecommendationDto extends createZodDto(selectRecommendationSchema) {}
 
 export const recommendationResponseSchema = z.object({
