@@ -16,8 +16,8 @@ around the directional real-world loop:
 | --------- | -------------------------------------------- | -------------- | ------- |
 | M1        | Platform kernel + catalog (read-only)        | ✅ Complete    | v0.1.0  |
 | M2        | Identity & access + audit trail              | ✅ Complete    | v0.2.0  |
-| W3        | Profile + hobby relationship / context       | 🟡 In progress | —       |
-| W4        | Activities + commitments                     | ⬜ Planned     | —       |
+| W3        | Profile + hobby relationship / context       | ✅ Complete    | —       |
+| W4        | Activities + commitments                     | 🟡 In progress | —       |
 | W5        | What's Next + recovery                       | ⬜ Planned     | —       |
 | W6        | Progress + Journey                           | ⬜ Planned     | —       |
 | W7        | Communities + people context                 | ⬜ Planned     | —       |
@@ -45,29 +45,39 @@ with a grants table ready for scoped roles, global `AuthGuard` with opt-in
 `@RequiresAuth()`, and an append-only audit trail written in-transaction
 across the auth lifecycle.
 
-## Current
-
 ### W3 — Profile + hobby relationship / context
 
-Approved scope is defined by ADR-0020. W3 gives Wayfinder persistent product
-context without expanding into recommendations or activities yet.
+ADR-0020 is implemented on `main`. Authenticated users can persist lightweight
+profile context and one evolving context record per hobby, including experience
+level, primary/secondary intent, goal, and social preference. Cross-context
+ownership remains logical rather than DB-coupled, protected operations call the
+existing policy layer explicitly, OpenAPI and migration artifacts are committed,
+and the main-branch CI + CodeQL runs are green.
+
+## Current
+
+### W4 — Activities + commitments
+
+Approved scope is defined by ADR-0021. W4 introduces the stable real-world
+opportunity and decision primitives that later recommendation, progress, and
+notification milestones depend on.
 
 Acceptance criteria:
 
-- authenticated users can read/update their own lightweight profile context;
-- authenticated users can create/read/update their own context for an active hobby;
-- hobby context captures experience level, primary intent, optional secondary intents,
-  optional goal, and social preference;
-- protected operations call the existing policy layer explicitly and default-deny;
-- the profile module does not own identity or catalog data and does not add cross-context DB foreign keys;
-- all input boundaries are Zod-validated and all endpoints are represented in OpenAPI;
+- published activities can be listed and read with hobby, place/time, host,
+  effort, preparation, availability/capacity, and status context;
+- authenticated users can read and mutate only their own activity commitments;
+- commitment lifecycle supports interested/committed/cancelled/missed without
+  treating commitment as completion;
+- known capacity is enforced deterministically on commitment writes;
+- activity hobby references are verified through the catalog public seam;
+- cross-context user/hobby/host/community references remain logical, not DB FKs;
+- all input boundaries are Zod-validated and endpoints are represented in OpenAPI;
 - persistence is introduced by a reviewed Prisma migration;
 - unit/integration/e2e coverage and CI remain green.
 
 ## Planned
 
-- **W4 Activities + Commitments** — Activity aggregate, place/time/host context,
-  availability/capacity, preparation/expectations, and commitment lifecycle.
 - **W5 What's Next + Recovery** — deterministic recommendations, rationale,
   rejection reasons, alternatives, and preservation of the actual chosen path.
 - **W6 Progress + Journey** — reflections, qualitative progress, optional metrics,
