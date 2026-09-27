@@ -790,6 +790,267 @@
           "me"
         ]
       }
+    },
+    "/api/v1/me/profile-context": {
+      "get": {
+        "operationId": "ProfileController_getProfileContext_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileContextResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "USER_SUSPENDED or PROFILE_ACCESS_DENIED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get private Wayfinder profile context for the authenticated user",
+        "tags": [
+          "profile"
+        ]
+      },
+      "put": {
+        "operationId": "ProfileController_putProfileContext_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertProfileContextDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileContextResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "USER_SUSPENDED or PROFILE_ACCESS_DENIED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create or replace private Wayfinder profile context",
+        "tags": [
+          "profile"
+        ]
+      }
+    },
+    "/api/v1/me/hobby-contexts": {
+      "get": {
+        "operationId": "ProfileController_listContexts_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HobbyContextListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the authenticated user hobby contexts",
+        "tags": [
+          "profile"
+        ]
+      }
+    },
+    "/api/v1/me/hobby-contexts/{hobbyId}": {
+      "get": {
+        "operationId": "ProfileController_getContext_v1",
+        "parameters": [
+          {
+            "name": "hobbyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HobbyContextResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "HOBBY_CONTEXT_NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the authenticated user context for one hobby",
+        "tags": [
+          "profile"
+        ]
+      },
+      "put": {
+        "operationId": "ProfileController_putContext_v1",
+        "parameters": [
+          {
+            "name": "hobbyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertHobbyContextDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HobbyContextResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "HOBBY_NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create or replace the authenticated user context for an active hobby",
+        "tags": [
+          "profile"
+        ]
+      }
     }
   },
   "info": {
@@ -1232,6 +1493,271 @@
           "globalRole",
           "sessionId"
         ]
+      },
+      "ProfileContextResponseDto": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "city",
+          "countryCode",
+          "timezone",
+          "updatedAt"
+        ]
+      },
+      "UpsertProfileContextDto": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "default": null,
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 2,
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "default": null,
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "HobbyContextListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "hobbyId": {
+                  "type": "string"
+                },
+                "experienceLevel": {
+                  "type": "string",
+                  "enum": [
+                    "exploring",
+                    "beginner",
+                    "returning",
+                    "regular",
+                    "experienced"
+                  ]
+                },
+                "primaryIntent": {
+                  "type": "string",
+                  "enum": [
+                    "start",
+                    "improve",
+                    "social",
+                    "explore"
+                  ]
+                },
+                "secondaryIntents": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "start",
+                      "improve",
+                      "social",
+                      "explore"
+                    ]
+                  }
+                },
+                "goal": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "socialPreference": {
+                  "type": "string",
+                  "enum": [
+                    "solo",
+                    "mixed",
+                    "social"
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "hobbyId",
+                "experienceLevel",
+                "primaryIntent",
+                "secondaryIntents",
+                "goal",
+                "socialPreference",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "HobbyContextResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "hobbyId": {
+            "type": "string"
+          },
+          "experienceLevel": {
+            "type": "string",
+            "enum": [
+              "exploring",
+              "beginner",
+              "returning",
+              "regular",
+              "experienced"
+            ]
+          },
+          "primaryIntent": {
+            "type": "string",
+            "enum": [
+              "start",
+              "improve",
+              "social",
+              "explore"
+            ]
+          },
+          "secondaryIntents": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "start",
+                "improve",
+                "social",
+                "explore"
+              ]
+            }
+          },
+          "goal": {
+            "type": "string",
+            "nullable": true
+          },
+          "socialPreference": {
+            "type": "string",
+            "enum": [
+              "solo",
+              "mixed",
+              "social"
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "hobbyId",
+          "experienceLevel",
+          "primaryIntent",
+          "secondaryIntents",
+          "goal",
+          "socialPreference",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpsertHobbyContextDto": {
+        "type": "object",
+        "properties": {
+          "experienceLevel": {
+            "type": "string",
+            "enum": [
+              "exploring",
+              "beginner",
+              "returning",
+              "regular",
+              "experienced"
+            ]
+          },
+          "primaryIntent": {
+            "type": "string",
+            "enum": [
+              "start",
+              "improve",
+              "social",
+              "explore"
+            ]
+          },
+          "secondaryIntents": {
+            "default": [],
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "start",
+                "improve",
+                "social",
+                "explore"
+              ]
+            }
+          },
+          "goal": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 280,
+            "default": null,
+            "nullable": true
+          },
+          "socialPreference": {
+            "default": "mixed",
+            "type": "string",
+            "enum": [
+              "solo",
+              "mixed",
+              "social"
+            ]
+          }
+        },
+        "required": [
+          "experienceLevel",
+          "primaryIntent"
+        ],
+        "additionalProperties": false
       }
     }
   }
