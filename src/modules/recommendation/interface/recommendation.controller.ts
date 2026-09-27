@@ -1,11 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorEnvelopeDto } from '@infra/http';
 import { CurrentUser, RequiresAuth, type Actor } from '@modules/access';
 import {
@@ -64,12 +58,7 @@ export class RecommendationController {
     @Body() body: RejectRecommendationDto,
   ): Promise<RecommendationResponseDto> {
     return toRecommendationResponse(
-      await this.rejectRecommendation.execute(
-        actor,
-        params.hobbyId,
-        params.recommendationId,
-        body,
-      ),
+      await this.rejectRecommendation.execute(actor, params.hobbyId, params.recommendationId, body),
     );
   }
 
