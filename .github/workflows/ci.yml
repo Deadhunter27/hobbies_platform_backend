@@ -8,6 +8,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -19,11 +22,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: pnpm format
-      - uses: actions/upload-artifact@v4
-        with:
-          name: w5-formatted-source
-          path: src/modules/recommendation
+      - run: pnpm format:check
       - run: pnpm lint
 
   typecheck:
@@ -111,6 +110,8 @@ jobs:
       JWT_SECRET: ci-only-test-secret-not-used-anywhere-real-0000
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: wayfinder-w5-recommendation
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -119,10 +120,17 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm prisma generate
       - run: pnpm openapi:generate
-      - uses: actions/upload-artifact@v4
-        with:
-          name: w5-openapi
-          path: openapi/openapi.json
+      - name: Commit generated OpenAPI
+        run: |
+          if git diff --quiet -- openapi/openapi.json; then
+            echo "OpenAPI is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add openapi/openapi.json
+          git commit -m "docs(openapi): regenerate W5 contract"
+          git push origin HEAD:wayfinder-w5-recommendation
 
   docker:
     runs-on: ubuntu-latest
