@@ -86,7 +86,8 @@ export const activitySeeds: ActivitySeed[] = [
     id: '01K6A000000000000000000004',
     hobbySlug: 'running',
     title: '5K with one pacing cue',
-    description: 'A self-guided 5K focused on learning sustainable effort rather than chasing pace.',
+    description:
+      'A self-guided 5K focused on learning sustainable effort rather than chasing pace.',
     activityType: 'self_guided_pacing_run',
     startOffsetDays: 5,
     durationMinutes: 50,
@@ -99,7 +100,8 @@ export const activitySeeds: ActivitySeed[] = [
     hostType: 'self',
     effortLevel: 'moderate',
     capacity: null,
-    preparation: 'Start the first kilometre deliberately controlled and keep one pacing cue in mind.',
+    preparation:
+      'Start the first kilometre deliberately controlled and keep one pacing cue in mind.',
     expectations: 'Notice where effort changes across the run instead of chasing a personal best.',
   },
 ];
