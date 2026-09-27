@@ -8,6 +8,8 @@ export type {
   RecommendationStatus,
   RecommendationRejectionReason,
 } from './recommendation.entity';
+export { rankActivities } from './recommendation-policy';
+export type { RankedActivity } from './recommendation-policy';
 export {
   RecommendationNotFoundError,
   NoViableRecommendationError,
