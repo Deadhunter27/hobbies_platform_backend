@@ -13,12 +13,7 @@ import {
   type UpdateHobbyInput,
 } from '@modules/catalog/application/use-cases/manage-hobby.use-cases';
 import type { Hobby, HobbyCategory } from '@modules/catalog/domain';
-import {
-  AUDIT_WRITER,
-  UNIT_OF_WORK,
-  type AuditWriter,
-  type UnitOfWork,
-} from '@shared/application';
+import { AUDIT_WRITER, UNIT_OF_WORK, type AuditWriter, type UnitOfWork } from '@shared/application';
 import { AdminAuthorization } from './admin-authorization';
 
 @Injectable()

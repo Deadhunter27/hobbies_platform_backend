@@ -64,7 +64,10 @@ describeIfDb('W10 admin operability e2e', () => {
       sortOrder: 999,
     };
 
-    await request(app.getHttpServer()).post('/api/v1/admin/catalog/categories').send(payload).expect(401);
+    await request(app.getHttpServer())
+      .post('/api/v1/admin/catalog/categories')
+      .send(payload)
+      .expect(401);
 
     const denied = await request(app.getHttpServer())
       .post('/api/v1/admin/catalog/categories')
