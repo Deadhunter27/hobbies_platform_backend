@@ -1,8 +1,12 @@
+import type { CommunityContext } from '@modules/community';
 import type { ActivityView } from '../../application';
 import type { ActivityCommitment } from '../../domain';
 import type { ActivityCommitmentResponseDto, ActivityResponseDto } from '../dto/activity.dto';
 
-export function toActivityResponse(view: ActivityView): ActivityResponseDto {
+export function toActivityResponse(
+  view: ActivityView,
+  communityContext: CommunityContext | null = null,
+): ActivityResponseDto {
   const activity = view.activity;
   return {
     id: activity.id,
@@ -21,6 +25,20 @@ export function toActivityResponse(view: ActivityView): ActivityResponseDto {
     hostType: activity.hostType,
     hostReferenceId: activity.hostReferenceId,
     communityReferenceId: activity.communityReferenceId,
+    communityContext: communityContext
+      ? {
+          id: communityContext.community.id,
+          name: communityContext.community.name,
+          slug: communityContext.community.slug,
+          city: communityContext.community.city,
+          memberCount: communityContext.people.memberCount,
+          hosts: communityContext.people.hosts.map((membership) => ({
+            personId: membership.userId,
+            displayName: membership.displayNameSnapshot,
+            role: membership.role === 'organizer' ? 'organizer' : 'host',
+          })),
+        }
+      : null,
     effortLevel: activity.effortLevel,
     capacity: activity.capacity,
     status: activity.status,

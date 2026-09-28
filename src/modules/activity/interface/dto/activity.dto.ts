@@ -14,6 +14,23 @@ export class ActivityIdParamDto extends createZodDto(activityIdParamSchema) {}
 export const activityListQuerySchema = z.object({ hobbyId: ulidSchema.optional() }).strict();
 export class ActivityListQueryDto extends createZodDto(activityListQuerySchema) {}
 
+export const activityCommunityContextSchema = z
+  .object({
+    id: ulidSchema,
+    name: z.string(),
+    slug: z.string(),
+    city: z.string().nullable(),
+    memberCount: z.number().int().nonnegative(),
+    hosts: z.array(
+      z.object({
+        personId: ulidSchema,
+        displayName: z.string(),
+        role: z.enum(['host', 'organizer']),
+      }),
+    ),
+  })
+  .nullable();
+
 export const activityResponseSchema = z.object({
   id: z.string(),
   hobbyId: z.string(),
@@ -31,6 +48,7 @@ export const activityResponseSchema = z.object({
   hostType: z.string().nullable(),
   hostReferenceId: z.string().nullable(),
   communityReferenceId: z.string().nullable(),
+  communityContext: activityCommunityContextSchema,
   effortLevel: z.enum(ACTIVITY_EFFORT_LEVELS),
   capacity: z.number().int().positive().nullable(),
   status: z.enum(ACTIVITY_STATUSES),

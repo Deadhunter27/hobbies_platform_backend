@@ -13,6 +13,7 @@ import { ProfileModule } from '@modules/profile';
 import { ActivityModule } from '@modules/activity';
 import { RecommendationModule } from '@modules/recommendation';
 import { ProgressModule } from '@modules/progress';
+import { CommunityModule } from '@modules/community';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ProgressModule } from '@modules/progress';
     ActivityModule,
     RecommendationModule,
     ProgressModule,
+    CommunityModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AppExceptionFilter },

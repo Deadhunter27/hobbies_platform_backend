@@ -1120,7 +1120,7 @@
             }
           }
         },
-        "summary": "Get one visible activity with current availability",
+        "summary": "Get one visible activity with current availability and trust context",
         "tags": [
           "activities"
         ]
@@ -1272,6 +1272,153 @@
         "summary": "Create or replace the authenticated user decision state for one activity",
         "tags": [
           "activity commitments"
+        ]
+      }
+    },
+    "/api/v1/communities/{communityRef}": {
+      "get": {
+        "operationId": "CommunitiesController_get_v1",
+        "parameters": [
+          {
+            "name": "communityRef",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "minLength": 1,
+              "maxLength": 180,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityContextResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "COMMUNITY_NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get one published community with activity-facing people context",
+        "tags": [
+          "communities"
+        ]
+      }
+    },
+    "/api/v1/me/community-memberships": {
+      "get": {
+        "operationId": "MyCommunityMembershipsController_list_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityMembershipListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the authenticated user community memberships",
+        "tags": [
+          "community memberships"
+        ]
+      }
+    },
+    "/api/v1/me/community-memberships/{communityId}": {
+      "put": {
+        "operationId": "MyCommunityMembershipsController_put_v1",
+        "parameters": [
+          {
+            "name": "communityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertCommunityMembershipDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityMembershipResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "COMMUNITY_NOT_FOUND or COMMUNITY_MEMBERSHIP_NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Join, rejoin, or leave one published community",
+        "tags": [
+          "community memberships"
         ]
       }
     },
@@ -2389,6 +2536,66 @@
                   "type": "string",
                   "nullable": true
                 },
+                "communityContext": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "slug": {
+                      "type": "string"
+                    },
+                    "city": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "memberCount": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "personId": {
+                            "type": "string",
+                            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                          },
+                          "displayName": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "host",
+                              "organizer"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "personId",
+                          "displayName",
+                          "role"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "slug",
+                    "city",
+                    "memberCount",
+                    "hosts"
+                  ],
+                  "nullable": true
+                },
                 "effortLevel": {
                   "type": "string",
                   "enum": [
@@ -2457,6 +2664,7 @@
                 "hostType",
                 "hostReferenceId",
                 "communityReferenceId",
+                "communityContext",
                 "effortLevel",
                 "capacity",
                 "status",
@@ -2533,6 +2741,66 @@
             "type": "string",
             "nullable": true
           },
+          "communityContext": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string",
+                "nullable": true
+              },
+              "memberCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "hosts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "personId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                    },
+                    "displayName": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "host",
+                        "organizer"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "personId",
+                    "displayName",
+                    "role"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "slug",
+              "city",
+              "memberCount",
+              "hosts"
+            ],
+            "nullable": true
+          },
           "effortLevel": {
             "type": "string",
             "enum": [
@@ -2601,6 +2869,7 @@
           "hostType",
           "hostReferenceId",
           "communityReferenceId",
+          "communityContext",
           "effortLevel",
           "capacity",
           "status",
@@ -2765,6 +3034,243 @@
           "state"
         ],
         "additionalProperties": false
+      },
+      "CommunityContextResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "hobbyId": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "archived"
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "people": {
+            "type": "object",
+            "properties": {
+              "memberCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "hosts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "personId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                    },
+                    "displayName": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "member",
+                        "host",
+                        "organizer"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "personId",
+                    "displayName",
+                    "role"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "memberCount",
+              "hosts"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "hobbyId",
+          "name",
+          "slug",
+          "description",
+          "city",
+          "countryCode",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "people"
+        ]
+      },
+      "CommunityMembershipListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                },
+                "communityId": {
+                  "type": "string",
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "member",
+                    "host",
+                    "organizer"
+                  ]
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "active",
+                    "left"
+                  ]
+                },
+                "joinedAt": {
+                  "type": "string"
+                },
+                "leftAt": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "communityId",
+                "displayName",
+                "role",
+                "state",
+                "joinedAt",
+                "leftAt",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpsertCommunityMembershipDto": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "left"
+            ]
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "CommunityMembershipResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "communityId": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "member",
+              "host",
+              "organizer"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "left"
+            ]
+          },
+          "joinedAt": {
+            "type": "string"
+          },
+          "leftAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "communityId",
+          "displayName",
+          "role",
+          "state",
+          "joinedAt",
+          "leftAt",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "RecommendationResponseDto": {
         "type": "object",

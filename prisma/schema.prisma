@@ -130,6 +130,29 @@ enum RecommendationRejectionReason {
   @@map("recommendation_rejection_reason")
 }
 
+enum CommunityStatus {
+  draft
+  published
+  archived
+
+  @@map("community_status")
+}
+
+enum CommunityMembershipRole {
+  member
+  host
+  organizer
+
+  @@map("community_membership_role")
+}
+
+enum CommunityMembershipState {
+  active
+  left
+
+  @@map("community_membership_state")
+}
+
 // ADR-0017: user aggregate. Email is stored lowercase (normalized at the
 // boundary); uniqueness on the normalized form is case-insensitive.
 model IdentityUser {
@@ -363,4 +386,45 @@ model ProgressReflection {
   @@unique([userId, activityId])
   @@index([userId, hobbyId, occurredAt, id])
   @@map("progress_reflection")
+}
+
+// ADR-0024: minimal community profile used to enrich real-world activity decisions.
+// hobbyId remains a logical cross-context reference to Catalog.
+model Community {
+  id          String                @id @db.Char(26)
+  hobbyId     String                @db.Char(26)
+  name        String                @db.VarChar(160)
+  slug        String                @unique @db.VarChar(180)
+  description String?               @db.Text
+  city        String?               @db.VarChar(120)
+  countryCode String?               @db.Char(2)
+  status      CommunityStatus       @default(draft)
+  memberships CommunityMembership[]
+  createdAt   DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime              @updatedAt @db.Timestamptz(3)
+
+  @@index([status, name, id])
+  @@index([hobbyId, status])
+  @@map("community")
+}
+
+// ADR-0024: durable relationship between one logical user reference and a Community.
+// userId intentionally has no FK to Identity; Community owns only the membership lifecycle.
+model CommunityMembership {
+  id                  String                   @id @db.Char(26)
+  communityId         String                   @db.Char(26)
+  community           Community                @relation(fields: [communityId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  userId              String                   @db.Char(26)
+  displayNameSnapshot String                   @db.VarChar(120)
+  role                CommunityMembershipRole  @default(member)
+  state               CommunityMembershipState @default(active)
+  joinedAt            DateTime                 @db.Timestamptz(3)
+  leftAt              DateTime?                @db.Timestamptz(3)
+  createdAt           DateTime                 @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime                 @updatedAt @db.Timestamptz(3)
+
+  @@unique([communityId, userId])
+  @@index([userId, state, updatedAt])
+  @@index([communityId, state, role])
+  @@map("community_membership")
 }

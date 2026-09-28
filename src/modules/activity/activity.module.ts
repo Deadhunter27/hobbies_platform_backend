@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '@infra/database';
 import { AccessModule } from '@modules/access';
+import { CommunityModule } from '@modules/community';
 import {
   ACTIVITY_REPOSITORY,
   ActivityAuthorization,
@@ -14,7 +15,7 @@ import { PrismaActivityRepository } from './infrastructure';
 import { ActivitiesController, MyActivityCommitmentsController } from './interface';
 
 @Module({
-  imports: [PrismaModule, AccessModule],
+  imports: [PrismaModule, AccessModule, CommunityModule],
   controllers: [ActivitiesController, MyActivityCommitmentsController],
   providers: [
     ActivityAuthorization,

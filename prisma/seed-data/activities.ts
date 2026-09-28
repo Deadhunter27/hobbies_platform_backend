@@ -1,3 +1,5 @@
+import { JAKARTA_RUNNERS_COMMUNITY_ID, JAKARTA_RUNNERS_ORGANIZER_ID } from './communities';
+
 export interface ActivitySeed {
   id: string;
   hobbySlug: string;
@@ -13,6 +15,8 @@ export interface ActivitySeed {
   longitude: number | null;
   hostName: string | null;
   hostType: string | null;
+  hostReferenceId: string | null;
+  communityReferenceId: string | null;
   effortLevel: 'easy' | 'moderate' | 'challenging' | 'open';
   capacity: number | null;
   preparation: string;
@@ -35,6 +39,8 @@ export const activitySeeds: ActivitySeed[] = [
     longitude: 106.8023,
     hostName: 'Jakarta Runners',
     hostType: 'community',
+    hostReferenceId: JAKARTA_RUNNERS_ORGANIZER_ID,
+    communityReferenceId: JAKARTA_RUNNERS_COMMUNITY_ID,
     effortLevel: 'easy',
     capacity: 40,
     preparation: 'Wear comfortable running shoes and bring water. Walking breaks are welcome.',
@@ -56,6 +62,8 @@ export const activitySeeds: ActivitySeed[] = [
     longitude: 106.8023,
     hostName: 'Wayfinder Running Guide',
     hostType: 'guide',
+    hostReferenceId: null,
+    communityReferenceId: null,
     effortLevel: 'easy',
     capacity: 20,
     preparation: 'Start slower than you think you need to. Walking breaks are completely fine.',
@@ -76,6 +84,8 @@ export const activitySeeds: ActivitySeed[] = [
     longitude: null,
     hostName: null,
     hostType: null,
+    hostReferenceId: null,
+    communityReferenceId: null,
     effortLevel: 'easy',
     capacity: null,
     preparation:
@@ -98,6 +108,8 @@ export const activitySeeds: ActivitySeed[] = [
     longitude: null,
     hostName: 'Self-guided',
     hostType: 'self',
+    hostReferenceId: null,
+    communityReferenceId: null,
     effortLevel: 'moderate',
     capacity: null,
     preparation:
