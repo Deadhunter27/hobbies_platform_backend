@@ -38,7 +38,9 @@ async function assertValidParent(
       throw new HobbyCategoryHierarchyError();
     }
     if (visited.has(cursor)) {
-      throw new HobbyCategoryHierarchyError('The hobby category hierarchy already contains a cycle.');
+      throw new HobbyCategoryHierarchyError(
+        'The hobby category hierarchy already contains a cycle.',
+      );
     }
     visited.add(cursor);
 

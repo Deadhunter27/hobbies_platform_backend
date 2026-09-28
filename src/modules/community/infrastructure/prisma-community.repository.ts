@@ -10,12 +10,7 @@ import type {
   CommunityRepository,
   SaveCommunityMembershipInput,
 } from '../application';
-import type {
-  Community,
-  CommunityContext,
-  CommunityMembership,
-  CommunityStatus,
-} from '../domain';
+import type { Community, CommunityContext, CommunityMembership, CommunityStatus } from '../domain';
 
 function toCommunity(record: CommunityRecord): Community {
   return {

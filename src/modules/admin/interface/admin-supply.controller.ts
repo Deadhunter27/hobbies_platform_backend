@@ -1,5 +1,11 @@
 import { Body, Controller, Param, Put } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ErrorEnvelopeDto } from '@infra/http';
 import { CurrentUser, RequiresAuth, type Actor } from '@modules/access';
 import { CurateActivityUseCase, CurateCommunityUseCase } from '../application';
@@ -35,7 +41,11 @@ export class AdminSupplyController {
     @Body() body: AdminActivityStatusDto,
   ): Promise<AdminActivityStatusResponseDto> {
     const activity = await this.curateActivity.execute(actor, params.activityId, body.status);
-    return { id: activity.id, status: activity.status, updatedAt: activity.updatedAt.toISOString() };
+    return {
+      id: activity.id,
+      status: activity.status,
+      updatedAt: activity.updatedAt.toISOString(),
+    };
   }
 
   @Put('communities/:communityId/status')
