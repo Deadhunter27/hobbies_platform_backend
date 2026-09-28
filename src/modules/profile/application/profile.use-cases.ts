@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { GetHobbyUseCase } from '@modules/catalog/application/use-cases/get-hobby.use-case';
+import { GetHobbyUseCase } from '@modules/catalog';
 import type { Actor } from '@modules/access';
 import { newId } from '@shared/utils';
 import {
