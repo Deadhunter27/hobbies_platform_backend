@@ -23,6 +23,7 @@ const USER_SELF_ACTIONS: ReadonlySet<string> = new Set([
   'community.membership.update',
   'checkin.self.read',
   'checkin.self.update',
+  'conversation.self.write',
 ]);
 
 /** Rule 2 — global role: platform-scoped actions satisfied by
