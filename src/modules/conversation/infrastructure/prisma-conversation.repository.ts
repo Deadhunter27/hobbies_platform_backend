@@ -79,9 +79,7 @@ export class PrismaConversationRepository implements ConversationRepository {
     return {
       data: pageRows.map(conversationFromRow),
       nextCursor:
-        hasMore && last
-          ? encodeCursor({ name: last.createdAt.toISOString(), id: last.id })
-          : null,
+        hasMore && last ? encodeCursor({ name: last.createdAt.toISOString(), id: last.id }) : null,
     };
   }
 
