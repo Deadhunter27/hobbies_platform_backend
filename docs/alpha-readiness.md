@@ -55,7 +55,7 @@ Acceptance:
 
 Note: strict CORS allowlisting was already implemented before this program. AR1 makes proxy trust and request-size policy explicit, centralizes the HTTP hardening seam, adds behavioral e2e proof, and records the Render deployment/migration contract in `docs/guides/deployment-render.md`.
 
-Current status: implementation is complete and branch CI + CodeQL are green. AR1 is pending squash merge and green verification on `main` before it is formally closed.
+Current status: complete. PR #10 is merged on `main`; post-merge CI and CodeQL are green.
 
 ### AR2 — Redis-backed abuse protection
 
@@ -68,6 +68,8 @@ Acceptance:
 - throttled requests return a stable `429` contract;
 - unit/integration/e2e coverage proves the important policies;
 - no engagement or product-ranking behavior is introduced through Redis.
+
+Current status: implementation in progress on `wayfinder-ar2-redis-rate-limit`. Redis is being introduced as a required readiness dependency and backing store for request throttling. AR2 remains open until branch CI + CodeQL, merge, and post-merge `main` verification are green.
 
 ### AR3 — Observability and error tracking
 
