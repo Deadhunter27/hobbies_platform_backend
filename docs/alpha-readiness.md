@@ -39,7 +39,7 @@ Acceptance:
 - production configuration gaps are identified before resource provisioning;
 - no paid resource is created without explicit owner approval.
 
-Current status: in progress.
+Current status: complete. Render workspace inspection found no existing web service, PostgreSQL database, or Key Value instance to reconcile. The initial topology is locked to a single Singapore web service + PostgreSQL + Key Value, with provisioning deferred until plan/spend approval.
 
 ### AR1 — Production configuration and HTTP security
 
@@ -53,7 +53,9 @@ Acceptance:
 - migration execution is explicit and repeatable;
 - health/readiness endpoints are suitable for provider probes.
 
-Note: strict CORS allowlisting is already implemented. AR1 verifies production wiring rather than re-implementing it.
+Note: strict CORS allowlisting was already implemented before this program. AR1 makes proxy trust and request-size policy explicit, centralizes the HTTP hardening seam, adds behavioral e2e proof, and records the Render deployment/migration contract in `docs/guides/deployment-render.md`.
+
+Current status: implementation complete on the readiness branch; pending CI/CodeQL proof before AR1 is closed.
 
 ### AR2 — Redis-backed abuse protection
 
