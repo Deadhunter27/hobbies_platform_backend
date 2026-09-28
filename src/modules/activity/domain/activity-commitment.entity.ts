@@ -6,6 +6,7 @@ export const ACTIVITY_COMMITMENT_STATES = [
   'committed',
   'cancelled',
   'missed',
+  'completed',
 ] as const;
 export type ActivityCommitmentState = (typeof ACTIVITY_COMMITMENT_STATES)[number];
 
@@ -17,6 +18,7 @@ export interface ActivityCommitmentProps {
   committedAt: Date | null;
   cancelledAt: Date | null;
   missedAt: Date | null;
+  completedAt: Date | null;
   note: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -46,6 +48,7 @@ export class ActivityCommitment extends Entity {
       committedAt: input.state === 'committed' ? now : null,
       cancelledAt: null,
       missedAt: null,
+      completedAt: null,
       createdAt: now,
       updatedAt: now,
     });
@@ -68,6 +71,13 @@ export class ActivityCommitment extends Entity {
         'Only a committed activity can be marked missed.',
         undefined,
         'ACTIVITY_COMMITMENT_INVALID_MISSED_STATE',
+      );
+    }
+    if (state === 'completed' && this.state !== 'committed') {
+      throw new DomainRuleViolation(
+        'Only a committed activity can be marked completed.',
+        undefined,
+        'ACTIVITY_COMMITMENT_INVALID_COMPLETED_STATE',
       );
     }
 
@@ -93,6 +103,12 @@ export class ActivityCommitment extends Entity {
           : state === 'interested' || state === 'committed'
             ? null
             : this.props.missedAt,
+      completedAt:
+        state === 'completed'
+          ? now
+          : state === 'interested' || state === 'committed'
+            ? null
+            : this.props.completedAt,
       updatedAt: now,
     });
   }
@@ -114,6 +130,9 @@ export class ActivityCommitment extends Entity {
   }
   get missedAt(): Date | null {
     return this.props.missedAt;
+  }
+  get completedAt(): Date | null {
+    return this.props.completedAt;
   }
   get note(): string | null {
     return this.props.note;
