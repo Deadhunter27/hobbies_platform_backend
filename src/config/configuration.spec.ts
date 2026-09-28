@@ -21,6 +21,7 @@ describe('loadConfig', () => {
       nodeEnv: 'test',
       port: 3000,
       databaseUrl: 'postgresql://user:pass@localhost:5432/db',
+      redisUrl: 'redis://localhost:6379',
       logLevel: 'info',
       isDevelopment: false,
       jwtSecret: TEST_SECRET,
@@ -53,6 +54,15 @@ describe('loadConfig', () => {
 
   it('throws naming PORT when it is not a valid number', () => {
     expect(() => loadConfig(baseEnv({ PORT: 'not-a-number' }))).toThrow(/PORT/);
+  });
+
+  it('requires REDIS_URL in production while keeping local/test default explicit', () => {
+    expect(loadConfig(baseEnv()).redisUrl).toBe('redis://localhost:6379');
+    expect(() => loadConfig(baseEnv({ NODE_ENV: 'production' }))).toThrow(/REDIS_URL/);
+    expect(
+      loadConfig(baseEnv({ NODE_ENV: 'production', REDIS_URL: 'redis://redis.internal:6379' }))
+        .redisUrl,
+    ).toBe('redis://redis.internal:6379');
   });
 
   it('applies token TTL defaults (900s access, 14d refresh)', () => {
