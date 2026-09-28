@@ -1,4 +1,4 @@
-import { resolveCheckInTiming } from './checkin.use-cases';
+import { resolveCheckInTiming } from '../domain/checkin-timing.policy';
 
 const HOUR_MS = 60 * 60 * 1000;
 const START = new Date('2026-09-28T07:00:00.000Z');
