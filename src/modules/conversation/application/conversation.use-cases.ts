@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { Actor } from '@modules/access';
 import { GetHobbyUseCase } from '@modules/catalog/application/use-cases/get-hobby.use-case';
 import { GetMyHobbyContextUseCase } from '@modules/profile/application/profile.use-cases';
+import type { TxContext } from '@shared/application';
 import { InvalidCursorError } from '@shared/errors';
 import { decodeCursor, newId } from '@shared/utils';
 import {
@@ -10,6 +11,7 @@ import {
   type ConversationDetail,
   type ConversationPage,
   type ConversationReply,
+  type ConversationStatus,
 } from '../domain';
 import { ConversationAuthorization } from './authorization';
 import {
@@ -127,5 +129,30 @@ export class ReplyToConversationUseCase {
       createdAt: now,
       updatedAt: now,
     });
+  }
+}
+
+@Injectable()
+export class SetConversationStatusUseCase {
+  constructor(
+    @Inject(CONVERSATION_REPOSITORY) private readonly repository: ConversationRepository,
+  ) {}
+
+  async execute(
+    conversationId: string,
+    status: ConversationStatus,
+    now = new Date(),
+    tx?: TxContext,
+  ): Promise<Conversation> {
+    const existing = await this.repository.findById(conversationId, tx);
+    if (!existing) throw new ConversationNotFoundError(conversationId);
+    if (existing.status === status) return existing;
+
+    const updated = await this.repository.updateStatus(
+      { id: conversationId, status, updatedAt: now },
+      tx,
+    );
+    if (!updated) throw new ConversationNotFoundError(conversationId);
+    return updated;
   }
 }

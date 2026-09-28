@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from '@infra/database';
+import { PrismaService, prismaClientOf } from '@infra/database';
+import type { TxContext } from '@shared/application';
 import { encodeCursor } from '@shared/utils';
 import type { ConversationRepository } from '../application/ports/conversation.repository.port';
 import type {
@@ -110,6 +111,19 @@ export class PrismaConversationRepository implements ConversationRepository {
     };
   }
 
+  async findById(id: string, tx?: TxContext): Promise<Conversation | null> {
+    const rows = await prismaClientOf(this.prisma, tx).$queryRaw<ConversationRow[]>(Prisma.sql`
+      SELECT
+        "id", "hobbyId", "communityReferenceId", "activityReferenceId",
+        "authorId", "authorDisplayName", "title", "body", "status"::text AS "status",
+        "createdAt", "updatedAt"
+      FROM "conversation"
+      WHERE "id" = ${id}
+      LIMIT 1
+    `);
+    return rows[0] ? conversationFromRow(rows[0]) : null;
+  }
+
   async createConversation(input: Conversation): Promise<Conversation> {
     const rows = await this.prisma.$queryRaw<ConversationRow[]>(Prisma.sql`
       INSERT INTO "conversation" (
@@ -139,5 +153,21 @@ export class PrismaConversationRepository implements ConversationRepository {
       RETURNING "id", "conversationId", "authorId", "authorDisplayName", "body", "createdAt", "updatedAt"
     `);
     return replyFromRow(rows[0]!);
+  }
+
+  async updateStatus(
+    input: { id: string; status: ConversationStatus; updatedAt: Date },
+    tx?: TxContext,
+  ): Promise<Conversation | null> {
+    const rows = await prismaClientOf(this.prisma, tx).$queryRaw<ConversationRow[]>(Prisma.sql`
+      UPDATE "conversation"
+      SET "status" = ${input.status}::"conversation_status", "updatedAt" = ${input.updatedAt}
+      WHERE "id" = ${input.id}
+      RETURNING
+        "id", "hobbyId", "communityReferenceId", "activityReferenceId",
+        "authorId", "authorDisplayName", "title", "body", "status"::text AS "status",
+        "createdAt", "updatedAt"
+    `);
+    return rows[0] ? conversationFromRow(rows[0]) : null;
   }
 }
