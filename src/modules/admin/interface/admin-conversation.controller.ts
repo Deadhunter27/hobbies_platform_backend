@@ -1,11 +1,5 @@
 import { Controller, Param, Post } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorEnvelopeDto } from '@infra/http';
 import { CurrentUser, RequiresAuth, type Actor } from '@modules/access';
 import { ModerateConversationUseCase } from '../application';

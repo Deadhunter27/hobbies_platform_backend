@@ -1,10 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { TxContext } from '@shared/application';
-import {
-  ConversationNotFoundError,
-  type Conversation,
-  type ConversationStatus,
-} from '../domain';
+import { ConversationNotFoundError, type Conversation, type ConversationStatus } from '../domain';
 import {
   CONVERSATION_REPOSITORY,
   type ConversationRepository,
