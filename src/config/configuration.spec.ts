@@ -7,6 +7,7 @@ function baseEnv(overrides: Partial<NodeJS.ProcessEnv> = {}): NodeJS.ProcessEnv 
     NODE_ENV: 'test',
     PORT: '3000',
     DATABASE_URL: 'postgresql://user:pass@localhost:5432/db',
+    REDIS_URL: 'redis://localhost:6379',
     LOG_LEVEL: 'info',
     JWT_SECRET: TEST_SECRET,
     ...overrides,
@@ -21,6 +22,7 @@ describe('loadConfig', () => {
       nodeEnv: 'test',
       port: 3000,
       databaseUrl: 'postgresql://user:pass@localhost:5432/db',
+      redisUrl: 'redis://localhost:6379',
       logLevel: 'info',
       isDevelopment: false,
       jwtSecret: TEST_SECRET,
@@ -38,6 +40,20 @@ describe('loadConfig', () => {
     delete env.DATABASE_URL;
 
     expect(() => loadConfig(env)).toThrow(/DATABASE_URL/);
+  });
+
+  it('throws naming REDIS_URL when it is missing or not a Redis URL', () => {
+    const env = baseEnv();
+    delete env.REDIS_URL;
+
+    expect(() => loadConfig(env)).toThrow(/REDIS_URL/);
+    expect(() => loadConfig(baseEnv({ REDIS_URL: 'https://example.com' }))).toThrow(/REDIS_URL/);
+  });
+
+  it('accepts TLS Redis URLs', () => {
+    expect(loadConfig(baseEnv({ REDIS_URL: 'rediss://redis.example.com:6379' })).redisUrl).toBe(
+      'rediss://redis.example.com:6379',
+    );
   });
 
   it('throws naming JWT_SECRET when it is missing', () => {
