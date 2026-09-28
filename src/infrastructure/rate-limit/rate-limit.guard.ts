@@ -16,6 +16,8 @@ import {
 
 const MUTATION_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
+type RateLimitedRequest = Request & RequestWithActor;
+
 @Injectable()
 export class RateLimitGuard implements CanActivate {
   constructor(
@@ -26,14 +28,34 @@ export class RateLimitGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (context.getType() !== 'http') return true;
 
-    const request = context.switchToHttp().getRequest<Request & RequestWithActor>();
+    const request = context.switchToHttp().getRequest<RateLimitedRequest>();
     const response = context.switchToHttp().getResponse<Response>();
 
     if (request.method === 'OPTIONS' || request.path.startsWith('/health/')) {
       return true;
     }
 
-    const policy = this.resolvePolicy(context, request.method);
+    const globalPolicy = MUTATION_METHODS.has(request.method)
+      ? DEFAULT_WRITE_RATE_LIMIT
+      : DEFAULT_READ_RATE_LIMIT;
+    await this.enforce(request, response, globalPolicy);
+
+    const configured = this.reflector.getAllAndOverride<RateLimitPolicyName>(RATE_LIMIT_POLICY_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (configured) {
+      await this.enforce(request, response, RATE_LIMIT_POLICIES[configured]);
+    }
+
+    return true;
+  }
+
+  private async enforce(
+    request: RateLimitedRequest,
+    response: Response,
+    policy: RateLimitPolicy,
+  ): Promise<void> {
     const identity = this.identityFor(request, policy);
     const key = `wayfinder:rate-limit:${policy.name}:${this.hash(identity)}`;
     const counter = await this.redis.consumeRateLimit(key, policy.windowMs);
@@ -47,26 +69,33 @@ export class RateLimitGuard implements CanActivate {
       response.setHeader('Retry-After', String(Math.ceil(counter.retryAfterMs / 1000)));
       throw new RateLimitExceededError(counter.retryAfterMs);
     }
-
-    return true;
   }
 
-  private resolvePolicy(context: ExecutionContext, method: string): RateLimitPolicy {
-    const configured = this.reflector.getAllAndOverride<RateLimitPolicyName>(RATE_LIMIT_POLICY_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-
-    if (configured) return RATE_LIMIT_POLICIES[configured];
-    return MUTATION_METHODS.has(method) ? DEFAULT_WRITE_RATE_LIMIT : DEFAULT_READ_RATE_LIMIT;
-  }
-
-  private identityFor(request: Request & RequestWithActor, policy: RateLimitPolicy): string {
+  private identityFor(request: RateLimitedRequest, policy: RateLimitPolicy): string {
     if (policy.identity === 'actor-or-ip' && request.actor) {
       return `actor:${request.actor.id}`;
     }
 
+    if (policy.identity === 'auth-target') {
+      const body = this.bodyOf(request);
+      if ((policy.name === 'auth-register' || policy.name === 'auth-login') && body.email) {
+        return `auth-email:${body.email.trim().toLowerCase()}`;
+      }
+      if (policy.name === 'auth-refresh' && body.refreshToken) {
+        return `auth-refresh:${body.refreshToken}`;
+      }
+    }
+
     return `ip:${request.ip ?? request.socket.remoteAddress ?? 'unknown'}`;
+  }
+
+  private bodyOf(request: Request): { email?: string; refreshToken?: string } {
+    if (!request.body || typeof request.body !== 'object' || Array.isArray(request.body)) return {};
+    const body = request.body as Record<string, unknown>;
+    return {
+      email: typeof body.email === 'string' ? body.email : undefined,
+      refreshToken: typeof body.refreshToken === 'string' ? body.refreshToken : undefined,
+    };
   }
 
   private hash(identity: string): string {
