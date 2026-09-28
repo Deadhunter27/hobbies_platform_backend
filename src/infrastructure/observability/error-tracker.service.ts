@@ -44,7 +44,6 @@ export class ErrorTrackerService implements OnModuleInit, OnModuleDestroy {
       dsn: this.config.sentryDsn,
       environment: this.config.nodeEnv,
       release: this.config.sentryRelease ?? undefined,
-      sendDefaultPii: false,
       tracesSampleRate: 0,
       maxBreadcrumbs: 0,
       beforeSend: (event) => sanitizeSentryEvent(event),
