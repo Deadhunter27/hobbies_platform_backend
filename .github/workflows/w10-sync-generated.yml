@@ -1,0 +1,42 @@
+name: W10 Sync Generated
+
+on:
+  push:
+    branches: [wayfinder-w10-admin-moderation]
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      PORT: 3000
+      LOG_LEVEL: info
+      DATABASE_URL: postgresql://hobbies:hobbies@localhost:5432/hobbies_dev
+      JWT_SECRET: ci-only-test-secret-not-used-anywhere-real-0000
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: wayfinder-w10-admin-moderation
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma generate
+      - run: pnpm format
+      - run: pnpm openapi:generate
+      - name: Commit synchronized files when needed
+        run: |
+          git add src test prisma scripts docs openapi/openapi.json
+          if git diff --cached --quiet; then
+            echo "Nothing to synchronize."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(admin): sync formatting and OpenAPI"
+          git push origin HEAD:wayfinder-w10-admin-moderation
