@@ -7,3 +7,4 @@ export { ForbiddenError } from './forbidden-error';
 export { DomainRuleViolation } from './domain-rule-violation';
 export { InfrastructureError } from './infrastructure-error';
 export { InvalidCursorError } from './invalid-cursor-error';
+export { RateLimitExceededError } from './rate-limit-exceeded-error';

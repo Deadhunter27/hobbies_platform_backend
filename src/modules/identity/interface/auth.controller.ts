@@ -11,6 +11,7 @@ import {
 import type { Request } from 'express';
 import { APP_CONFIG, type AppConfig } from '@config/index';
 import { ErrorEnvelopeDto } from '@infra/http';
+import { RateLimit } from '@infra/rate-limit';
 import { CurrentUser, RequiresAuth, type Actor } from '@modules/access';
 import {
   ChangePasswordUseCase,
@@ -47,6 +48,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @RateLimit('auth-register')
   @ApiOperation({ summary: 'Register a new account' })
   @ApiCreatedResponse({ type: UserResponseDto })
   @ApiResponse({ status: 409, description: 'EMAIL_ALREADY_REGISTERED', type: ErrorEnvelopeDto })
@@ -55,6 +57,7 @@ export class AuthController {
     description: 'VALIDATION_FAILED or PASSWORD_TOO_WEAK',
     type: ErrorEnvelopeDto,
   })
+  @ApiResponse({ status: 429, description: 'RATE_LIMIT_EXCEEDED', type: ErrorEnvelopeDto })
   async register(@Body() body: RegisterBodyDto, @Req() req: RequestWithId) {
     const user = await this.registerUseCase.execute({
       email: body.email,
@@ -74,6 +77,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(200)
+  @RateLimit('auth-login')
   @ApiOperation({ summary: 'Log in with email and password' })
   @ApiOkResponse({ type: AuthTokensResponseDto })
   @ApiResponse({
@@ -82,6 +86,7 @@ export class AuthController {
     type: ErrorEnvelopeDto,
   })
   @ApiResponse({ status: 403, description: 'USER_SUSPENDED', type: ErrorEnvelopeDto })
+  @ApiResponse({ status: 429, description: 'RATE_LIMIT_EXCEEDED', type: ErrorEnvelopeDto })
   async login(@Body() body: LoginBodyDto, @Req() req: RequestWithId) {
     return this.loginUseCase.execute({
       email: body.email,
@@ -94,6 +99,7 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(200)
+  @RateLimit('auth-refresh')
   @ApiOperation({ summary: 'Rotate a refresh token for a new token pair' })
   @ApiOkResponse({ type: AuthTokensResponseDto })
   @ApiResponse({
@@ -103,6 +109,7 @@ export class AuthController {
     type: ErrorEnvelopeDto,
   })
   @ApiResponse({ status: 403, description: 'USER_SUSPENDED', type: ErrorEnvelopeDto })
+  @ApiResponse({ status: 429, description: 'RATE_LIMIT_EXCEEDED', type: ErrorEnvelopeDto })
   async refresh(@Body() body: RefreshBodyDto, @Req() req: RequestWithId) {
     return this.refreshUseCase.execute({
       refreshToken: body.refreshToken,
@@ -129,6 +136,7 @@ export class AuthController {
   @Post('change-password')
   @HttpCode(204)
   @RequiresAuth()
+  @RateLimit('sensitive-write')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change password; revokes ALL sessions (ADR-0017)' })
   @ApiNoContentResponse({ description: 'Password changed, every session revoked' })
@@ -142,6 +150,7 @@ export class AuthController {
     description: 'UNAUTHORIZED or INVALID_CREDENTIALS (wrong current password)',
     type: ErrorEnvelopeDto,
   })
+  @ApiResponse({ status: 429, description: 'RATE_LIMIT_EXCEEDED', type: ErrorEnvelopeDto })
   async changePassword(
     @CurrentUser() actor: Actor,
     @Body() body: ChangePasswordBodyDto,

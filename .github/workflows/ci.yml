@@ -1,5 +1,5 @@
 # CI pipeline (ADR-0007). Required checks per PR: format, lint, typecheck,
-# build, unit tests, DB-gated integration + e2e tests, OpenAPI staleness
+# build, unit tests, DB/Redis-gated integration + e2e tests, OpenAPI staleness
 # gate, commit message linting. CodeQL runs as a separate workflow.
 name: CI
 
@@ -77,11 +77,21 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     env:
       NODE_ENV: test
       PORT: 3000
       LOG_LEVEL: info
       DATABASE_URL: postgresql://hobbies:hobbies@localhost:5432/hobbies_dev
+      REDIS_URL: redis://localhost:6379
       JWT_SECRET: ci-only-test-secret-not-used-anywhere-real-0000
     steps:
       - uses: actions/checkout@v4
@@ -103,10 +113,10 @@ jobs:
       NODE_ENV: test
       PORT: 3000
       LOG_LEVEL: info
-      # No Postgres service needed: PrismaService connects lazily, so the
-      # app can construct (and the OpenAPI doc can be generated) with only
-      # a syntactically valid, unreachable DATABASE_URL. Verified locally.
+      # No dependency services needed: Prisma/Redis connect lazily, so app
+      # construction for deterministic OpenAPI generation is network-free.
       DATABASE_URL: postgresql://hobbies:hobbies@localhost:5432/hobbies_dev
+      REDIS_URL: redis://localhost:6379
       JWT_SECRET: ci-only-test-secret-not-used-anywhere-real-0000
     steps:
       - uses: actions/checkout@v4
@@ -136,6 +146,15 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t hobbies-backend:ci .
@@ -144,6 +163,7 @@ jobs:
           docker run -d --name api --network host \
             -e NODE_ENV=production -e PORT=3000 -e LOG_LEVEL=info \
             -e DATABASE_URL=postgresql://hobbies:hobbies@localhost:5432/hobbies_dev \
+            -e REDIS_URL=redis://localhost:6379 \
             -e JWT_SECRET=ci-only-test-secret-not-used-anywhere-real-0000 \
             hobbies-backend:ci
           live=""
