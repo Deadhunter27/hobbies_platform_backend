@@ -1,5 +1,5 @@
+import './runtime-paths';
 import 'reflect-metadata';
-import 'tsconfig-paths/register';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule } from '@nestjs/swagger';
