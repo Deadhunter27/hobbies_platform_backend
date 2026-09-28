@@ -105,6 +105,7 @@ enum ActivityCommitmentState {
   committed
   cancelled
   missed
+  completed
 
   @@map("activity_commitment_state")
 }
@@ -310,6 +311,7 @@ model ActivityCommitment {
   committedAt DateTime?               @db.Timestamptz(3)
   cancelledAt DateTime?               @db.Timestamptz(3)
   missedAt    DateTime?               @db.Timestamptz(3)
+  completedAt DateTime?               @db.Timestamptz(3)
   note        String?                 @db.VarChar(280)
   createdAt   DateTime                @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime                @updatedAt @db.Timestamptz(3)
@@ -342,4 +344,23 @@ model RecommendationDecision {
   @@index([activityId])
   @@index([selectedActivityId])
   @@map("recommendation_decision")
+}
+
+// W6: qualitative evidence that a real-world activity happened. Activity and
+// hobby are logical cross-context references; one reflection per user/activity.
+model ProgressReflection {
+  id         String   @id @db.Char(26)
+  userId     String   @db.Char(26)
+  hobbyId    String   @db.Char(26)
+  activityId String   @db.Char(26)
+  rating     Int?
+  tags       String[] @default([])
+  note       String?  @db.VarChar(560)
+  occurredAt DateTime @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
+
+  @@unique([userId, activityId])
+  @@index([userId, hobbyId, occurredAt, id])
+  @@map("progress_reflection")
 }
