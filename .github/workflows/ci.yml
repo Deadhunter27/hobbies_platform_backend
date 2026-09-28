@@ -164,6 +164,8 @@ jobs:
             -e NODE_ENV=production -e PORT=3000 -e LOG_LEVEL=info \
             -e DATABASE_URL=postgresql://hobbies:hobbies@localhost:5432/hobbies_dev \
             -e REDIS_URL=redis://localhost:6379 \
+            -e SENTRY_DSN=https://public@example.invalid/1 \
+            -e SENTRY_RELEASE=ci-docker \
             -e JWT_SECRET=ci-only-test-secret-not-used-anywhere-real-0000 \
             hobbies-backend:ci
           live=""
