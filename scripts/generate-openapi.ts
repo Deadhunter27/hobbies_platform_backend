@@ -20,7 +20,9 @@ async function main(): Promise<void> {
 
   const document = buildOpenApiDocument(app);
   const outputPath = join(__dirname, '..', 'openapi', 'openapi.json');
-  writeFileSync(outputPath, `${JSON.stringify(document, null, 2)}\n`);
+  // Keep the generated contract compact. CI compares bytes, so this remains
+  // deterministic while avoiding a very large pretty-printed generated diff.
+  writeFileSync(outputPath, `${JSON.stringify(document)}\n`);
   logger.info({ outputPath }, 'OpenAPI spec generated');
 
   await app.close();
