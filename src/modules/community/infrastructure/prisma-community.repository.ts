@@ -4,15 +4,8 @@ import type {
   CommunityMembership as CommunityMembershipRecord,
 } from '@prisma/client';
 import { PrismaService } from '@infra/database';
-import type {
-  CommunityRepository,
-  SaveCommunityMembershipInput,
-} from '../application';
-import type {
-  Community,
-  CommunityContext,
-  CommunityMembership,
-} from '../domain';
+import type { CommunityRepository, SaveCommunityMembershipInput } from '../application';
+import type { Community, CommunityContext, CommunityMembership } from '../domain';
 
 function toCommunity(record: CommunityRecord): Community {
   return {

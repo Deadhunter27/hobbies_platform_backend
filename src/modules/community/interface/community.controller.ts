@@ -57,7 +57,11 @@ export class MyCommunityMembershipsController {
   @ApiOperation({ summary: 'Join, rejoin, or leave one published community' })
   @ApiOkResponse({ type: CommunityMembershipResponseDto })
   @ApiResponse({ status: 400, description: 'VALIDATION_FAILED', type: ErrorEnvelopeDto })
-  @ApiResponse({ status: 404, description: 'COMMUNITY_NOT_FOUND or COMMUNITY_MEMBERSHIP_NOT_FOUND', type: ErrorEnvelopeDto })
+  @ApiResponse({
+    status: 404,
+    description: 'COMMUNITY_NOT_FOUND or COMMUNITY_MEMBERSHIP_NOT_FOUND',
+    type: ErrorEnvelopeDto,
+  })
   async put(
     @CurrentUser() actor: Actor,
     @Param() params: CommunityIdParamDto,

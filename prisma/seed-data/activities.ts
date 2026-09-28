@@ -1,7 +1,4 @@
-import {
-  JAKARTA_RUNNERS_COMMUNITY_ID,
-  JAKARTA_RUNNERS_ORGANIZER_ID,
-} from './communities';
+import { JAKARTA_RUNNERS_COMMUNITY_ID, JAKARTA_RUNNERS_ORGANIZER_ID } from './communities';
 
 export interface ActivitySeed {
   id: string;

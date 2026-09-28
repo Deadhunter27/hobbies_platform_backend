@@ -10,10 +10,7 @@ import {
   type CommunityMembershipState,
 } from '../domain';
 import { CommunityAuthorization } from './authorization';
-import {
-  COMMUNITY_REPOSITORY,
-  type CommunityRepository,
-} from './ports/community.repository.port';
+import { COMMUNITY_REPOSITORY, type CommunityRepository } from './ports/community.repository.port';
 
 @Injectable()
 export class GetCommunityUseCase {
@@ -86,9 +83,7 @@ export class UpsertMyCommunityMembershipUseCase {
       role: existing?.role ?? 'member',
       state: input.state,
       joinedAt:
-        input.state === 'active' && existing?.state === 'left'
-          ? now
-          : (existing?.joinedAt ?? now),
+        input.state === 'active' && existing?.state === 'left' ? now : (existing?.joinedAt ?? now),
       leftAt: input.state === 'left' ? now : null,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,

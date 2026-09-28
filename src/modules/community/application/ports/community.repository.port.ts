@@ -1,8 +1,4 @@
-import type {
-  Community,
-  CommunityContext,
-  CommunityMembership,
-} from '../../domain';
+import type { Community, CommunityContext, CommunityMembership } from '../../domain';
 
 export const COMMUNITY_REPOSITORY = Symbol('COMMUNITY_REPOSITORY');
 

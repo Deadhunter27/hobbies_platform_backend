@@ -43,16 +43,12 @@ export const communityContextResponseSchema = z.object({
     hosts: z.array(communityHostSchema),
   }),
 });
-export class CommunityContextResponseDto extends createZodDto(
-  communityContextResponseSchema,
-) {}
+export class CommunityContextResponseDto extends createZodDto(communityContextResponseSchema) {}
 
 export const upsertCommunityMembershipSchema = z
   .object({ state: z.enum(COMMUNITY_MEMBERSHIP_STATES) })
   .strict();
-export class UpsertCommunityMembershipDto extends createZodDto(
-  upsertCommunityMembershipSchema,
-) {}
+export class UpsertCommunityMembershipDto extends createZodDto(upsertCommunityMembershipSchema) {}
 
 export const communityMembershipResponseSchema = z.object({
   id: ulid,

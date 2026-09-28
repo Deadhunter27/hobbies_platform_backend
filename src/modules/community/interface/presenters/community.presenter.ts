@@ -20,9 +20,7 @@ export function toCommunityResponse(community: Community): CommunityResponseDto 
   };
 }
 
-export function toCommunityContextResponse(
-  context: CommunityContext,
-): CommunityContextResponseDto {
+export function toCommunityContextResponse(context: CommunityContext): CommunityContextResponseDto {
   return {
     ...toCommunityResponse(context.community),
     people: {
