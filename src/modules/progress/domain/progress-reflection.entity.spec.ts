@@ -44,19 +44,13 @@ describe('ProgressReflection', () => {
 
   it('rejects an empty reflection', () => {
     expect(() =>
-      ProgressReflection.create(
-        { ...base, rating: null, tags: [], note: null },
-        now,
-      ),
+      ProgressReflection.create({ ...base, rating: null, tags: [], note: null }, now),
     ).toThrow(expect.objectContaining({ code: 'PROGRESS_EMPTY_REFLECTION' }));
   });
 
   it('rejects ratings outside 1 to 5', () => {
     expect(() =>
-      ProgressReflection.create(
-        { ...base, rating: 6, tags: [], note: null },
-        now,
-      ),
+      ProgressReflection.create({ ...base, rating: 6, tags: [], note: null }, now),
     ).toThrow(expect.objectContaining({ code: 'PROGRESS_INVALID_RATING' }));
   });
 });
