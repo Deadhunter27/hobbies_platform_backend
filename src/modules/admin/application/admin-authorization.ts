@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PLATFORM_RESOURCE, PolicyService, type Actor } from '@modules/access';
+import { PolicyService } from '@modules/access/application/policy.service';
+import { PLATFORM_RESOURCE, type Actor } from '@modules/access/domain';
 import { AdminAccessDeniedError } from '../domain';
 
 @Injectable()

@@ -1,4 +1,4 @@
-import type { Actor } from '@modules/access';
+import type { Actor } from '@modules/access/domain';
 import type { AuditRecord, TxContext } from '@shared/application';
 import { ModerateConversationUseCase } from './moderate-conversation.use-case';
 

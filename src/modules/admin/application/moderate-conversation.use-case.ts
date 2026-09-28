@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { Actor } from '@modules/access';
-import { SetConversationStatusUseCase } from '@modules/conversation/application';
+import type { Actor } from '@modules/access/domain';
+import { SetConversationStatusUseCase } from '@modules/conversation/application/conversation.use-cases';
 import type { Conversation, ConversationStatus } from '@modules/conversation/domain';
 import {
   AUDIT_WRITER,
