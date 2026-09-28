@@ -111,7 +111,9 @@ export class ConversationController {
   }
 
   @Get('hobbies/:hobbyId/feed')
-  @ApiOperation({ summary: 'Read the chronological hobby feed of conversations and upcoming activities' })
+  @ApiOperation({
+    summary: 'Read the chronological hobby feed of conversations and upcoming activities',
+  })
   @ApiOkResponse({ type: HobbyFeedPageResponseDto })
   @ApiResponse({ status: 404, description: 'HOBBY_NOT_FOUND', type: ErrorEnvelopeDto })
   async feed(
