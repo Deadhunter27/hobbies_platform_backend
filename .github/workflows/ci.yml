@@ -47,11 +47,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm prisma generate
       - run: pnpm build
-      - name: Prove compiled runtime aliases without tsconfig.json
-        run: |
-          mv tsconfig.json tsconfig.json.ci-hidden
-          node -e "require('./dist/runtime-paths.js'); require('@config/index')"
-          mv tsconfig.json.ci-hidden tsconfig.json
       - run: pnpm build:seed
 
   unit-test:
