@@ -35,9 +35,7 @@ export const checkInListResponseSchema = z.object({
 });
 export class CheckInListResponseDto extends createZodDto(checkInListResponseSchema) {}
 
-export const updateCheckInSchema = z
-  .object({ status: z.enum(['actioned', 'dismissed']) })
-  .strict();
+export const updateCheckInSchema = z.object({ status: z.enum(['actioned', 'dismissed']) }).strict();
 export class UpdateCheckInDto extends createZodDto(updateCheckInSchema) {}
 
 export const checkInStateResponseSchema = z.object({
@@ -51,6 +49,4 @@ export const checkInStateResponseSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
 });
-export class CheckInStateResponseDto extends createZodDto(
-  checkInStateResponseSchema,
-) {}
+export class CheckInStateResponseDto extends createZodDto(checkInStateResponseSchema) {}

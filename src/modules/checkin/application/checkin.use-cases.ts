@@ -1,9 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { Actor } from '@modules/access';
-import {
-  GetActivityUseCase,
-  ListMyActivityCommitmentsUseCase,
-} from '@modules/activity';
+import { GetActivityUseCase, ListMyActivityCommitmentsUseCase } from '@modules/activity';
 import { newId } from '@shared/utils';
 import {
   CheckInNotFoundError,
@@ -13,10 +10,7 @@ import {
   type CheckInView,
 } from '../domain';
 import { CheckInAuthorization } from './authorization';
-import {
-  CHECK_IN_REPOSITORY,
-  type CheckInRepository,
-} from './ports/checkin.repository.port';
+import { CHECK_IN_REPOSITORY, type CheckInRepository } from './ports/checkin.repository.port';
 
 const HOUR_MS = 60 * 60 * 1000;
 const REMINDER_LEAD_MS = 24 * HOUR_MS;
@@ -114,19 +108,18 @@ export class ListMyCheckInsUseCase {
       );
       if (existing && existing.status !== 'pending') continue;
 
-      const checkIn: CheckIn =
-        existing ?? {
-          id: newId(),
-          userId: actor.id,
-          activityId: activity.id,
-          kind: due.kind,
-          status: 'pending',
-          availableAt: due.availableAt,
-          actionedAt: null,
-          dismissedAt: null,
-          createdAt: now,
-          updatedAt: now,
-        };
+      const checkIn: CheckIn = existing ?? {
+        id: newId(),
+        userId: actor.id,
+        activityId: activity.id,
+        kind: due.kind,
+        status: 'pending',
+        availableAt: due.availableAt,
+        actionedAt: null,
+        dismissedAt: null,
+        createdAt: now,
+        updatedAt: now,
+      };
       const saved = existing ? checkIn : await this.repository.save(checkIn);
       views.push(
         toView(saved, {
@@ -137,9 +130,7 @@ export class ListMyCheckInsUseCase {
       );
     }
 
-    return views.sort(
-      (a, b) => a.checkIn.availableAt.getTime() - b.checkIn.availableAt.getTime(),
-    );
+    return views.sort((a, b) => a.checkIn.availableAt.getTime() - b.checkIn.availableAt.getTime());
   }
 }
 

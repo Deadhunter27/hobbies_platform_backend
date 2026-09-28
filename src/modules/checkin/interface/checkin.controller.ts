@@ -1,11 +1,5 @@
 import { Body, Controller, Get, Param, Put } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorEnvelopeDto } from '@infra/http';
 import { CurrentUser, RequiresAuth, type Actor } from '@modules/access';
 import { ListMyCheckInsUseCase, UpdateMyCheckInUseCase } from '../application';
@@ -15,10 +9,7 @@ import {
   CheckInStateResponseDto,
   UpdateCheckInDto,
 } from './dto/checkin.dto';
-import {
-  toCheckInResponse,
-  toCheckInStateResponse,
-} from './presenters/checkin.presenter';
+import { toCheckInResponse, toCheckInStateResponse } from './presenters/checkin.presenter';
 
 @ApiTags('check-ins')
 @ApiBearerAuth()
