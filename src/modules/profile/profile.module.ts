@@ -26,5 +26,6 @@ import { ProfileController } from './interface';
     UpsertMyHobbyContextUseCase,
     { provide: PROFILE_REPOSITORY, useClass: PrismaProfileRepository },
   ],
+  exports: [GetMyHobbyContextUseCase],
 })
 export class ProfileModule {}

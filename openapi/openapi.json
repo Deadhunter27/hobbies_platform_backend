@@ -1274,6 +1274,225 @@
           "activity commitments"
         ]
       }
+    },
+    "/api/v1/me/hobbies/{hobbyId}/whats-next": {
+      "get": {
+        "operationId": "RecommendationController_get_v1",
+        "parameters": [
+          {
+            "name": "hobbyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "HOBBY_CONTEXT_NOT_FOUND or NO_VIABLE_RECOMMENDATION",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the authenticated user current explainable next step",
+        "tags": [
+          "recommendation"
+        ]
+      }
+    },
+    "/api/v1/me/hobbies/{hobbyId}/whats-next/{recommendationId}/reject": {
+      "post": {
+        "operationId": "RecommendationController_reject_v1",
+        "parameters": [
+          {
+            "name": "hobbyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "recommendationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectRecommendationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "RECOMMENDATION_NOT_FOUND or NO_VIABLE_RECOMMENDATION",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "RECOMMENDATION_STALE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reject the current next step and get a recovery alternative",
+        "tags": [
+          "recommendation"
+        ]
+      }
+    },
+    "/api/v1/me/hobbies/{hobbyId}/whats-next/{recommendationId}/select": {
+      "post": {
+        "operationId": "RecommendationController_select_v1",
+        "parameters": [
+          {
+            "name": "hobbyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "recommendationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectRecommendationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "RECOMMENDATION_NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "RECOMMENDATION_STALE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record the activity path selected from the current recommendation",
+        "tags": [
+          "recommendation"
+        ]
+      }
     }
   },
   "info": {
@@ -2408,6 +2627,130 @@
         },
         "required": [
           "state"
+        ],
+        "additionalProperties": false
+      },
+      "RecommendationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "hobbyId": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "activityId": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "fitSignals": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "intent": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "rejected",
+              "superseded",
+              "selected"
+            ]
+          },
+          "rejectionReason": {
+            "type": "string",
+            "enum": [
+              "timing",
+              "too_difficult",
+              "prefer_solo",
+              "learn_first",
+              "social_comfort",
+              "other",
+              null
+            ],
+            "nullable": true
+          },
+          "rejectionNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectedActivityId": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "hobbyId",
+          "activityId",
+          "title",
+          "rationale",
+          "fitSignals",
+          "intent",
+          "status",
+          "rejectionReason",
+          "rejectionNote",
+          "selectedActivityId",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "RejectRecommendationDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "timing",
+              "too_difficult",
+              "prefer_solo",
+              "learn_first",
+              "social_comfort",
+              "other"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 280,
+            "default": null,
+            "nullable": true
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "SelectRecommendationDto": {
+        "type": "object",
+        "properties": {
+          "activityId": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          }
+        },
+        "required": [
+          "activityId"
         ],
         "additionalProperties": false
       }

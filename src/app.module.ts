@@ -11,6 +11,7 @@ import { AccessModule, AuthGuard } from '@modules/access';
 import { IdentityModule } from '@modules/identity';
 import { ProfileModule } from '@modules/profile';
 import { ActivityModule } from '@modules/activity';
+import { RecommendationModule } from '@modules/recommendation';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ActivityModule } from '@modules/activity';
     IdentityModule,
     ProfileModule,
     ActivityModule,
+    RecommendationModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AppExceptionFilter },
