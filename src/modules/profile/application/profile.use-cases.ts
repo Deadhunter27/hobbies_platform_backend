@@ -13,20 +13,6 @@ import {
 import { ProfileAuthorization } from './authorization';
 import { PROFILE_REPOSITORY, type ProfileRepository } from './ports/profile.repository.port';
 
-export interface UpsertProfileContextInput {
-  city: string | null;
-  countryCode: string | null;
-  timezone: string | null;
-}
-
-export interface UpsertHobbyContextInput {
-  experienceLevel: ExperienceLevel;
-  primaryIntent: ProfileIntent;
-  secondaryIntents: ProfileIntent[];
-  goal: string | null;
-  socialPreference: SocialPreference;
-}
-
 @Injectable()
 export class GetMyProfileContextUseCase {
   constructor(
@@ -36,8 +22,14 @@ export class GetMyProfileContextUseCase {
 
   async execute(actor: Actor): Promise<ProfileContext | null> {
     await this.authorization.assertCanRead(actor);
-    return this.repository.findProfileContext(actor.id);
+    return this.repository.findProfile(actor.id);
   }
+}
+
+export interface UpsertMyProfileContextInput {
+  city: string | null;
+  countryCode: string | null;
+  timezone: string | null;
 }
 
 @Injectable()
@@ -47,13 +39,10 @@ export class UpsertMyProfileContextUseCase {
     @Inject(PROFILE_REPOSITORY) private readonly repository: ProfileRepository,
   ) {}
 
-  async execute(actor: Actor, input: UpsertProfileContextInput): Promise<ProfileContext> {
+  async execute(actor: Actor, input: UpsertMyProfileContextInput): Promise<ProfileContext> {
     await this.authorization.assertCanUpdate(actor);
-    const existing = await this.repository.findProfileContext(actor.id);
-    const context = existing
-      ? existing.update(input)
-      : ProfileContext.create({ userId: actor.id, ...input });
-    return this.repository.saveProfileContext(context);
+    const context = ProfileContext.create({ userId: actor.id, ...input });
+    return this.repository.upsertProfile(context);
   }
 }
 
@@ -85,6 +74,14 @@ export class GetMyHobbyContextUseCase {
   }
 }
 
+export interface UpsertMyHobbyContextInput {
+  experienceLevel: ExperienceLevel;
+  primaryIntent: ProfileIntent;
+  secondaryIntents: ProfileIntent[];
+  goal: string | null;
+  socialPreference: SocialPreference;
+}
+
 @Injectable()
 export class UpsertMyHobbyContextUseCase {
   constructor(
@@ -96,15 +93,18 @@ export class UpsertMyHobbyContextUseCase {
   async execute(
     actor: Actor,
     hobbyId: string,
-    input: UpsertHobbyContextInput,
+    input: UpsertMyHobbyContextInput,
   ): Promise<HobbyContext> {
     await this.authorization.assertCanUpdate(actor);
     await this.getHobby.execute({ slugOrId: hobbyId });
 
     const existing = await this.repository.findHobbyContext(actor.id, hobbyId);
-    const context = existing
-      ? existing.update(input)
-      : HobbyContext.create({ id: newId(), userId: actor.id, hobbyId, ...input });
-    return this.repository.saveHobbyContext(context);
+    const context = HobbyContext.create({
+      id: existing?.id ?? newId(),
+      userId: actor.id,
+      hobbyId,
+      ...input,
+    });
+    return this.repository.upsertHobbyContext(context);
   }
 }
