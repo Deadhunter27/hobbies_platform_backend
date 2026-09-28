@@ -27,6 +27,8 @@ describe('loadConfig', () => {
       accessTokenTtlSeconds: 900,
       refreshTokenTtlDays: 14,
       corsOrigins: [],
+      trustProxyHops: 0,
+      requestBodyLimitKb: 100,
     });
     expect(Object.isFrozen(config)).toBe(true);
   });
@@ -65,6 +67,28 @@ describe('loadConfig', () => {
       loadConfig(baseEnv({ CORS_ORIGINS: ' http://localhost:8081 ,https://app.example.com,' }))
         .corsOrigins,
     ).toEqual(['http://localhost:8081', 'https://app.example.com']);
+  });
+
+  it('defaults proxy trust to zero and the request body ceiling to 100 KB', () => {
+    const config = loadConfig(baseEnv());
+    expect(config.trustProxyHops).toBe(0);
+    expect(config.requestBodyLimitKb).toBe(100);
+  });
+
+  it('accepts bounded proxy-hop and body-limit overrides', () => {
+    const config = loadConfig(
+      baseEnv({ TRUST_PROXY_HOPS: '1', REQUEST_BODY_LIMIT_KB: '256' }),
+    );
+    expect(config.trustProxyHops).toBe(1);
+    expect(config.requestBodyLimitKb).toBe(256);
+  });
+
+  it('rejects unsafe proxy-hop and request body limits', () => {
+    expect(() => loadConfig(baseEnv({ TRUST_PROXY_HOPS: '-1' }))).toThrow(/TRUST_PROXY_HOPS/);
+    expect(() => loadConfig(baseEnv({ TRUST_PROXY_HOPS: '6' }))).toThrow(/TRUST_PROXY_HOPS/);
+    expect(() => loadConfig(baseEnv({ REQUEST_BODY_LIMIT_KB: '2048' }))).toThrow(
+      /REQUEST_BODY_LIMIT_KB/,
+    );
   });
 
   it('defaults NODE_ENV to development and marks isDevelopment true', () => {
