@@ -4,6 +4,7 @@ export interface AppConfig {
   readonly nodeEnv: 'development' | 'test' | 'production';
   readonly port: number;
   readonly databaseUrl: string;
+  readonly redisUrl: string;
   readonly logLevel: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
   readonly isDevelopment: boolean;
   readonly jwtSecret: string;
@@ -32,11 +33,15 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   }
 
   const parsed = result.data;
+  if (parsed.NODE_ENV === 'production' && !parsed.REDIS_URL) {
+    throw new Error('Invalid environment configuration:\n  - REDIS_URL: Required in production');
+  }
 
   return Object.freeze({
     nodeEnv: parsed.NODE_ENV,
     port: parsed.PORT,
     databaseUrl: parsed.DATABASE_URL,
+    redisUrl: parsed.REDIS_URL ?? 'redis://localhost:6379',
     logLevel: parsed.LOG_LEVEL,
     isDevelopment: parsed.NODE_ENV === 'development',
     jwtSecret: parsed.JWT_SECRET,
