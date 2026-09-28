@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { PrismaModule } from '@infra/database';
 import { AccessModule } from '@modules/access';
 import {
+  COMMUNITY_LIFECYCLE_REPOSITORY,
   COMMUNITY_REPOSITORY,
   CommunityAuthorization,
   GetCommunityContextUseCase,
@@ -25,7 +26,9 @@ import { CommunitiesController, MyCommunityMembershipsController } from './inter
     ListMyCommunityMembershipsUseCase,
     UpsertMyCommunityMembershipUseCase,
     SetCommunityStatusUseCase,
-    { provide: COMMUNITY_REPOSITORY, useClass: PrismaCommunityRepository },
+    PrismaCommunityRepository,
+    { provide: COMMUNITY_REPOSITORY, useExisting: PrismaCommunityRepository },
+    { provide: COMMUNITY_LIFECYCLE_REPOSITORY, useExisting: PrismaCommunityRepository },
   ],
   exports: [
     GetCommunityUseCase,

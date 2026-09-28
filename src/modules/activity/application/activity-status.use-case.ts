@@ -1,11 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { TxContext } from '@shared/application';
 import { ActivityNotFoundError, type Activity, type ActivityStatus } from '../domain';
-import { ACTIVITY_REPOSITORY, type ActivityRepository } from './ports/activity.repository.port';
+import {
+  ACTIVITY_LIFECYCLE_REPOSITORY,
+  type ActivityLifecycleRepository,
+} from './ports/activity-lifecycle.repository.port';
 
 @Injectable()
 export class SetActivityStatusUseCase {
-  constructor(@Inject(ACTIVITY_REPOSITORY) private readonly repository: ActivityRepository) {}
+  constructor(
+    @Inject(ACTIVITY_LIFECYCLE_REPOSITORY)
+    private readonly repository: ActivityLifecycleRepository,
+  ) {}
 
   async execute(
     activityId: string,

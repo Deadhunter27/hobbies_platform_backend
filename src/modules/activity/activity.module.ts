@@ -3,6 +3,7 @@ import { PrismaModule } from '@infra/database';
 import { AccessModule } from '@modules/access';
 import { CommunityModule } from '@modules/community';
 import {
+  ACTIVITY_LIFECYCLE_REPOSITORY,
   ACTIVITY_REPOSITORY,
   ActivityAuthorization,
   GetActivityUseCase,
@@ -26,7 +27,9 @@ import { ActivitiesController, MyActivityCommitmentsController } from './interfa
     GetMyActivityCommitmentUseCase,
     UpsertMyActivityCommitmentUseCase,
     SetActivityStatusUseCase,
-    { provide: ACTIVITY_REPOSITORY, useClass: PrismaActivityRepository },
+    PrismaActivityRepository,
+    { provide: ACTIVITY_REPOSITORY, useExisting: PrismaActivityRepository },
+    { provide: ACTIVITY_LIFECYCLE_REPOSITORY, useExisting: PrismaActivityRepository },
   ],
   exports: [
     ListActivitiesUseCase,

@@ -1,11 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { TxContext } from '@shared/application';
 import { CommunityNotFoundError, type Community, type CommunityStatus } from '../domain';
-import { COMMUNITY_REPOSITORY, type CommunityRepository } from './ports/community.repository.port';
+import {
+  COMMUNITY_LIFECYCLE_REPOSITORY,
+  type CommunityLifecycleRepository,
+} from './ports/community-lifecycle.repository.port';
 
 @Injectable()
 export class SetCommunityStatusUseCase {
-  constructor(@Inject(COMMUNITY_REPOSITORY) private readonly repository: CommunityRepository) {}
+  constructor(
+    @Inject(COMMUNITY_LIFECYCLE_REPOSITORY)
+    private readonly repository: CommunityLifecycleRepository,
+  ) {}
 
   async execute(
     communityId: string,

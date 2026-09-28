@@ -5,7 +5,11 @@ import type {
 } from '@prisma/client';
 import { PrismaService, prismaClientOf } from '@infra/database';
 import type { TxContext } from '@shared/application';
-import type { CommunityRepository, SaveCommunityMembershipInput } from '../application';
+import type {
+  CommunityLifecycleRepository,
+  CommunityRepository,
+  SaveCommunityMembershipInput,
+} from '../application';
 import type {
   Community,
   CommunityContext,
@@ -44,7 +48,9 @@ function toMembership(record: CommunityMembershipRecord): CommunityMembership {
 }
 
 @Injectable()
-export class PrismaCommunityRepository implements CommunityRepository {
+export class PrismaCommunityRepository
+  implements CommunityRepository, CommunityLifecycleRepository
+{
   constructor(private readonly prisma: PrismaService) {}
 
   async findPublishedBySlugOrId(reference: string): Promise<Community | null> {

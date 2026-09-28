@@ -6,7 +6,11 @@ import {
 } from '@prisma/client';
 import { PrismaService, prismaClientOf } from '@infra/database';
 import type { TxContext } from '@shared/application';
-import type { ActivityRepository, ActivitySnapshot } from '../application';
+import type {
+  ActivityLifecycleRepository,
+  ActivityRepository,
+  ActivitySnapshot,
+} from '../application';
 import {
   Activity,
   ActivityCapacityFullError,
@@ -61,7 +65,7 @@ function toCommitment(record: CommitmentRecord): ActivityCommitment {
 }
 
 @Injectable()
-export class PrismaActivityRepository implements ActivityRepository {
+export class PrismaActivityRepository implements ActivityRepository, ActivityLifecycleRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async listPublished(now: Date, hobbyId?: string): Promise<ActivitySnapshot[]> {
