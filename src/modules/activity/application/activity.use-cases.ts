@@ -125,12 +125,19 @@ export class UpsertMyActivityCommitmentUseCase {
       }
     }
 
-    if ((input.state === 'cancelled' || input.state === 'missed') && !existing) {
+    if (
+      (input.state === 'cancelled' || input.state === 'missed' || input.state === 'completed') &&
+      !existing
+    ) {
       throw new ActivityCommitmentNotFoundError(activityId);
     }
 
     if (input.state === 'missed' && snapshot.activity.startsAt > now) {
       throw new ActivityUnavailableError('An activity cannot be marked missed before it starts.');
+    }
+
+    if (input.state === 'completed' && snapshot.activity.startsAt > now) {
+      throw new ActivityUnavailableError('An activity cannot be completed before it starts.');
     }
 
     const commitment = existing

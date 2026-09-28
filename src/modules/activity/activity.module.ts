@@ -25,6 +25,11 @@ import { ActivitiesController, MyActivityCommitmentsController } from './interfa
     UpsertMyActivityCommitmentUseCase,
     { provide: ACTIVITY_REPOSITORY, useClass: PrismaActivityRepository },
   ],
-  exports: [ListActivitiesUseCase, GetActivityUseCase],
+  exports: [
+    ListActivitiesUseCase,
+    GetActivityUseCase,
+    GetMyActivityCommitmentUseCase,
+    UpsertMyActivityCommitmentUseCase,
+  ],
 })
 export class ActivityModule {}

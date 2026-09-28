@@ -12,6 +12,7 @@ import { IdentityModule } from '@modules/identity';
 import { ProfileModule } from '@modules/profile';
 import { ActivityModule } from '@modules/activity';
 import { RecommendationModule } from '@modules/recommendation';
+import { ProgressModule } from '@modules/progress';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { RecommendationModule } from '@modules/recommendation';
     ProfileModule,
     ActivityModule,
     RecommendationModule,
+    ProgressModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AppExceptionFilter },
