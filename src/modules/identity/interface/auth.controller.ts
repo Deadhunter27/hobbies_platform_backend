@@ -8,6 +8,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { APP_CONFIG, type AppConfig } from '@config/index';
 import { ErrorEnvelopeDto } from '@infra/http';
@@ -30,6 +31,12 @@ import {
 
 type RequestWithId = Request & { id?: string | number };
 
+const RATE_LIMITED_RESPONSE = {
+  status: 429,
+  description: 'RATE_LIMITED',
+  type: ErrorEnvelopeDto,
+} as const;
+
 function requestIdOf(req: RequestWithId): string | null {
   return req.id !== undefined ? String(req.id) : null;
 }
@@ -47,6 +54,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @Throttle({ default: { limit: 20, ttl: 600_000, blockDuration: 0 } })
   @ApiOperation({ summary: 'Register a new account' })
   @ApiCreatedResponse({ type: UserResponseDto })
   @ApiResponse({ status: 409, description: 'EMAIL_ALREADY_REGISTERED', type: ErrorEnvelopeDto })
@@ -55,6 +63,7 @@ export class AuthController {
     description: 'VALIDATION_FAILED or PASSWORD_TOO_WEAK',
     type: ErrorEnvelopeDto,
   })
+  @ApiResponse(RATE_LIMITED_RESPONSE)
   async register(@Body() body: RegisterBodyDto, @Req() req: RequestWithId) {
     const user = await this.registerUseCase.execute({
       email: body.email,
@@ -74,6 +83,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(200)
+  @Throttle({ default: { limit: 30, ttl: 60_000, blockDuration: 0 } })
   @ApiOperation({ summary: 'Log in with email and password' })
   @ApiOkResponse({ type: AuthTokensResponseDto })
   @ApiResponse({
@@ -82,6 +92,7 @@ export class AuthController {
     type: ErrorEnvelopeDto,
   })
   @ApiResponse({ status: 403, description: 'USER_SUSPENDED', type: ErrorEnvelopeDto })
+  @ApiResponse(RATE_LIMITED_RESPONSE)
   async login(@Body() body: LoginBodyDto, @Req() req: RequestWithId) {
     return this.loginUseCase.execute({
       email: body.email,
@@ -94,6 +105,7 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(200)
+  @Throttle({ default: { limit: 60, ttl: 60_000, blockDuration: 0 } })
   @ApiOperation({ summary: 'Rotate a refresh token for a new token pair' })
   @ApiOkResponse({ type: AuthTokensResponseDto })
   @ApiResponse({
@@ -103,6 +115,7 @@ export class AuthController {
     type: ErrorEnvelopeDto,
   })
   @ApiResponse({ status: 403, description: 'USER_SUSPENDED', type: ErrorEnvelopeDto })
+  @ApiResponse(RATE_LIMITED_RESPONSE)
   async refresh(@Body() body: RefreshBodyDto, @Req() req: RequestWithId) {
     return this.refreshUseCase.execute({
       refreshToken: body.refreshToken,
@@ -118,6 +131,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Revoke the presenting session (idempotent)' })
   @ApiNoContentResponse({ description: 'Session revoked (or already revoked)' })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED', type: ErrorEnvelopeDto })
+  @ApiResponse(RATE_LIMITED_RESPONSE)
   async logout(@CurrentUser() actor: Actor, @Req() req: RequestWithId): Promise<void> {
     await this.logoutUseCase.execute({
       actorId: actor.id,
@@ -128,6 +142,7 @@ export class AuthController {
 
   @Post('change-password')
   @HttpCode(204)
+  @Throttle({ default: { limit: 10, ttl: 600_000, blockDuration: 0 } })
   @RequiresAuth()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change password; revokes ALL sessions (ADR-0017)' })
@@ -142,6 +157,7 @@ export class AuthController {
     description: 'UNAUTHORIZED or INVALID_CREDENTIALS (wrong current password)',
     type: ErrorEnvelopeDto,
   })
+  @ApiResponse(RATE_LIMITED_RESPONSE)
   async changePassword(
     @CurrentUser() actor: Actor,
     @Body() body: ChangePasswordBodyDto,
