@@ -84,8 +84,12 @@ describe('loadConfig', () => {
   });
 
   it('rejects unsafe proxy-hop and request body limits', () => {
-    expect(() => loadConfig(baseEnv({ TRUST_PROXY_HOPS: '-1' }))).toThrow(/TRUST_PROXY_HOPS/);
-    expect(() => loadConfig(baseEnv({ TRUST_PROXY_HOPS: '6' }))).toThrow(/TRUST_PROXY_HOPS/);
+    expect(() => loadConfig(baseEnv({ TRUST_PROXY_HOPS: '-1' }))).toThrow(
+      /TRUST_PROXY_HOPS/,
+    );
+    expect(() => loadConfig(baseEnv({ TRUST_PROXY_HOPS: '6' }))).toThrow(
+      /TRUST_PROXY_HOPS/,
+    );
     expect(() => loadConfig(baseEnv({ REQUEST_BODY_LIMIT_KB: '2048' }))).toThrow(
       /REQUEST_BODY_LIMIT_KB/,
     );
