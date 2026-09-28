@@ -49,23 +49,23 @@ GET /health/ready
 
 `/health/live` proves only that the process is alive. `/health/ready` is the traffic-routing probe and verifies both PostgreSQL and Redis reachability. A Redis outage therefore removes an instance from readiness rather than silently disabling abuse protection.
 
-## Database migration
+## Release-time database commands
 
-Schema migration is explicit and separate from normal application startup:
-
-```text
-pnpm db:migrate
-```
-
-Run `prisma migrate deploy` through that repository script before sending traffic to a new schema-dependent release. Application startup must not silently mutate the database schema.
-
-The Alpha seed is also explicit:
+Schema migration is explicit and separate from normal application startup. Run it from the production image before sending traffic to a schema-dependent release:
 
 ```text
-pnpm db:seed
+./node_modules/.bin/prisma migrate deploy
 ```
 
-Do not run the seed automatically on every deploy. Apply it deliberately when creating/reconciling the controlled Alpha supply. The seed is repository-owned and idempotent.
+The controlled Alpha seed is compiled into the same image and is also explicit:
+
+```text
+node dist-seed/prisma/seed.js
+```
+
+The runtime seed artifact intentionally does not require `ts-node` or development dependencies. Local development and the non-Docker integration suite can continue using `pnpm db:seed`.
+
+Do not run the seed automatically on every deploy. Apply it deliberately when creating or reconciling the controlled Alpha supply. The seed remains repository-owned and idempotent. CI must prove both release-time commands from the built production image against a clean PostgreSQL service.
 
 ## First deployment sequence
 
@@ -73,8 +73,8 @@ Do not run the seed automatically on every deploy. Apply it deliberately when cr
 2. Create the dedicated Sentry backend project and obtain its DSN before production/staging traffic is enabled.
 3. Create the Docker-backed Render web service from this repository and `main`.
 4. Set production environment variables in Render, including `DATABASE_URL`, internal `REDIS_URL`, `SENTRY_DSN`, and the application secrets; never commit them.
-5. Run the database migration against the hosted PostgreSQL instance.
-6. Deliberately apply the Alpha seed.
+5. Run `./node_modules/.bin/prisma migrate deploy` from the deployed production artifact against hosted PostgreSQL.
+6. Deliberately run `node dist-seed/prisma/seed.js` once to establish/reconcile the controlled Alpha supply.
 7. Verify `/health/live` and `/health/ready` over HTTPS.
 8. Trigger one controlled server-side test error and verify its Sentry event can be correlated to Render logs by `request_id`.
 9. Run the AR4 real-device smoke-test flow before inviting Alpha users.
