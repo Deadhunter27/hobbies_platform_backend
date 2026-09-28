@@ -11,7 +11,7 @@ All latency-sensitive resources live in Render Singapore:
 - one managed Redis-compatible Key Value instance;
 - provider-managed HTTPS on the public service URL.
 
-A custom domain is not required for the first Closed Alpha.
+A custom domain is not required for the first Closed Alpha. Sentry is the external Stage-1 error tracker; it is not part of the latency-sensitive Render topology.
 
 ## Required application environment
 
@@ -21,6 +21,8 @@ Never commit production values to the repository.
 - `PORT` — supplied by Render to the web service; the application also has a local default for development.
 - `DATABASE_URL` — hosted PostgreSQL connection string.
 - `REDIS_URL` — hosted Key Value connection string. Production startup fails closed when it is absent.
+- `SENTRY_DSN` — DSN for the dedicated Wayfinder backend Sentry project. Production startup fails closed when it is absent.
+- `SENTRY_RELEASE` — optional deployed backend revision/label used for release correlation.
 - `JWT_SECRET` — unique production secret; generate independently from development/test credentials.
 - `LOG_LEVEL=info` unless incident debugging requires a temporary change.
 - `ACCESS_TOKEN_TTL_SECONDS=900`
@@ -28,6 +30,8 @@ Never commit production values to the repository.
 - `CORS_ORIGINS` — comma-separated browser origins. Empty means no cross-origin browser origin is allowed. Native mobile clients do not require browser CORS permission.
 - `TRUST_PROXY_HOPS=1` — Render terminates public HTTPS in front of the service. Trust exactly one proxy hop so protocol/client-IP semantics are correct without trusting arbitrary forwarded headers by default.
 - `REQUEST_BODY_LIMIT_KB=100` — explicit JSON and URL-encoded request size ceiling for the Alpha API.
+
+The Alpha Sentry integration sends unexpected/5xx exceptions only. Request bodies, headers, user data, credentials and arbitrary extra context are removed by the application privacy boundary before events are sent. Tracing is disabled in Stage 1.
 
 ## Deploy contract
 
@@ -66,13 +70,15 @@ Do not run the seed automatically on every deploy. Apply it deliberately when cr
 ## First deployment sequence
 
 1. Provision PostgreSQL and Key Value in Singapore only after owner approval for the selected plans.
-2. Create the Docker-backed web service from this repository and `main`.
-3. Set production environment variables in Render, including the internal `REDIS_URL`, not in source control.
-4. Run the database migration against the hosted PostgreSQL instance.
-5. Deliberately apply the Alpha seed.
-6. Verify `/health/live` and `/health/ready` over HTTPS.
-7. Run the AR4 real-device smoke-test flow before inviting Alpha users.
+2. Create the dedicated Sentry backend project and obtain its DSN before production/staging traffic is enabled.
+3. Create the Docker-backed Render web service from this repository and `main`.
+4. Set production environment variables in Render, including `DATABASE_URL`, internal `REDIS_URL`, `SENTRY_DSN`, and the application secrets; never commit them.
+5. Run the database migration against the hosted PostgreSQL instance.
+6. Deliberately apply the Alpha seed.
+7. Verify `/health/live` and `/health/ready` over HTTPS.
+8. Trigger one controlled server-side test error and verify its Sentry event can be correlated to Render logs by `request_id`.
+9. Run the AR4 real-device smoke-test flow before inviting Alpha users.
 
 ## Failure and rollback rule
 
-A failed readiness probe means the release does not receive traffic. Do not solve a failed deploy by weakening environment validation, health checks, CORS, authentication, or rate limiting. Roll back/redeploy the last known-good revision, diagnose from application/provider logs, and only then retry the release.
+A failed readiness probe means the release does not receive traffic. Do not solve a failed deploy by weakening environment validation, health checks, CORS, authentication, rate limiting, or error-tracking privacy controls. Roll back/redeploy the last known-good revision, diagnose from application/provider logs and Sentry when relevant, and only then retry the release.
