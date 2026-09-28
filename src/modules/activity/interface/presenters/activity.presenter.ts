@@ -42,6 +42,7 @@ export function toActivityCommitmentResponse(
     committedAt: commitment.committedAt?.toISOString() ?? null,
     cancelledAt: commitment.cancelledAt?.toISOString() ?? null,
     missedAt: commitment.missedAt?.toISOString() ?? null,
+    completedAt: commitment.completedAt?.toISOString() ?? null,
     note: commitment.note,
     createdAt: commitment.createdAt.toISOString(),
     updatedAt: commitment.updatedAt.toISOString(),
