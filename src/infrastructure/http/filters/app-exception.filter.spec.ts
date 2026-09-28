@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import type { ArgumentsHost } from '@nestjs/common';
+import type { ErrorTrackerService } from '@infra/observability';
 import { AppExceptionFilter } from './app-exception.filter';
 import {
   ConflictError,
@@ -11,6 +12,10 @@ import {
   ValidationError,
 } from '@shared/errors';
 
+function makeTracker(): ErrorTrackerService {
+  return { captureException: jest.fn() } as unknown as ErrorTrackerService;
+}
+
 function makeHost(requestId?: string): {
   host: ArgumentsHost;
   json: jest.Mock;
@@ -19,7 +24,14 @@ function makeHost(requestId?: string): {
   const json = jest.fn();
   const status = jest.fn().mockReturnValue({ json });
   const response = { status };
-  const request = { method: 'GET', url: '/test', headers: {}, id: requestId };
+  const request = {
+    method: 'GET',
+    url: '/api/v1/things/123?token=must-not-leak',
+    baseUrl: '/api/v1/things',
+    route: { path: '/:thingId' },
+    headers: {},
+    id: requestId,
+  };
 
   const host = {
     switchToHttp: () => ({
@@ -39,21 +51,50 @@ describe('AppExceptionFilter', () => {
     [new UnauthorizedError('nope'), 401, 'UNAUTHORIZED'],
     [new ForbiddenError('nope'), 403, 'FORBIDDEN'],
     [new DomainRuleViolation('rule broken'), 422, 'DOMAIN_RULE_VIOLATION'],
-    [new InfrastructureError('db down'), 500, 'INFRASTRUCTURE_ERROR'],
-  ])('maps %p to the documented status and code', (error, expectedStatus, expectedCode) => {
-    const filter = new AppExceptionFilter();
-    const { host, json, status } = makeHost();
+  ])(
+    'maps expected %p without reporting it as an error-tracker issue',
+    (error, statusCode, code) => {
+      const tracker = makeTracker();
+      const filter = new AppExceptionFilter(tracker);
+      const { host, json, status } = makeHost();
+
+      filter.catch(error, host);
+
+      expect(status).toHaveBeenCalledWith(statusCode);
+      expect(json).toHaveBeenCalledWith({
+        error: { code, message: error.message, details: [] },
+      });
+      expect(tracker.captureException).not.toHaveBeenCalled();
+    },
+  );
+
+  it('captures infrastructure errors with request correlation and route template only', () => {
+    const tracker = makeTracker();
+    const filter = new AppExceptionFilter(tracker);
+    const { host, json, status } = makeHost('req-abc-123');
+    const error = new InfrastructureError('db down', undefined, 'DATABASE_UNAVAILABLE');
 
     filter.catch(error, host);
 
-    expect(status).toHaveBeenCalledWith(expectedStatus);
+    expect(status).toHaveBeenCalledWith(500);
     expect(json).toHaveBeenCalledWith({
-      error: { code: expectedCode, message: error.message, details: [] },
+      error: { code: 'DATABASE_UNAVAILABLE', message: 'db down', details: [] },
     });
+    expect(tracker.captureException).toHaveBeenCalledWith(error, {
+      requestId: 'req-abc-123',
+      method: 'GET',
+      route: '/api/v1/things/:thingId',
+      errorCode: 'DATABASE_UNAVAILABLE',
+    });
+    expect(tracker.captureException).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ route: expect.stringContaining('token=') }),
+    );
   });
 
-  it('rewrites a bare HttpException 404 to ROUTE_NOT_FOUND', () => {
-    const filter = new AppExceptionFilter();
+  it('rewrites a bare HttpException 404 to ROUTE_NOT_FOUND without reporting it', () => {
+    const tracker = makeTracker();
+    const filter = new AppExceptionFilter(tracker);
     const { host, json, status } = makeHost();
 
     filter.catch(new HttpException('Not Found', HttpStatus.NOT_FOUND), host);
@@ -66,23 +107,14 @@ describe('AppExceptionFilter', () => {
         details: [],
       },
     });
+    expect(tracker.captureException).not.toHaveBeenCalled();
   });
 
-  it('maps a bare Error to 500 INTERNAL without leaking its message', () => {
-    const filter = new AppExceptionFilter();
-    const { host, json, status } = makeHost();
-
-    filter.catch(new Error('some internal detail nobody should see'), host);
-
-    expect(status).toHaveBeenCalledWith(500);
-    expect(json).toHaveBeenCalledWith({
-      error: { code: 'INTERNAL', message: 'An internal error occurred.', details: [] },
-    });
-  });
-
-  it('logs unhandled errors with the pino-assigned request id', () => {
-    const filter = new AppExceptionFilter();
-    const { host } = makeHost('req-abc-123');
+  it('captures an unexpected error but keeps the stable INTERNAL client envelope', () => {
+    const tracker = makeTracker();
+    const filter = new AppExceptionFilter(tracker);
+    const { host, json, status } = makeHost('req-abc-123');
+    const error = new Error('some internal detail nobody should see');
     const errorSpy = jest
       .spyOn(
         (filter as unknown as { logger: { error: (...args: unknown[]) => void } }).logger,
@@ -90,11 +122,22 @@ describe('AppExceptionFilter', () => {
       )
       .mockImplementation(() => undefined);
 
-    filter.catch(new Error('boom'), host);
+    filter.catch(error, host);
 
+    expect(status).toHaveBeenCalledWith(500);
+    expect(json).toHaveBeenCalledWith({
+      error: { code: 'INTERNAL', message: 'An internal error occurred.', details: [] },
+    });
+    expect(tracker.captureException).toHaveBeenCalledWith(error, {
+      requestId: 'req-abc-123',
+      method: 'GET',
+      route: '/api/v1/things/:thingId',
+      errorCode: 'INTERNAL',
+    });
     expect(errorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('requestId=req-abc-123'),
+      expect.stringContaining('GET /api/v1/things/:thingId [requestId=req-abc-123]'),
       expect.any(String),
     );
+    expect(errorSpy).not.toHaveBeenCalledWith(expect.stringContaining('token='), expect.anything());
   });
 });

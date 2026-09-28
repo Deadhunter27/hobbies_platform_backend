@@ -69,7 +69,7 @@ Acceptance:
 - unit/integration/e2e coverage proves the important policies;
 - no engagement or product-ranking behavior is introduced through Redis.
 
-Current status: branch-verified. `wayfinder-alpha-readiness-ar2` has green format/lint, typecheck, unit, real Redis integration, e2e, OpenAPI staleness, build, Docker readiness, commitlint, and CodeQL checks. The implementation includes the official Node Redis client, production `REDIS_URL` validation, Redis-backed atomic counters, layered global/auth-target/sensitive-write policies, stable `429 RATE_LIMIT_EXCEEDED`, hashed limiter identities, and Redis readiness health. AR2 becomes complete only after PR #11 is merged and the merged `main` commit passes CI + CodeQL.
+Current status: complete. PR #11 was squash-merged to `main` as `f908afdf`, and the merged commit passed format/lint, typecheck, unit, real Redis integration, e2e, OpenAPI staleness, build, Docker readiness and CodeQL checks. The implementation uses production-required `REDIS_URL`, Redis-backed atomic counters, layered global/auth-target/sensitive-write policies, stable `429 RATE_LIMIT_EXCEEDED`, hashed limiter identities and Redis readiness health.
 
 ### AR3 — Observability and error tracking
 
@@ -81,6 +81,8 @@ Acceptance:
 - Render logs and basic service/database/key-value metrics are usable for incident triage;
 - a minimal Alpha alerting/escalation rule is documented;
 - observability remains proportionate to Closed Alpha rather than becoming an enterprise monitoring project.
+
+Current status: implementation in progress on `wayfinder-alpha-readiness-ar3`. Sentry is selected for Stage-1 server error tracking only; tracing/metrics remain deferred. The branch requires `SENTRY_DSN` in production, captures only unexpected/5xx failures through the existing global exception boundary, correlates them with safe request-id/method/route/error-code tags, and strips request/user/breadcrumb/extra/context data before transmission. AR3 code still requires CI + CodeQL verification, and the hosted Sentry project/DSN plus one controlled event must be validated before the gate is formally complete.
 
 ### AR4 — Staging deployment and real-device smoke test
 
