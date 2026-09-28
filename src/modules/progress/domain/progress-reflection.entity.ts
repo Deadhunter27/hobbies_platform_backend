@@ -19,7 +19,10 @@ function normalizeTags(tags: string[]): string[] {
 }
 
 function assertRules(props: ProgressReflectionProps): void {
-  if (props.rating !== null && (!Number.isInteger(props.rating) || props.rating < 1 || props.rating > 5)) {
+  if (
+    props.rating !== null &&
+    (!Number.isInteger(props.rating) || props.rating < 1 || props.rating > 5)
+  ) {
     throw new DomainRuleViolation(
       'Reflection rating must be an integer from 1 to 5.',
       undefined,
