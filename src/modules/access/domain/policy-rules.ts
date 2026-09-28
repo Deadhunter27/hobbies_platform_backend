@@ -21,6 +21,8 @@ const USER_SELF_ACTIONS: ReadonlySet<string> = new Set([
   'progress.self.update',
   'community.membership.read',
   'community.membership.update',
+  'checkin.self.read',
+  'checkin.self.update',
 ]);
 
 /** Rule 2 — global role: platform-scoped actions satisfied by
