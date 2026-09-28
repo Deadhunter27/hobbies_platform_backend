@@ -21,8 +21,8 @@ around the directional real-world loop:
 | W5        | What's Next + recovery                       | ✅ Complete    | —       |
 | W6        | Progress + Journey                           | ✅ Complete    | —       |
 | W7        | Communities + people context                 | ✅ Complete    | —       |
-| W8        | Notifications / check-ins                    | 🟡 In progress | —       |
-| W9        | Conversations / feed                         | ⬜ Planned     | —       |
+| W8        | Notifications / check-ins                    | ✅ Complete    | —       |
+| W9        | Conversations / feed                         | 🟡 In progress | —       |
 | W10       | Admin / moderation / seeding                 | ⬜ Planned     | —       |
 
 ## Completed
@@ -92,34 +92,45 @@ while membership remains optional and never gates an Activity commitment. The
 Running Alpha includes Jakarta Runners seed supply and the mobile client consumes
 this trust context without introducing a generic social-network surface.
 
-## Current
-
 ### W8 — Notifications / Check-ins
 
-ADR-0025 defines an in-app-first check-in lifecycle that closes the return loop
-after commitment before Wayfinder pays the complexity cost of outbound push/email
-infrastructure.
+ADR-0025 is implemented on `main`. Authenticated users receive deterministic in-app
+check-ins derived from authoritative committed Activity state: a pre-activity
+reminder, post-activity reflection prompt, or missed-plan recovery prompt depending
+on server-owned timing. Check-ins have their own `pending | actioned | dismissed`
+lifecycle and never silently mutate Activity completion or missed state. The mobile
+Alpha surfaces the server-authored nonjudgmental prompts on Home and routes them to
+the existing plan, reflection, or recovery flows. W8 intentionally adds no push,
+email, SMS, delivery-provider, Redis/BullMQ scheduling, or engagement-notification
+surface.
+
+## Current
+
+### W9 — Conversations / Feed
+
+ADR-0026 defines a deliberately small discussion layer after the directional loop
+is coherent. Conversation is a hobby-scoped discussion object; Feed is a bounded
+read model over useful ecosystem activity, not a generic authored post stream.
 
 Acceptance criteria:
 
-- authenticated users can read their currently actionable own check-ins;
-- check-ins are derived only from authoritative committed Activity state and server-owned timing rules;
-- the Alpha supports exactly three check-in kinds: `activity_reminder`, `post_activity`, and `missed_plan`;
-- reminder becomes actionable within 24 hours before start, post-activity from start through the first 6 hours, and missed-plan after the 6-hour grace period;
-- materialization is idempotent with at most one row per user + Activity + kind;
-- users can mark a pending check-in `actioned` or `dismissed` without silently mutating Activity completion/missed state;
-- completed, cancelled, missed, interested, or otherwise non-committed paths do not generate actionable check-ins;
-- copy remains factual and nonjudgmental, especially for missed plans;
-- protected operations call the existing policy layer explicitly and default-deny;
-- W8 imports only public Activity seams and never Activity infrastructure repositories;
+- authenticated users can create a hobby-scoped Conversation with title/body and public display-name snapshot;
+- users can read published Conversations for one hobby using bounded keyset pagination;
+- Conversation detail exposes flat chronological replies; authenticated users can add a reply;
+- optional community/activity references remain logical and do not redefine Conversation as an Activity or require community membership by default;
+- Conversation/Reply writes call the existing policy layer explicitly and default-deny;
+- Feed is a read model combining at least published Conversations and upcoming published Activities for one hobby;
+- every Feed item preserves source type/id and enough source context for client routing;
+- Feed ordering is deterministic and contextual/chronological, never engagement-ranked;
+- Feed uses bounded keyset pagination and does not introduce infinite-scroll-oriented ranking semantics;
+- W9 introduces no follows, likes, reactions, reposts, DMs, reputation score, deep reply trees, or algorithmic virality ranking;
+- cross-context user/hobby/community/activity references remain logical; DB relations exist only inside Conversation ownership;
 - persistence is introduced by a reviewed Prisma migration;
 - all input boundaries are Zod-validated and endpoints are represented in OpenAPI;
-- unit/integration/e2e coverage and CI remain green;
-- Redis/BullMQ, push tokens, provider delivery, retries, and receipts remain deferred until an outbound channel is explicitly approved.
+- unit/integration/e2e coverage and CI remain green.
 
 ## Planned
 
-- **W9 Conversations / Feed** — only after the directional loop is coherent.
 - **W10 Admin / Moderation / Seeding** — staff tooling, curation, moderation,
   taxonomy writes, and seeded supply management.
 
