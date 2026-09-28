@@ -25,7 +25,12 @@ describeIfDb('Conversation + hobby feed e2e', () => {
 
   beforeAll(async () => {
     await prisma.catalogHobbyCategory.create({
-      data: { id: categoryId, slug: categorySlug, name: `Conversation E2E ${run}`, sortOrder: 999 },
+      data: {
+        id: categoryId,
+        slug: categorySlug,
+        name: `Conversation E2E ${run}`,
+        sortOrder: 999,
+      },
     });
     await prisma.catalogHobby.create({
       data: {
@@ -183,6 +188,10 @@ describeIfDb('Conversation + hobby feed e2e', () => {
         expect.objectContaining({ type: 'conversation', sourceId: secondConversationId }),
       ]),
     );
-    expect(feed.body.data.every((item: { type: string }) => ['activity', 'conversation'].includes(item.type))).toBe(true);
+    expect(
+      feed.body.data.every((item: { type: string }) =>
+        ['activity', 'conversation'].includes(item.type),
+      ),
+    ).toBe(true);
   });
 });
