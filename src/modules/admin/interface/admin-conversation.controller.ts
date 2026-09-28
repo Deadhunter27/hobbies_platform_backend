@@ -1,4 +1,4 @@
-import { Controller, Param, Post } from '@nestjs/common';
+import { Controller, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorEnvelopeDto } from '@infra/http';
 import { CurrentUser, RequiresAuth, type Actor } from '@modules/access';
@@ -16,6 +16,7 @@ export class AdminConversationController {
   constructor(private readonly moderateConversation: ModerateConversationUseCase) {}
 
   @Post(':conversationId/archive')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Archive a Conversation through the explicit staff moderation path' })
   @ApiOkResponse({ type: AdminConversationStatusResponseDto })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED', type: ErrorEnvelopeDto })
@@ -38,6 +39,7 @@ export class AdminConversationController {
   }
 
   @Post(':conversationId/publish')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Publish a Conversation through the explicit staff moderation path' })
   @ApiOkResponse({ type: AdminConversationStatusResponseDto })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED', type: ErrorEnvelopeDto })
