@@ -29,6 +29,7 @@ import { ActivitiesController, MyActivityCommitmentsController } from './interfa
   exports: [
     ListActivitiesUseCase,
     GetActivityUseCase,
+    ListMyActivityCommitmentsUseCase,
     GetMyActivityCommitmentUseCase,
     UpsertMyActivityCommitmentUseCase,
   ],

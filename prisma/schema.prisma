@@ -153,6 +153,22 @@ enum CommunityMembershipState {
   @@map("community_membership_state")
 }
 
+enum CheckInKind {
+  activity_reminder
+  post_activity
+  missed_plan
+
+  @@map("check_in_kind")
+}
+
+enum CheckInStatus {
+  pending
+  actioned
+  dismissed
+
+  @@map("check_in_status")
+}
+
 // ADR-0017: user aggregate. Email is stored lowercase (normalized at the
 // boundary); uniqueness on the normalized form is case-insensitive.
 model IdentityUser {
@@ -427,4 +443,23 @@ model CommunityMembership {
   @@index([userId, state, updatedAt])
   @@index([communityId, state, role])
   @@map("community_membership")
+}
+
+// ADR-0025: durable in-app prompts derived from Activity + commitment state.
+// Cross-context user/activity references remain logical.
+model CheckIn {
+  id          String        @id @db.Char(26)
+  userId      String        @db.Char(26)
+  activityId  String        @db.Char(26)
+  kind        CheckInKind
+  status      CheckInStatus @default(pending)
+  availableAt DateTime      @db.Timestamptz(3)
+  actionedAt  DateTime?     @db.Timestamptz(3)
+  dismissedAt DateTime?     @db.Timestamptz(3)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime      @updatedAt @db.Timestamptz(3)
+
+  @@unique([userId, activityId, kind])
+  @@index([userId, status, availableAt, id])
+  @@map("check_in")
 }

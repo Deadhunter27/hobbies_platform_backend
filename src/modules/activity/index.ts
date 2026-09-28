@@ -2,6 +2,7 @@ export { ActivityModule } from './activity.module';
 export {
   ListActivitiesUseCase,
   GetActivityUseCase,
+  ListMyActivityCommitmentsUseCase,
   GetMyActivityCommitmentUseCase,
   UpsertMyActivityCommitmentUseCase,
 } from './application';

@@ -1763,6 +1763,140 @@
           "progress"
         ]
       }
+    },
+    "/api/v1/me/check-ins": {
+      "get": {
+        "operationId": "MyCheckInsController_list_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckInListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "CHECK_IN_ACCESS_DENIED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List currently actionable in-app check-ins for the authenticated user",
+        "tags": [
+          "check-ins"
+        ]
+      }
+    },
+    "/api/v1/me/check-ins/{checkInId}": {
+      "put": {
+        "operationId": "MyCheckInsController_update_v1",
+        "parameters": [
+          {
+            "name": "checkInId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCheckInDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckInStateResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "CHECK_IN_ACCESS_DENIED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "CHECK_IN_NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark one own check-in as actioned or dismissed",
+        "tags": [
+          "check-ins"
+        ]
+      }
     }
   },
   "info": {
@@ -3558,6 +3692,179 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "CheckInListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                },
+                "activityId": {
+                  "type": "string",
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "activity_reminder",
+                    "post_activity",
+                    "missed_plan"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "pending",
+                    "actioned",
+                    "dismissed"
+                  ]
+                },
+                "availableAt": {
+                  "type": "string"
+                },
+                "actionedAt": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "dismissedAt": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                },
+                "ctaLabel": {
+                  "type": "string"
+                },
+                "activity": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "startsAt": {
+                      "type": "string"
+                    },
+                    "placeName": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "title",
+                    "startsAt",
+                    "placeName"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "activityId",
+                "kind",
+                "status",
+                "availableAt",
+                "actionedAt",
+                "dismissedAt",
+                "createdAt",
+                "updatedAt",
+                "title",
+                "body",
+                "ctaLabel",
+                "activity"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateCheckInDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "actioned",
+              "dismissed"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "CheckInStateResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "activityId": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "activity_reminder",
+              "post_activity",
+              "missed_plan"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "actioned",
+              "dismissed"
+            ]
+          },
+          "availableAt": {
+            "type": "string"
+          },
+          "actionedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "dismissedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "activityId",
+          "kind",
+          "status",
+          "availableAt",
+          "actionedAt",
+          "dismissedAt",
+          "createdAt",
+          "updatedAt"
         ]
       }
     }

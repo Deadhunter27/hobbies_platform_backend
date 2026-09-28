@@ -14,6 +14,7 @@ import { ActivityModule } from '@modules/activity';
 import { RecommendationModule } from '@modules/recommendation';
 import { ProgressModule } from '@modules/progress';
 import { CommunityModule } from '@modules/community';
+import { CheckInModule } from '@modules/checkin';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CommunityModule } from '@modules/community';
     RecommendationModule,
     ProgressModule,
     CommunityModule,
+    CheckInModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AppExceptionFilter },
