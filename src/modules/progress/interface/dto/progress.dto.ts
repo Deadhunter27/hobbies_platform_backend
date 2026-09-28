@@ -3,9 +3,7 @@ import { createZodDto } from 'nestjs-zod';
 
 const ulid = z.string().regex(/^[0-9A-HJKMNP-TV-Z]{26}$/);
 
-export const progressActivityParamSchema = z
-  .object({ hobbyId: ulid, activityId: ulid })
-  .strict();
+export const progressActivityParamSchema = z.object({ hobbyId: ulid, activityId: ulid }).strict();
 export class ProgressActivityParamDto extends createZodDto(progressActivityParamSchema) {}
 
 export const journeyParamSchema = z.object({ hobbyId: ulid }).strict();
@@ -31,9 +29,7 @@ export const progressReflectionResponseSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
 });
-export class ProgressReflectionResponseDto extends createZodDto(
-  progressReflectionResponseSchema,
-) {}
+export class ProgressReflectionResponseDto extends createZodDto(progressReflectionResponseSchema) {}
 
 export const journeyMomentResponseSchema = progressReflectionResponseSchema.extend({
   activityTitle: z.string(),
