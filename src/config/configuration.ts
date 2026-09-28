@@ -12,6 +12,8 @@ export interface AppConfig {
   /** Parsed from CORS_ORIGINS (comma-separated). Empty in production means
    * no cross-origin browser access at all — fail-closed, not fail-open. */
   readonly corsOrigins: string[];
+  readonly trustProxyHops: number;
+  readonly requestBodyLimitKb: number;
 }
 
 /**
@@ -44,5 +46,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       .split(',')
       .map((origin) => origin.trim())
       .filter((origin) => origin.length > 0),
+    trustProxyHops: parsed.TRUST_PROXY_HOPS,
+    requestBodyLimitKb: parsed.REQUEST_BODY_LIMIT_KB,
   });
 }
