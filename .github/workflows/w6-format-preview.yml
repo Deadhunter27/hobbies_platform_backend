@@ -1,0 +1,23 @@
+name: W6 Format Preview
+
+on:
+  push:
+    branches:
+      - wayfinder-w6-progress-journey
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format
+      - uses: actions/upload-artifact@v4
+        with:
+          name: w6-formatted-source
+          path: src/modules/progress
