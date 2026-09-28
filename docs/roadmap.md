@@ -20,8 +20,8 @@ around the directional real-world loop:
 | W4        | Activities + commitments                     | ✅ Complete    | —       |
 | W5        | What's Next + recovery                       | ✅ Complete    | —       |
 | W6        | Progress + Journey                           | ✅ Complete    | —       |
-| W7        | Communities + people context                 | 🟡 In progress | —       |
-| W8        | Notifications / check-ins                    | ⬜ Planned     | —       |
+| W7        | Communities + people context                 | ✅ Complete    | —       |
+| W8        | Notifications / check-ins                    | 🟡 In progress | —       |
 | W9        | Conversations / feed                         | ⬜ Planned     | —       |
 | W10       | Admin / moderation / seeding                 | ⬜ Planned     | —       |
 
@@ -79,33 +79,46 @@ completed real-world action. Reflections support qualitative rating, tags, and
 notes, are revisable without rewriting their original occurrence time, and feed a
 server-authoritative Journey read model enriched with activity context. W6 adds no
 streaks, XP, leaderboards, GPS proof, wearable proof, or competitive scoring. The
-mobile Alpha now persists reflections and renders server-backed Journey moments.
-
-## Current
+mobile Alpha persists reflections and renders server-backed Journey moments.
 
 ### W7 — Communities + People Context
 
-W7 implements only the community/person context needed to make real-world activity
-decisions more trustworthy. It does **not** expand Wayfinder into a generic social
-network before the directional loop is coherent.
+ADR-0024 is implemented on `main`. Published community profiles expose only the
+minimum identity, hobby, location, member-count, and host/organizer context needed
+around real-world Activity decisions. Authenticated users can join, leave, and
+rejoin communities through durable membership state with explicit community roles.
+Activity resolves its logical community reference through the public Community seam,
+while membership remains optional and never gates an Activity commitment. The
+Running Alpha includes Jakarta Runners seed supply and the mobile client consumes
+this trust context without introducing a generic social-network surface.
+
+## Current
+
+### W8 — Notifications / Check-ins
+
+ADR-0025 defines an in-app-first check-in lifecycle that closes the return loop
+after commitment before Wayfinder pays the complexity cost of outbound push/email
+infrastructure.
 
 Acceptance criteria:
 
-- published community profiles expose the identity, hobby, location, description, and visible context needed for a user to understand who an activity is connected to;
-- authenticated users can persist and read their own community membership state;
-- community host roles are represented explicitly instead of inferred from free-text activity labels;
-- Activity can resolve its existing `communityReferenceId` / host references through a public W7 seam without importing Community infrastructure repositories;
-- activity-facing community/person context is read-only enrichment and does not make community membership a prerequisite for joining an activity;
-- user/community references remain logically owned by their modules rather than coupled with cross-module database foreign keys;
-- protected membership operations call the existing policy layer explicitly and default-deny;
+- authenticated users can read their currently actionable own check-ins;
+- check-ins are derived only from authoritative committed Activity state and server-owned timing rules;
+- the Alpha supports exactly three check-in kinds: `activity_reminder`, `post_activity`, and `missed_plan`;
+- reminder becomes actionable within 24 hours before start, post-activity from start through the first 6 hours, and missed-plan after the 6-hour grace period;
+- materialization is idempotent with at most one row per user + Activity + kind;
+- users can mark a pending check-in `actioned` or `dismissed` without silently mutating Activity completion/missed state;
+- completed, cancelled, missed, interested, or otherwise non-committed paths do not generate actionable check-ins;
+- copy remains factual and nonjudgmental, especially for missed plans;
+- protected operations call the existing policy layer explicitly and default-deny;
+- W8 imports only public Activity seams and never Activity infrastructure repositories;
 - persistence is introduced by a reviewed Prisma migration;
-- all input boundaries are Zod-validated and public endpoints are represented in OpenAPI;
-- unit/integration/e2e coverage and CI remain green.
+- all input boundaries are Zod-validated and endpoints are represented in OpenAPI;
+- unit/integration/e2e coverage and CI remain green;
+- Redis/BullMQ, push tokens, provider delivery, retries, and receipts remain deferred until an outbound channel is explicitly approved.
 
 ## Planned
 
-- **W8 Notifications / Check-ins** — reminders, post-activity check-ins, and
-  missed-plan check-ins; BullMQ/Redis activation as required.
 - **W9 Conversations / Feed** — only after the directional loop is coherent.
 - **W10 Admin / Moderation / Seeding** — staff tooling, curation, moderation,
   taxonomy writes, and seeded supply management.
