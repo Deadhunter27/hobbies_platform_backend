@@ -3,6 +3,7 @@ import pino from 'pino';
 import { newId } from '../src/shared/utils/id';
 import { activitySeeds } from './seed-data/activities';
 import { categorySeeds } from './seed-data/categories';
+import { communitySeeds } from './seed-data/communities';
 import { hobbySeeds } from './seed-data/hobbies';
 
 const prisma = new PrismaClient();
@@ -15,8 +16,8 @@ function futureStart(offsetDays: number): Date {
 }
 
 /**
- * Idempotent starter taxonomy + W4 running activities. Catalog rows upsert by
- * slug; activity fixtures use stable ULIDs so development seeds can be rerun.
+ * Idempotent starter taxonomy + Running real-world loop supply. Catalog rows
+ * upsert by slug; W4/W7 fixtures use stable ULIDs so development seeds can rerun.
  */
 async function main(): Promise<void> {
   const categoryIdBySlug = new Map<string, string>();
@@ -77,6 +78,64 @@ async function main(): Promise<void> {
     logger.info({ slug: hobby.slug }, 'Seeded hobby');
   }
 
+  for (const community of communitySeeds) {
+    const hobbyId = hobbyIdBySlug.get(community.hobbySlug);
+    if (!hobbyId) {
+      throw new Error(
+        `Seed data error: unknown hobby slug "${community.hobbySlug}" for community "${community.name}".`,
+      );
+    }
+
+    const record = await prisma.community.upsert({
+      where: { slug: community.slug },
+      update: {
+        hobbyId,
+        name: community.name,
+        description: community.description,
+        city: community.city,
+        countryCode: community.countryCode,
+        status: 'published',
+      },
+      create: {
+        id: community.id,
+        hobbyId,
+        name: community.name,
+        slug: community.slug,
+        description: community.description,
+        city: community.city,
+        countryCode: community.countryCode,
+        status: 'published',
+      },
+    });
+
+    for (const member of community.members) {
+      await prisma.communityMembership.upsert({
+        where: {
+          communityId_userId: {
+            communityId: record.id,
+            userId: member.userId,
+          },
+        },
+        update: {
+          displayNameSnapshot: member.displayNameSnapshot,
+          role: member.role,
+          state: 'active',
+          leftAt: null,
+        },
+        create: {
+          id: member.id,
+          communityId: record.id,
+          userId: member.userId,
+          displayNameSnapshot: member.displayNameSnapshot,
+          role: member.role,
+          state: 'active',
+          joinedAt: new Date(),
+        },
+      });
+    }
+    logger.info({ communityId: record.id, slug: community.slug }, 'Seeded community context');
+  }
+
   for (const activity of activitySeeds) {
     const hobbyId = hobbyIdBySlug.get(activity.hobbySlug);
     if (!hobbyId) {
@@ -102,6 +161,8 @@ async function main(): Promise<void> {
         longitude: activity.longitude,
         hostName: activity.hostName,
         hostType: activity.hostType,
+        hostReferenceId: activity.hostReferenceId,
+        communityReferenceId: activity.communityReferenceId,
         effortLevel: activity.effortLevel,
         capacity: activity.capacity,
         status: 'published',
@@ -123,6 +184,8 @@ async function main(): Promise<void> {
         longitude: activity.longitude,
         hostName: activity.hostName,
         hostType: activity.hostType,
+        hostReferenceId: activity.hostReferenceId,
+        communityReferenceId: activity.communityReferenceId,
         effortLevel: activity.effortLevel,
         capacity: activity.capacity,
         status: 'published',
