@@ -18,9 +18,9 @@ around the directional real-world loop:
 | M2        | Identity & access + audit trail              | ✅ Complete    | v0.2.0  |
 | W3        | Profile + hobby relationship / context       | ✅ Complete    | —       |
 | W4        | Activities + commitments                     | ✅ Complete    | —       |
-| W5        | What's Next + recovery                       | 🟡 In progress | —       |
-| W6        | Progress + Journey                           | ⬜ Planned     | —       |
-| W7        | Communities + people context                 | ⬜ Planned     | —       |
+| W5        | What's Next + recovery                       | ✅ Complete    | —       |
+| W6        | Progress + Journey                           | ✅ Complete    | —       |
+| W7        | Communities + people context                 | 🟡 In progress | —       |
 | W8        | Notifications / check-ins                    | ⬜ Planned     | —       |
 | W9        | Conversations / feed                         | ⬜ Planned     | —       |
 | W10       | Admin / moderation / seeding                 | ⬜ Planned     | —       |
@@ -62,34 +62,48 @@ users can persist interested/committed/cancelled/missed states without treating
 commitment as completion. Capacity is enforced on writes, running fixtures cover
 the current Alpha branches, and the mobile Alpha is wired to the W4 APIs.
 
-## Current
-
 ### W5 — What's Next + recovery
 
-Approved scope is defined by ADR-0022. W5 moves recommendation and recovery policy
-out of seeded mobile copy into a durable, explainable server-side decision context.
+ADR-0022 is implemented on `main`. Authenticated users receive one current,
+explainable next-step recommendation generated deterministically from W3 context
+and W4 viable activity inventory. The server persists rationale and fit signals,
+keeps rejected recommendations distinct from later choices, returns meaningfully
+different recovery options when available, and preserves the actual selected path.
+The mobile Alpha consumes the server-backed recommendation and recovery contract.
+
+### W6 — Progress + Journey
+
+ADR-0023 is implemented on `main`. A saved activity commitment remains intent,
+while a user-authored post-activity reflection becomes durable evidence of a
+completed real-world action. Reflections support qualitative rating, tags, and
+notes, are revisable without rewriting their original occurrence time, and feed a
+server-authoritative Journey read model enriched with activity context. W6 adds no
+streaks, XP, leaderboards, GPS proof, wearable proof, or competitive scoring. The
+mobile Alpha now persists reflections and renders server-backed Journey moments.
+
+## Current
+
+### W7 — Communities + People Context
+
+W7 implements only the community/person context needed to make real-world activity
+decisions more trustworthy. It does **not** expand Wayfinder into a generic social
+network before the directional loop is coherent.
 
 Acceptance criteria:
 
-- authenticated users can request one current What's Next recommendation for an active hobby context;
-- recommendations are generated from W3 context + W4 viable activity inventory using deterministic rules;
-- every recommendation includes human-readable rationale and fit signals matching the actual rules used;
-- unavailable/full/cancelled/ended activities are never returned as viable next steps;
-- users can reject a recommendation with a stable reason vocabulary and receive a meaningfully different alternative when one exists;
-- the original recommendation and later selected activity remain distinct durable concepts;
-- recovery preserves the actual chosen path rather than snapping back to the original recommendation;
-- protected operations call the existing policy layer explicitly and default-deny;
-- W5 imports only public seams from Profile and Activity, never their infrastructure repositories;
+- published community profiles expose the identity, hobby, location, description, and visible context needed for a user to understand who an activity is connected to;
+- authenticated users can persist and read their own community membership state;
+- community host roles are represented explicitly instead of inferred from free-text activity labels;
+- Activity can resolve its existing `communityReferenceId` / host references through a public W7 seam without importing Community infrastructure repositories;
+- activity-facing community/person context is read-only enrichment and does not make community membership a prerequisite for joining an activity;
+- user/community references remain logically owned by their modules rather than coupled with cross-module database foreign keys;
+- protected membership operations call the existing policy layer explicitly and default-deny;
 - persistence is introduced by a reviewed Prisma migration;
-- all input boundaries are Zod-validated and all endpoints are represented in OpenAPI;
+- all input boundaries are Zod-validated and public endpoints are represented in OpenAPI;
 - unit/integration/e2e coverage and CI remain green.
 
 ## Planned
 
-- **W6 Progress + Journey** — reflections, qualitative progress, optional metrics,
-  recognition context, and Journey moments without competitive gamification.
-- **W7 Communities + People Context** — the minimum membership/host/trust context
-  required to support real-world activity decisions.
 - **W8 Notifications / Check-ins** — reminders, post-activity check-ins, and
   missed-plan check-ins; BullMQ/Redis activation as required.
 - **W9 Conversations / Feed** — only after the directional loop is coherent.
