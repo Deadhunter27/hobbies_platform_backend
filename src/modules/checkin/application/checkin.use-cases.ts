@@ -22,7 +22,7 @@ const HOUR_MS = 60 * 60 * 1000;
 const REMINDER_LEAD_MS = 24 * HOUR_MS;
 const MISSED_GRACE_MS = 6 * HOUR_MS;
 
-function currentKind(
+export function resolveCheckInTiming(
   startsAt: Date,
   now: Date,
 ): { kind: CheckInKind; availableAt: Date } | null {
@@ -104,7 +104,7 @@ export class ListMyCheckInsUseCase {
       const activity = activityView.activity;
       if (activity.status !== 'published') continue;
 
-      const due = currentKind(activity.startsAt, now);
+      const due = resolveCheckInTiming(activity.startsAt, now);
       if (!due) continue;
 
       const existing = await this.repository.findByUserActivityKind(
