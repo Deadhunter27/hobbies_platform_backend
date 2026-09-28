@@ -17,6 +17,8 @@ const USER_SELF_ACTIONS: ReadonlySet<string> = new Set([
   'activity.commitment.update',
   'recommendation.self.read',
   'recommendation.self.update',
+  'progress.self.read',
+  'progress.self.update',
 ]);
 
 /** Rule 2 — global role: platform-scoped actions satisfied by
