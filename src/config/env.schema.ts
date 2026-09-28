@@ -13,6 +13,12 @@ export const envSchema = z.object({
   // Optional and unset by default — see configuration.ts for the fail-closed
   // production behavior when it's absent.
   CORS_ORIGINS: z.string().optional(),
+  // Number of reverse-proxy hops whose forwarded protocol/client IP may be
+  // trusted. Zero is the fail-closed default for local/direct deployments.
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
+  // Keep the API request surface bounded. 100 KB matches Express' default,
+  // but making it explicit prevents framework defaults from becoming policy.
+  REQUEST_BODY_LIMIT_KB: z.coerce.number().int().min(16).max(1024).default(100),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;
