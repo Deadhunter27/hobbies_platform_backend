@@ -30,7 +30,9 @@ export const checkInResponseSchema = z.object({
 });
 export class CheckInResponseDto extends createZodDto(checkInResponseSchema) {}
 
-export const checkInListResponseSchema = z.object({ data: z.array(checkInResponseSchema) });
+export const checkInListResponseSchema = z.object({
+  data: z.array(checkInResponseSchema),
+});
 export class CheckInListResponseDto extends createZodDto(checkInListResponseSchema) {}
 
 export const updateCheckInSchema = z
@@ -49,4 +51,6 @@ export const checkInStateResponseSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
 });
-export class CheckInStateResponseDto extends createZodDto(checkInStateResponseSchema) {}
+export class CheckInStateResponseDto extends createZodDto(
+  checkInStateResponseSchema,
+) {}
