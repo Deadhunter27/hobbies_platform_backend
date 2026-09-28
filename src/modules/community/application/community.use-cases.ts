@@ -37,6 +37,18 @@ export class GetCommunityContextUseCase {
 }
 
 @Injectable()
+export class ResolveCommunityContextUseCase {
+  constructor(@Inject(COMMUNITY_REPOSITORY) private readonly repository: CommunityRepository) {}
+
+  async execute(reference: string | null): Promise<CommunityContext | null> {
+    if (!reference) return null;
+    const community = await this.repository.findPublishedBySlugOrId(reference);
+    if (!community) return null;
+    return this.repository.getContext(community.id);
+  }
+}
+
+@Injectable()
 export class ListMyCommunityMembershipsUseCase {
   constructor(
     private readonly authorization: CommunityAuthorization,
