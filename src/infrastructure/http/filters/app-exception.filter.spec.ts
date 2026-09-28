@@ -138,9 +138,6 @@ describe('AppExceptionFilter', () => {
       expect.stringContaining('GET /api/v1/things/:thingId [requestId=req-abc-123]'),
       expect.any(String),
     );
-    expect(errorSpy).not.toHaveBeenCalledWith(
-      expect.stringContaining('token='),
-      expect.anything(),
-    );
+    expect(errorSpy).not.toHaveBeenCalledWith(expect.stringContaining('token='), expect.anything());
   });
 });
