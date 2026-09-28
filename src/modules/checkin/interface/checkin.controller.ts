@@ -1,5 +1,11 @@
 import { Body, Controller, Get, Param, Put } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ErrorEnvelopeDto } from '@infra/http';
 import { CurrentUser, RequiresAuth, type Actor } from '@modules/access';
 import { ListMyCheckInsUseCase, UpdateMyCheckInUseCase } from '../application';
@@ -9,7 +15,10 @@ import {
   CheckInStateResponseDto,
   UpdateCheckInDto,
 } from './dto/checkin.dto';
-import { toCheckInResponse, toCheckInStateResponse } from './presenters/checkin.presenter';
+import {
+  toCheckInResponse,
+  toCheckInStateResponse,
+} from './presenters/checkin.presenter';
 
 @ApiTags('check-ins')
 @ApiBearerAuth()
@@ -22,10 +31,16 @@ export class MyCheckInsController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List currently actionable in-app check-ins for the authenticated user' })
+  @ApiOperation({
+    summary: 'List currently actionable in-app check-ins for the authenticated user',
+  })
   @ApiOkResponse({ type: CheckInListResponseDto })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED', type: ErrorEnvelopeDto })
-  @ApiResponse({ status: 403, description: 'CHECK_IN_ACCESS_DENIED', type: ErrorEnvelopeDto })
+  @ApiResponse({
+    status: 403,
+    description: 'CHECK_IN_ACCESS_DENIED',
+    type: ErrorEnvelopeDto,
+  })
   async list(@CurrentUser() actor: Actor): Promise<CheckInListResponseDto> {
     const checkIns = await this.listMyCheckIns.execute(actor);
     return { data: checkIns.map(toCheckInResponse) };
@@ -36,7 +51,11 @@ export class MyCheckInsController {
   @ApiOkResponse({ type: CheckInStateResponseDto })
   @ApiResponse({ status: 400, description: 'VALIDATION_FAILED', type: ErrorEnvelopeDto })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED', type: ErrorEnvelopeDto })
-  @ApiResponse({ status: 403, description: 'CHECK_IN_ACCESS_DENIED', type: ErrorEnvelopeDto })
+  @ApiResponse({
+    status: 403,
+    description: 'CHECK_IN_ACCESS_DENIED',
+    type: ErrorEnvelopeDto,
+  })
   @ApiResponse({ status: 404, description: 'CHECK_IN_NOT_FOUND', type: ErrorEnvelopeDto })
   async update(
     @CurrentUser() actor: Actor,
