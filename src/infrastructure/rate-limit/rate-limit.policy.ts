@@ -8,7 +8,7 @@ export interface RateLimitPolicy {
   readonly name: string;
   readonly limit: number;
   readonly windowMs: number;
-  readonly identity: 'ip' | 'actor-or-ip';
+  readonly identity: 'ip' | 'actor-or-ip' | 'auth-target';
 }
 
 export const RATE_LIMIT_POLICIES: Readonly<Record<RateLimitPolicyName, RateLimitPolicy>> = {
@@ -16,19 +16,19 @@ export const RATE_LIMIT_POLICIES: Readonly<Record<RateLimitPolicyName, RateLimit
     name: 'auth-register',
     limit: 5,
     windowMs: 15 * 60 * 1000,
-    identity: 'ip',
+    identity: 'auth-target',
   },
   'auth-login': {
     name: 'auth-login',
     limit: 10,
     windowMs: 5 * 60 * 1000,
-    identity: 'ip',
+    identity: 'auth-target',
   },
   'auth-refresh': {
     name: 'auth-refresh',
     limit: 30,
     windowMs: 5 * 60 * 1000,
-    identity: 'ip',
+    identity: 'auth-target',
   },
   'sensitive-write': {
     name: 'sensitive-write',
