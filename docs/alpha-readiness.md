@@ -69,7 +69,7 @@ Acceptance:
 - unit/integration/e2e coverage proves the important policies;
 - no engagement or product-ranking behavior is introduced through Redis.
 
-Current status: implementation in progress on `wayfinder-alpha-readiness-ar2`. The branch now contains the official Node Redis client, production `REDIS_URL` validation, Redis-backed atomic counters, layered global/auth-target/sensitive-write policies, stable `429 RATE_LIMIT_EXCEEDED`, Redis readiness health, and real Redis CI/e2e coverage. AR2 remains open until branch CI + CodeQL and merged-`main` verification are green.
+Current status: branch-verified. `wayfinder-alpha-readiness-ar2` has green format/lint, typecheck, unit, real Redis integration, e2e, OpenAPI staleness, build, Docker readiness, commitlint, and CodeQL checks. The implementation includes the official Node Redis client, production `REDIS_URL` validation, Redis-backed atomic counters, layered global/auth-target/sensitive-write policies, stable `429 RATE_LIMIT_EXCEEDED`, hashed limiter identities, and Redis readiness health. AR2 becomes complete only after PR #11 is merged and the merged `main` commit passes CI + CodeQL.
 
 ### AR3 — Observability and error tracking
 
