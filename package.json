@@ -6,7 +6,7 @@
   "license": "UNLICENSED",
   "packageManager": "pnpm@9.0.0",
   "engines": {
-    "node": ">=22",
+    "node": "22.x",
     "pnpm": ">=9"
   },
   "scripts": {
@@ -43,7 +43,7 @@
     "argon2": "^0.44.0",
     "helmet": "^8.3.0",
     "nestjs-pino": "^4.6.1",
-    "nestjs-zod": "^5.4.0",
+    "nestjs-zod": "^5.4.3",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
     "prisma": "6.19.3",
