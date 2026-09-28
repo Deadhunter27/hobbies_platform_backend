@@ -74,12 +74,7 @@ export class RedisService implements OnModuleDestroy {
       await this.ensureConnected();
       return await operation();
     } catch (cause) {
-      throw new InfrastructureError(
-        'Redis is unavailable.',
-        undefined,
-        'REDIS_UNAVAILABLE',
-        cause,
-      );
+      throw new InfrastructureError('Redis is unavailable.', undefined, 'REDIS_UNAVAILABLE', cause);
     }
   }
 

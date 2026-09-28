@@ -40,10 +40,10 @@ export class RateLimitGuard implements CanActivate {
       : DEFAULT_READ_RATE_LIMIT;
     await this.enforce(request, response, globalPolicy);
 
-    const configured = this.reflector.getAllAndOverride<RateLimitPolicyName>(RATE_LIMIT_POLICY_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const configured = this.reflector.getAllAndOverride<RateLimitPolicyName>(
+      RATE_LIMIT_POLICY_KEY,
+      [context.getHandler(), context.getClass()],
+    );
     if (configured) {
       await this.enforce(request, response, RATE_LIMIT_POLICIES[configured]);
     }

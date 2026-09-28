@@ -1,8 +1,5 @@
 export type RateLimitPolicyName =
-  | 'auth-register'
-  | 'auth-login'
-  | 'auth-refresh'
-  | 'sensitive-write';
+  'auth-register' | 'auth-login' | 'auth-refresh' | 'sensitive-write';
 
 export interface RateLimitPolicy {
   readonly name: string;

@@ -61,7 +61,9 @@ describe('RateLimitGuard', () => {
   });
 
   it('does not silently fail open when Redis is unavailable', async () => {
-    const reflector = { getAllAndOverride: jest.fn().mockReturnValue(undefined) } as unknown as Reflector;
+    const reflector = {
+      getAllAndOverride: jest.fn().mockReturnValue(undefined),
+    } as unknown as Reflector;
     const unavailable = new InfrastructureError(
       'Redis is unavailable.',
       undefined,
