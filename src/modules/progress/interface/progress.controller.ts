@@ -29,8 +29,16 @@ export class ProgressController {
   @ApiOperation({ summary: 'Save or revise a qualitative reflection after a real-world activity' })
   @ApiOkResponse({ type: ProgressReflectionResponseDto })
   @ApiResponse({ status: 400, description: 'VALIDATION_FAILED', type: ErrorEnvelopeDto })
-  @ApiResponse({ status: 404, description: 'ACTIVITY_NOT_FOUND or ACTIVITY_COMMITMENT_NOT_FOUND', type: ErrorEnvelopeDto })
-  @ApiResponse({ status: 409, description: 'PROGRESS_ACTIVITY_HOBBY_MISMATCH or PROGRESS_COMMITMENT_REQUIRED', type: ErrorEnvelopeDto })
+  @ApiResponse({
+    status: 404,
+    description: 'ACTIVITY_NOT_FOUND or ACTIVITY_COMMITMENT_NOT_FOUND',
+    type: ErrorEnvelopeDto,
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'PROGRESS_ACTIVITY_HOBBY_MISMATCH or PROGRESS_COMMITMENT_REQUIRED',
+    type: ErrorEnvelopeDto,
+  })
   async save(
     @CurrentUser() actor: Actor,
     @Param() params: ProgressActivityParamDto,
