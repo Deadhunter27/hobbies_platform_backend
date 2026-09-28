@@ -52,6 +52,7 @@ function toCommitment(record: CommitmentRecord): ActivityCommitment {
     committedAt: record.committedAt,
     cancelledAt: record.cancelledAt,
     missedAt: record.missedAt,
+    completedAt: record.completedAt,
     note: record.note,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,
@@ -177,6 +178,7 @@ export class PrismaActivityRepository implements ActivityRepository {
       committedAt: commitment.committedAt,
       cancelledAt: commitment.cancelledAt,
       missedAt: commitment.missedAt,
+      completedAt: commitment.completedAt,
       note: commitment.note,
       createdAt: commitment.createdAt,
       updatedAt: commitment.updatedAt,
@@ -189,6 +191,7 @@ export class PrismaActivityRepository implements ActivityRepository {
       committedAt: commitment.committedAt,
       cancelledAt: commitment.cancelledAt,
       missedAt: commitment.missedAt,
+      completedAt: commitment.completedAt,
       note: commitment.note,
       updatedAt: commitment.updatedAt,
     };
