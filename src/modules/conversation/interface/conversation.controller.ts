@@ -8,6 +8,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ErrorEnvelopeDto } from '@infra/http';
+import { RateLimit } from '@infra/rate-limit';
 import { CurrentUser, RequiresAuth, type Actor } from '@modules/access';
 import {
   CreateConversationUseCase,
@@ -76,11 +77,13 @@ export class ConversationController {
   @Post('hobbies/:hobbyId/conversations')
   @ApiBearerAuth()
   @RequiresAuth()
+  @RateLimit('sensitive-write')
   @ApiOperation({ summary: 'Create a hobby-scoped conversation for an active user hobby context' })
   @ApiCreatedResponse({ type: ConversationResponseDto })
   @ApiResponse({ status: 400, description: 'VALIDATION_FAILED', type: ErrorEnvelopeDto })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED', type: ErrorEnvelopeDto })
   @ApiResponse({ status: 403, description: 'CONVERSATION_ACCESS_DENIED', type: ErrorEnvelopeDto })
+  @ApiResponse({ status: 429, description: 'RATE_LIMIT_EXCEEDED', type: ErrorEnvelopeDto })
   async create(
     @CurrentUser() actor: Actor,
     @Param() params: ConversationHobbyIdParamDto,
@@ -94,12 +97,14 @@ export class ConversationController {
   @Post('conversations/:conversationId/replies')
   @ApiBearerAuth()
   @RequiresAuth()
+  @RateLimit('sensitive-write')
   @ApiOperation({ summary: 'Add one flat reply to a published conversation' })
   @ApiCreatedResponse({ type: ConversationReplyResponseDto })
   @ApiResponse({ status: 400, description: 'VALIDATION_FAILED', type: ErrorEnvelopeDto })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED', type: ErrorEnvelopeDto })
   @ApiResponse({ status: 403, description: 'CONVERSATION_ACCESS_DENIED', type: ErrorEnvelopeDto })
   @ApiResponse({ status: 404, description: 'CONVERSATION_NOT_FOUND', type: ErrorEnvelopeDto })
+  @ApiResponse({ status: 429, description: 'RATE_LIMIT_EXCEEDED', type: ErrorEnvelopeDto })
   async reply(
     @CurrentUser() actor: Actor,
     @Param() params: ConversationIdParamDto,
