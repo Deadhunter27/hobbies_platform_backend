@@ -47,6 +47,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm prisma generate
       - run: pnpm build
+      - run: pnpm build:seed
 
   unit-test:
     runs-on: ubuntu-latest
@@ -158,6 +159,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t hobbies-backend:ci .
+      - name: Prove release migration and Alpha seed from production image
+        run: |
+          docker run --rm --network host \
+            -e DATABASE_URL=postgresql://hobbies:hobbies@localhost:5432/hobbies_dev \
+            hobbies-backend:ci ./node_modules/.bin/prisma migrate deploy
+          docker run --rm --network host \
+            -e DATABASE_URL=postgresql://hobbies:hobbies@localhost:5432/hobbies_dev \
+            hobbies-backend:ci node dist-seed/prisma/seed.js
       - name: Boot the image and probe health endpoints
         run: |
           docker run -d --name api --network host \
