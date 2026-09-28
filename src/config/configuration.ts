@@ -5,6 +5,8 @@ export interface AppConfig {
   readonly port: number;
   readonly databaseUrl: string;
   readonly redisUrl: string;
+  readonly sentryDsn: string | null;
+  readonly sentryRelease: string | null;
   readonly logLevel: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
   readonly isDevelopment: boolean;
   readonly jwtSecret: string;
@@ -33,8 +35,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   }
 
   const parsed = result.data;
-  if (parsed.NODE_ENV === 'production' && !parsed.REDIS_URL) {
-    throw new Error('Invalid environment configuration:\n  - REDIS_URL: Required in production');
+  if (parsed.NODE_ENV === 'production') {
+    const productionIssues: string[] = [];
+    if (!parsed.REDIS_URL) productionIssues.push('  - REDIS_URL: Required in production');
+    if (!parsed.SENTRY_DSN) productionIssues.push('  - SENTRY_DSN: Required in production');
+    if (productionIssues.length > 0) {
+      throw new Error(`Invalid environment configuration:\n${productionIssues.join('\n')}`);
+    }
   }
 
   return Object.freeze({
@@ -42,6 +49,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     port: parsed.PORT,
     databaseUrl: parsed.DATABASE_URL,
     redisUrl: parsed.REDIS_URL ?? 'redis://localhost:6379',
+    sentryDsn: parsed.SENTRY_DSN ?? null,
+    sentryRelease: parsed.SENTRY_RELEASE ?? null,
     logLevel: parsed.LOG_LEVEL,
     isDevelopment: parsed.NODE_ENV === 'development',
     jwtSecret: parsed.JWT_SECRET,
