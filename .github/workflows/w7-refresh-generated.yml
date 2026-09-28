@@ -1,0 +1,41 @@
+name: W7 Refresh Generated
+
+on:
+  push:
+    branches:
+      - wayfinder-w7-communities-people
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      PORT: 3000
+      LOG_LEVEL: info
+      DATABASE_URL: postgresql://hobbies:hobbies@localhost:5432/hobbies_dev
+      JWT_SECRET: ci-refresh-only-secret-0000000000000000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma generate
+      - run: pnpm exec prettier --write "{src,test,prisma,scripts}/**/*.ts" "docs/**/*.md"
+      - run: pnpm openapi:generate
+      - name: Commit refreshed files
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src test prisma docs openapi
+          git commit -m "chore(community): refresh W7 generated artifacts"
+          git push
