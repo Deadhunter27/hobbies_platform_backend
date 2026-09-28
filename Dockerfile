@@ -31,8 +31,8 @@ COPY package.json pnpm-lock.yaml* ./
 COPY prisma ./prisma
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --prod
-RUN pnpm prisma generate \
-    && test -f node_modules/.prisma/client/default.js
+RUN ./node_modules/.bin/prisma generate \
+    && node -e "require('@prisma/client')"
 
 # ---- Runtime: slim, non-root ----
 FROM node:22-slim AS runtime
