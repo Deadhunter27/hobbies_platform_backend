@@ -1,0 +1,37 @@
+name: W9 Preview
+
+on:
+  push:
+    branches:
+      - wayfinder-w9-conversations-feed
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      PORT: 3000
+      LOG_LEVEL: info
+      DATABASE_URL: postgresql://hobbies:hobbies@localhost:5432/hobbies_dev
+      JWT_SECRET: ci-only-test-secret-not-used-anywhere-real-0000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma generate
+      - run: pnpm format
+      - run: pnpm openapi:generate
+      - uses: actions/upload-artifact@v4
+        with:
+          name: w9-preview
+          path: |
+            src/modules/conversation
+            src/app.module.ts
+            src/modules/access/domain/policy-rules.ts
+            docs/roadmap.md
+            docs/adr/0026-conversations-and-hobby-feed.md
+            openapi/openapi.json
