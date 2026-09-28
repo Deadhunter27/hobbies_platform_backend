@@ -1493,6 +1493,129 @@
           "recommendation"
         ]
       }
+    },
+    "/api/v1/me/hobbies/{hobbyId}/progress/{activityId}": {
+      "put": {
+        "operationId": "ProgressController_save_v1",
+        "parameters": [
+          {
+            "name": "hobbyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "activityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveProgressReflectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressReflectionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ACTIVITY_NOT_FOUND or ACTIVITY_COMMITMENT_NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "PROGRESS_ACTIVITY_HOBBY_MISMATCH or PROGRESS_COMMITMENT_REQUIRED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Save or revise a qualitative reflection after a real-world activity",
+        "tags": [
+          "progress"
+        ]
+      }
+    },
+    "/api/v1/me/hobbies/{hobbyId}/journey": {
+      "get": {
+        "operationId": "ProgressController_journey_v1",
+        "parameters": [
+          {
+            "name": "hobbyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the authenticated user meaningful progress moments for a hobby",
+        "tags": [
+          "progress"
+        ]
+      }
     }
   },
   "info": {
@@ -2508,7 +2631,8 @@
                     "interested",
                     "committed",
                     "cancelled",
-                    "missed"
+                    "missed",
+                    "completed"
                   ]
                 },
                 "committedAt": {
@@ -2520,6 +2644,10 @@
                   "nullable": true
                 },
                 "missedAt": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "completedAt": {
                   "type": "string",
                   "nullable": true
                 },
@@ -2541,6 +2669,7 @@
                 "committedAt",
                 "cancelledAt",
                 "missedAt",
+                "completedAt",
                 "note",
                 "createdAt",
                 "updatedAt"
@@ -2567,7 +2696,8 @@
               "interested",
               "committed",
               "cancelled",
-              "missed"
+              "missed",
+              "completed"
             ]
           },
           "committedAt": {
@@ -2579,6 +2709,10 @@
             "nullable": true
           },
           "missedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "completedAt": {
             "type": "string",
             "nullable": true
           },
@@ -2600,6 +2734,7 @@
           "committedAt",
           "cancelledAt",
           "missedAt",
+          "completedAt",
           "note",
           "createdAt",
           "updatedAt"
@@ -2614,7 +2749,8 @@
               "interested",
               "committed",
               "cancelled",
-              "missed"
+              "missed",
+              "completed"
             ]
           },
           "note": {
@@ -2753,6 +2889,170 @@
           "activityId"
         ],
         "additionalProperties": false
+      },
+      "SaveProgressReflectionDto": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "default": null,
+            "nullable": true
+          },
+          "tags": {
+            "default": [],
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            }
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 560,
+            "default": null,
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProgressReflectionResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "hobbyId": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "activityId": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "hobbyId",
+          "activityId",
+          "rating",
+          "tags",
+          "note",
+          "occurredAt",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "JourneyResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                },
+                "hobbyId": {
+                  "type": "string",
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                },
+                "activityId": {
+                  "type": "string",
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                },
+                "rating": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5,
+                  "nullable": true
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "note": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "occurredAt": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "activityTitle": {
+                  "type": "string"
+                },
+                "activityType": {
+                  "type": "string"
+                },
+                "placeName": {
+                  "type": "string"
+                },
+                "hostName": {
+                  "type": "string",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "hobbyId",
+                "activityId",
+                "rating",
+                "tags",
+                "note",
+                "occurredAt",
+                "createdAt",
+                "updatedAt",
+                "activityTitle",
+                "activityType",
+                "placeName",
+                "hostName"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
       }
     }
   }
