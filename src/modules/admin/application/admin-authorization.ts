@@ -11,4 +11,9 @@ export class AdminAuthorization {
     const decision = await this.policy.can(actor, 'platform.manage', PLATFORM_RESOURCE);
     if (!decision.allow) throw new AdminAccessDeniedError();
   }
+
+  async assertCanManageCatalog(actor: Actor): Promise<void> {
+    const decision = await this.policy.can(actor, 'catalog.manage', PLATFORM_RESOURCE);
+    if (!decision.allow) throw new AdminAccessDeniedError();
+  }
 }
