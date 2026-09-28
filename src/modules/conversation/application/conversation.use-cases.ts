@@ -50,7 +50,7 @@ export class ListConversationsUseCase {
     limit: number;
     cursor?: string;
   }): Promise<ConversationPage> {
-    await this.getHobby.execute(input.hobbyId);
+    await this.getHobby.execute({ slugOrId: input.hobbyId });
     return this.repository.listPublished({
       hobbyId: input.hobbyId,
       limit: input.limit,
@@ -93,7 +93,7 @@ export class CreateConversationUseCase {
     now = new Date(),
   ): Promise<Conversation> {
     await this.authorization.assertCanWrite(actor);
-    await this.getHobby.execute(hobbyId);
+    await this.getHobby.execute({ slugOrId: hobbyId });
     await this.getHobbyContext.execute(actor, hobbyId);
 
     return this.repository.createConversation({
@@ -155,12 +155,10 @@ export class ListHobbyFeedUseCase {
     cursor?: string;
     now?: Date;
   }): Promise<HobbyFeedPage> {
-    await this.getHobby.execute(input.hobbyId);
+    await this.getHobby.execute({ slugOrId: input.hobbyId });
     const now = input.now ?? new Date();
     const rawCursor = input.cursor ? decodeCursor(input.cursor) : null;
-    const cursor = rawCursor
-      ? { occurredAt: new Date(rawCursor.name), id: rawCursor.id }
-      : null;
+    const cursor = rawCursor ? { occurredAt: new Date(rawCursor.name), id: rawCursor.id } : null;
     if (cursor && Number.isNaN(cursor.occurredAt.getTime())) throw new InvalidCursorError();
 
     const [conversationPage, activityViews] = await Promise.all([
