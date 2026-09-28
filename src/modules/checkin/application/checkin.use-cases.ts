@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { Actor } from '@modules/access';
-import { GetActivityUseCase, ListMyActivityCommitmentsUseCase } from '@modules/activity';
+import {
+  GetActivityUseCase,
+  ListMyActivityCommitmentsUseCase,
+} from '@modules/activity';
 import { newId } from '@shared/utils';
 import {
   CheckInNotFoundError,
@@ -10,13 +13,19 @@ import {
   type CheckInView,
 } from '../domain';
 import { CheckInAuthorization } from './authorization';
-import { CHECK_IN_REPOSITORY, type CheckInRepository } from './ports/checkin.repository.port';
+import {
+  CHECK_IN_REPOSITORY,
+  type CheckInRepository,
+} from './ports/checkin.repository.port';
 
 const HOUR_MS = 60 * 60 * 1000;
 const REMINDER_LEAD_MS = 24 * HOUR_MS;
 const MISSED_GRACE_MS = 6 * HOUR_MS;
 
-function currentKind(startsAt: Date, now: Date): { kind: CheckInKind; availableAt: Date } | null {
+function currentKind(
+  startsAt: Date,
+  now: Date,
+): { kind: CheckInKind; availableAt: Date } | null {
   const diff = startsAt.getTime() - now.getTime();
   if (diff > 0 && diff <= REMINDER_LEAD_MS) {
     return {
@@ -38,7 +47,10 @@ function currentKind(startsAt: Date, now: Date): { kind: CheckInKind; availableA
   return null;
 }
 
-function copyFor(kind: CheckInKind, activityTitle: string): Pick<CheckInView, 'title' | 'body' | 'ctaLabel'> {
+function copyFor(
+  kind: CheckInKind,
+  activityTitle: string,
+): Pick<CheckInView, 'title' | 'body' | 'ctaLabel'> {
   switch (kind) {
     case 'activity_reminder':
       return {
@@ -61,7 +73,10 @@ function copyFor(kind: CheckInKind, activityTitle: string): Pick<CheckInView, 't
   }
 }
 
-function toView(checkIn: CheckIn, activity: { title: string; startsAt: Date; placeName: string }): CheckInView {
+function toView(
+  checkIn: CheckIn,
+  activity: { title: string; startsAt: Date; placeName: string },
+): CheckInView {
   return {
     checkIn,
     ...copyFor(checkIn.kind, activity.title),
