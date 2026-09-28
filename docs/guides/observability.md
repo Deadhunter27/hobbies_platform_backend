@@ -23,7 +23,7 @@ Each reported server error receives only safe correlation tags:
 - `http.route` — route template, never the raw URL/query string;
 - `error.code`.
 
-Before an event leaves the application, the Alpha privacy boundary removes request data, user data, breadcrumbs, arbitrary extras and auto-collected contexts. `sendDefaultPii` is disabled, tracing sampling is zero, and breadcrumbs are disabled. Request bodies, headers, credentials, tokens, emails and actor identifiers must not be intentionally attached to Sentry events.
+Before an event leaves the application, the Alpha privacy boundary removes request data, user data, breadcrumbs, arbitrary extras and auto-collected contexts. Tracing sampling is zero and breadcrumbs are disabled. Request bodies, headers, credentials, tokens, emails and actor identifiers must not be intentionally attached to Sentry events.
 
 `SENTRY_DSN` is required only for the production runtime; development/test can leave it unset. `SENTRY_RELEASE` is optional and should identify the deployed backend revision when available.
 
