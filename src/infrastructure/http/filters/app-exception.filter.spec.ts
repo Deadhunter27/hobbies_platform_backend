@@ -51,19 +51,22 @@ describe('AppExceptionFilter', () => {
     [new UnauthorizedError('nope'), 401, 'UNAUTHORIZED'],
     [new ForbiddenError('nope'), 403, 'FORBIDDEN'],
     [new DomainRuleViolation('rule broken'), 422, 'DOMAIN_RULE_VIOLATION'],
-  ])('maps expected %p without reporting it as an error-tracker issue', (error, statusCode, code) => {
-    const tracker = makeTracker();
-    const filter = new AppExceptionFilter(tracker);
-    const { host, json, status } = makeHost();
+  ])(
+    'maps expected %p without reporting it as an error-tracker issue',
+    (error, statusCode, code) => {
+      const tracker = makeTracker();
+      const filter = new AppExceptionFilter(tracker);
+      const { host, json, status } = makeHost();
 
-    filter.catch(error, host);
+      filter.catch(error, host);
 
-    expect(status).toHaveBeenCalledWith(statusCode);
-    expect(json).toHaveBeenCalledWith({
-      error: { code, message: error.message, details: [] },
-    });
-    expect(tracker.captureException).not.toHaveBeenCalled();
-  });
+      expect(status).toHaveBeenCalledWith(statusCode);
+      expect(json).toHaveBeenCalledWith({
+        error: { code, message: error.message, details: [] },
+      });
+      expect(tracker.captureException).not.toHaveBeenCalled();
+    },
+  );
 
   it('captures infrastructure errors with request correlation and route template only', () => {
     const tracker = makeTracker();
@@ -135,6 +138,9 @@ describe('AppExceptionFilter', () => {
       expect.stringContaining('GET /api/v1/things/:thingId [requestId=req-abc-123]'),
       expect.any(String),
     );
-    expect(errorSpy).not.toHaveBeenCalledWith(expect.stringContaining('token='), expect.anything());
+    expect(errorSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('token='),
+      expect.anything(),
+    );
   });
 });
