@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@config/index';
 import { LoggerModule } from '@infra/logging';
+import { ObservabilityModule } from '@infra/observability';
 import { PrismaModule } from '@infra/database';
 import { RedisModule } from '@infra/redis';
 import { RateLimitGuard } from '@infra/rate-limit';
@@ -24,6 +25,7 @@ import { ConversationModule } from '@modules/conversation';
   imports: [
     ConfigModule,
     LoggerModule,
+    ObservabilityModule,
     PrismaModule,
     RedisModule,
     AuditModule,
