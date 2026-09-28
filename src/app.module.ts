@@ -3,6 +3,7 @@ import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@config/index';
 import { LoggerModule } from '@infra/logging';
 import { PrismaModule } from '@infra/database';
+import { RateLimitModule } from '@infra/rate-limit';
 import { HealthModule } from '@infra/health';
 import { AuditModule } from '@infra/audit';
 import { AppExceptionFilter, AppZodValidationPipe } from '@infra/http';
@@ -23,6 +24,7 @@ import { ConversationModule } from '@modules/conversation';
     ConfigModule,
     LoggerModule,
     PrismaModule,
+    RateLimitModule,
     AuditModule,
     HealthModule,
     CatalogModule,
