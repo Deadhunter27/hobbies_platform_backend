@@ -60,6 +60,7 @@ export const activityCommitmentResponseSchema = z.object({
   committedAt: z.string().nullable(),
   cancelledAt: z.string().nullable(),
   missedAt: z.string().nullable(),
+  completedAt: z.string().nullable(),
   note: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
