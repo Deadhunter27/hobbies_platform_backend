@@ -162,11 +162,12 @@ describeIfDb('W10 admin operability e2e', () => {
     });
     await prisma.$executeRaw`
       INSERT INTO "conversation" (
-        "id", "hobbyId", "authorId", "authorDisplayName", "title", "body", "status"
+        "id", "hobbyId", "authorId", "authorDisplayName", "title", "body", "status",
+        "createdAt", "updatedAt"
       ) VALUES (
         ${conversationId}, ${hobbyId}, ${userId}, 'W10 Operator',
         'W10 moderation fixture', 'This conversation should be explicitly moderatable.',
-        'published'::"conversation_status"
+        'published'::"conversation_status", CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
       )
     `;
 
