@@ -25,12 +25,14 @@ RUN pnpm prisma generate && pnpm build && pnpm build:seed
 # ---- Production dependencies only ----
 FROM base AS prod-deps
 COPY package.json pnpm-lock.yaml* ./
-# prisma/ must be present before install: @prisma/client's postinstall runs
-# `prisma generate` (the CLI is a production dependency — it is also needed
-# at release time for `prisma migrate deploy`, ADR-0004).
+# prisma/ must be present before production install/generation. Do not rely on
+# @prisma/client's postinstall side effect for a runtime-critical artifact:
+# generate explicitly so every container builder produces the same client.
 COPY prisma ./prisma
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --prod
+RUN pnpm prisma generate \
+    && test -f node_modules/.prisma/client/default.js
 
 # ---- Runtime: slim, non-root ----
 FROM node:22-slim AS runtime
