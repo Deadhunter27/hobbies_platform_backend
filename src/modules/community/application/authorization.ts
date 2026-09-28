@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PolicyService, type Actor } from '@modules/access';
+import { PolicyService } from '@modules/access/application/policy.service';
+import type { Actor } from '@modules/access/domain';
 import { CommunityAccessDeniedError } from '../domain';
 
 @Injectable()
