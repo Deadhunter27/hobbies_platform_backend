@@ -1,5 +1,5 @@
 import { encodeCursor } from '@shared/utils';
-import { ListHobbyFeedUseCase } from './conversation.use-cases';
+import { ListHobbyFeedUseCase } from './hobby-feed.use-case';
 
 const HOBBY_ID = '01K6B000000000000000000001';
 const CONVERSATION_ID = '01K6B000000000000000000002';
