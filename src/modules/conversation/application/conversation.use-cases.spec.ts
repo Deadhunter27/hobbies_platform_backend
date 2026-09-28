@@ -1,3 +1,10 @@
+jest.mock('@modules/activity/application/activity.use-cases', () => ({
+  ListActivitiesUseCase: class {},
+}));
+jest.mock('@modules/catalog/application/use-cases/get-hobby.use-case', () => ({
+  GetHobbyUseCase: class {},
+}));
+
 import { encodeCursor } from '@shared/utils';
 import { ListHobbyFeedUseCase } from './hobby-feed.use-case';
 
