@@ -37,3 +37,16 @@ export const updateCheckInSchema = z
   .object({ status: z.enum(['actioned', 'dismissed']) })
   .strict();
 export class UpdateCheckInDto extends createZodDto(updateCheckInSchema) {}
+
+export const checkInStateResponseSchema = z.object({
+  id: ulid,
+  activityId: ulid,
+  kind: z.enum(CHECK_IN_KINDS),
+  status: z.enum(CHECK_IN_STATUSES),
+  availableAt: z.string(),
+  actionedAt: z.string().nullable(),
+  dismissedAt: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export class CheckInStateResponseDto extends createZodDto(checkInStateResponseSchema) {}
