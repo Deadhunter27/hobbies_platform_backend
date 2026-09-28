@@ -3,9 +3,14 @@ import type {
   Community as CommunityRecord,
   CommunityMembership as CommunityMembershipRecord,
 } from '@prisma/client';
-import { PrismaService } from '@infra/database';
-import type { CommunityRepository, SaveCommunityMembershipInput } from '../application';
-import type { Community, CommunityContext, CommunityMembership } from '../domain';
+import { PrismaService, prismaClientOf } from '@infra/database';
+import type { TxContext } from '@shared/application';
+import type {
+  CommunityLifecycleRepository,
+  CommunityRepository,
+  SaveCommunityMembershipInput,
+} from '../application';
+import type { Community, CommunityContext, CommunityMembership, CommunityStatus } from '../domain';
 
 function toCommunity(record: CommunityRecord): Community {
   return {
@@ -38,7 +43,9 @@ function toMembership(record: CommunityMembershipRecord): CommunityMembership {
 }
 
 @Injectable()
-export class PrismaCommunityRepository implements CommunityRepository {
+export class PrismaCommunityRepository
+  implements CommunityRepository, CommunityLifecycleRepository
+{
   constructor(private readonly prisma: PrismaService) {}
 
   async findPublishedBySlugOrId(reference: string): Promise<Community | null> {
@@ -48,6 +55,11 @@ export class PrismaCommunityRepository implements CommunityRepository {
         OR: [{ id: reference }, { slug: reference }],
       },
     });
+    return record ? toCommunity(record) : null;
+  }
+
+  async findById(id: string, tx?: TxContext): Promise<Community | null> {
+    const record = await prismaClientOf(this.prisma, tx).community.findUnique({ where: { id } });
     return record ? toCommunity(record) : null;
   }
 
@@ -109,5 +121,19 @@ export class PrismaCommunityRepository implements CommunityRepository {
       },
     });
     return toMembership(record);
+  }
+
+  async updateStatus(
+    input: { id: string; status: CommunityStatus; updatedAt: Date },
+    tx?: TxContext,
+  ): Promise<Community | null> {
+    const client = prismaClientOf(this.prisma, tx);
+    const existing = await client.community.findUnique({ where: { id: input.id } });
+    if (!existing) return null;
+    const record = await client.community.update({
+      where: { id: input.id },
+      data: { status: input.status, updatedAt: input.updatedAt },
+    });
+    return toCommunity(record);
   }
 }

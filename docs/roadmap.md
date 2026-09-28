@@ -12,18 +12,18 @@ around the directional real-world loop:
 
 ## Status
 
-| Milestone | Scope                                        | Status         | Version |
-| --------- | -------------------------------------------- | -------------- | ------- |
-| M1        | Platform kernel + catalog (read-only)        | ✅ Complete    | v0.1.0  |
-| M2        | Identity & access + audit trail              | ✅ Complete    | v0.2.0  |
-| W3        | Profile + hobby relationship / context       | ✅ Complete    | —       |
-| W4        | Activities + commitments                     | ✅ Complete    | —       |
-| W5        | What's Next + recovery                       | ✅ Complete    | —       |
-| W6        | Progress + Journey                           | ✅ Complete    | —       |
-| W7        | Communities + people context                 | ✅ Complete    | —       |
-| W8        | Notifications / check-ins                    | ✅ Complete    | —       |
-| W9        | Conversations / feed                         | 🟡 In progress | —       |
-| W10       | Admin / moderation / seeding                 | ⬜ Planned     | —       |
+| Milestone | Scope                                        | Status      | Version |
+| --------- | -------------------------------------------- | ----------- | ------- |
+| M1        | Platform kernel + catalog (read-only)        | ✅ Complete | v0.1.0  |
+| M2        | Identity & access + audit trail              | ✅ Complete | v0.2.0  |
+| W3        | Profile + hobby relationship / context       | ✅ Complete | —       |
+| W4        | Activities + commitments                     | ✅ Complete | —       |
+| W5        | What's Next + recovery                       | ✅ Complete | —       |
+| W6        | Progress + Journey                           | ✅ Complete | —       |
+| W7        | Communities + people context                 | ✅ Complete | —       |
+| W8        | Notifications / check-ins                    | ✅ Complete | —       |
+| W9        | Conversations / feed                         | ✅ Complete | —       |
+| W10       | Admin / moderation / seeding                 | ✅ Complete | —       |
 
 ## Completed
 
@@ -104,35 +104,39 @@ the existing plan, reflection, or recovery flows. W8 intentionally adds no push,
 email, SMS, delivery-provider, Redis/BullMQ scheduling, or engagement-notification
 surface.
 
-## Current
-
 ### W9 — Conversations / Feed
 
-ADR-0026 defines a deliberately small discussion layer after the directional loop
-is coherent. Conversation is a hobby-scoped discussion object; Feed is a bounded
-read model over useful ecosystem activity, not a generic authored post stream.
+ADR-0026 is implemented on `main`. Conversation is a hobby-scoped discussion object
+with flat replies, while Feed is a bounded read model combining published
+Conversations and upcoming Activities for one hobby. Source type/id is preserved,
+ordering is deterministic/contextual rather than engagement-ranked, and writes are
+protected through the existing default-deny policy layer. W9 adds no likes, follows,
+reposts, DMs, reputation score, deep reply trees, or algorithmic virality ranking.
+The mobile Alpha exposes separate “What’s happening?” and “Conversations” surfaces
+so discussion never replaces the real-world Activity primitive.
 
-Acceptance criteria:
+### W10 — Admin / Moderation / Seeding
 
-- authenticated users can create a hobby-scoped Conversation with title/body and public display-name snapshot;
-- users can read published Conversations for one hobby using bounded keyset pagination;
-- Conversation detail exposes flat chronological replies; authenticated users can add a reply;
-- optional community/activity references remain logical and do not redefine Conversation as an Activity or require community membership by default;
-- Conversation/Reply writes call the existing policy layer explicitly and default-deny;
-- Feed is a read model combining at least published Conversations and upcoming published Activities for one hobby;
-- every Feed item preserves source type/id and enough source context for client routing;
-- Feed ordering is deterministic and contextual/chronological, never engagement-ranked;
-- Feed uses bounded keyset pagination and does not introduce infinite-scroll-oriented ranking semantics;
-- W9 introduces no follows, likes, reactions, reposts, DMs, reputation score, deep reply trees, or algorithmic virality ranking;
-- cross-context user/hobby/community/activity references remain logical; DB relations exist only inside Conversation ownership;
-- persistence is introduced by a reviewed Prisma migration;
-- all input boundaries are Zod-validated and endpoints are represented in OpenAPI;
-- unit/integration/e2e coverage and CI remain green.
+ADR-0027 is implemented as the minimum staff-operability layer required to run the
+Alpha without bypassing bounded-context ownership. Staff operations reuse the
+existing default-deny policy layer: Catalog taxonomy management requires
+`catalog.manage`, while Activity/Community curation and Conversation moderation
+require `platform.manage`.
 
-## Planned
+Catalog retains its own validation and persistence for hobby/category mutations.
+Activity and Community expose narrow source-owned lifecycle seams for staff curation,
+and Conversation exposes explicit publish/archive transitions rather than shadow
+moderation copies. Admin orchestration coordinates those source use cases, while
+staff mutations and their audit records commit in the same transaction.
 
-- **W10 Admin / Moderation / Seeding** — staff tooling, curation, moderation,
-  taxonomy writes, and seeded supply management.
+The staff interface is intentionally narrow and Zod-validated, is represented in
+OpenAPI, and defaults non-staff actors to denied access. W10 adds no reputation or
+engagement scoring, automated content judgment, generic CMS, workflow engine,
+admin frontend framework, or remote seed executor. Repository-owned seed data
+remains deterministic, idempotent, code-reviewed, and uses stable identifiers for
+re-runnable Alpha supply. Unit/integration/e2e coverage proves staff authorization,
+Catalog writes, Activity/Community curation, Conversation archive/publish, source
+state changes, and audit recording; CI and CodeQL are green before merge.
 
 See `docs/wayfinder-v1-backend-plan.md` for the product rationale and sequencing.
 

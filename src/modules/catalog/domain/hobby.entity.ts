@@ -1,5 +1,6 @@
 import { Entity } from '@shared/domain';
 import type { HobbyCostLevel, HobbyDifficulty, HobbySetting, HobbyStatus } from './enums';
+import { Slug } from './value-objects/slug.vo';
 
 export interface HobbyProps {
   id: string;
@@ -15,17 +16,57 @@ export interface HobbyProps {
   updatedAt: Date;
 }
 
-/**
- * M1 is read-only, so this aggregate only ever gets reconstituted from
- * persisted rows — a `create()` factory arrives with the write endpoints.
- */
+export interface CreateHobbyProps {
+  id: string;
+  categoryId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  difficulty: HobbyDifficulty;
+  costLevel: HobbyCostLevel;
+  setting: HobbySetting;
+  status?: HobbyStatus;
+}
+
+export interface UpdateHobbyProps {
+  categoryId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  difficulty: HobbyDifficulty;
+  costLevel: HobbyCostLevel;
+  setting: HobbySetting;
+  status: HobbyStatus;
+}
+
 export class Hobby extends Entity {
   private constructor(private readonly props: HobbyProps) {
     super(props.id);
   }
 
+  static create(input: CreateHobbyProps, now = new Date()): Hobby {
+    return new Hobby({
+      ...input,
+      name: input.name.trim(),
+      slug: Slug.create(input.slug).toString(),
+      status: input.status ?? 'draft',
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
   static reconstitute(props: HobbyProps): Hobby {
     return new Hobby(props);
+  }
+
+  update(input: UpdateHobbyProps, now = new Date()): Hobby {
+    return new Hobby({
+      ...this.props,
+      ...input,
+      name: input.name.trim(),
+      slug: Slug.create(input.slug).toString(),
+      updatedAt: now,
+    });
   }
 
   get categoryId(): string {

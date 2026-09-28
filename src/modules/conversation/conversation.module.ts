@@ -12,6 +12,7 @@ import {
   ListConversationsUseCase,
   ListHobbyFeedUseCase,
   ReplyToConversationUseCase,
+  SetConversationStatusUseCase,
 } from './application';
 import { PrismaConversationRepository } from './infrastructure';
 import { ConversationController } from './interface';
@@ -25,8 +26,10 @@ import { ConversationController } from './interface';
     GetConversationUseCase,
     CreateConversationUseCase,
     ReplyToConversationUseCase,
+    SetConversationStatusUseCase,
     ListHobbyFeedUseCase,
     { provide: CONVERSATION_REPOSITORY, useClass: PrismaConversationRepository },
   ],
+  exports: [SetConversationStatusUseCase],
 })
 export class ConversationModule {}

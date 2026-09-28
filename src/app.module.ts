@@ -6,6 +6,7 @@ import { PrismaModule } from '@infra/database';
 import { HealthModule } from '@infra/health';
 import { AuditModule } from '@infra/audit';
 import { AppExceptionFilter, AppZodValidationPipe } from '@infra/http';
+import { AdminModule } from '@modules/admin';
 import { CatalogModule } from '@modules/catalog';
 import { AccessModule, AuthGuard } from '@modules/access';
 import { IdentityModule } from '@modules/identity';
@@ -34,6 +35,7 @@ import { ConversationModule } from '@modules/conversation';
     CommunityModule,
     CheckInModule,
     ConversationModule,
+    AdminModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AppExceptionFilter },

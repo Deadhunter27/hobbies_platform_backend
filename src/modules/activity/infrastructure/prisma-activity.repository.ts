@@ -4,8 +4,13 @@ import {
   type Activity as ActivityRecord,
   type ActivityCommitment as CommitmentRecord,
 } from '@prisma/client';
-import { PrismaService } from '@infra/database';
-import type { ActivityRepository, ActivitySnapshot } from '../application';
+import { PrismaService, prismaClientOf } from '@infra/database';
+import type { TxContext } from '@shared/application';
+import type {
+  ActivityLifecycleRepository,
+  ActivityRepository,
+  ActivitySnapshot,
+} from '../application';
 import {
   Activity,
   ActivityCapacityFullError,
@@ -60,7 +65,7 @@ function toCommitment(record: CommitmentRecord): ActivityCommitment {
 }
 
 @Injectable()
-export class PrismaActivityRepository implements ActivityRepository {
+export class PrismaActivityRepository implements ActivityRepository, ActivityLifecycleRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async listPublished(now: Date, hobbyId?: string): Promise<ActivitySnapshot[]> {
@@ -91,6 +96,13 @@ export class PrismaActivityRepository implements ActivityRepository {
     return record
       ? { activity: toActivity(record), committedCount: record._count.commitments }
       : null;
+  }
+
+  async findById(activityId: string, tx?: TxContext): Promise<Activity | null> {
+    const record = await prismaClientOf(this.prisma, tx).activity.findUnique({
+      where: { id: activityId },
+    });
+    return record ? toActivity(record) : null;
   }
 
   async listCommitments(userId: string): Promise<ActivityCommitment[]> {
@@ -157,6 +169,20 @@ export class PrismaActivityRepository implements ActivityRepository {
       }
     }
     throw new Error('Unreachable activity commitment retry state.');
+  }
+
+  async updateStatus(
+    input: { id: string; status: ActivityStatus; updatedAt: Date },
+    tx?: TxContext,
+  ): Promise<Activity | null> {
+    const client = prismaClientOf(this.prisma, tx);
+    const existing = await client.activity.findUnique({ where: { id: input.id } });
+    if (!existing) return null;
+    const record = await client.activity.update({
+      where: { id: input.id },
+      data: { status: input.status, updatedAt: input.updatedAt },
+    });
+    return toActivity(record);
   }
 
   private upsert(commitment: ActivityCommitment): Promise<CommitmentRecord> {

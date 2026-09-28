@@ -1,3 +1,4 @@
+import type { TxContext } from '@shared/application';
 import type { Hobby, HobbyDifficulty } from '../../domain';
 
 export interface ListHobbiesFilter {
@@ -23,8 +24,12 @@ export interface ListHobbiesResult {
 }
 
 export interface HobbyRepository {
-  list(query: ListHobbiesQuery): Promise<ListHobbiesResult>;
-  findBySlugOrId(slugOrId: string): Promise<Hobby | null>;
+  list(query: ListHobbiesQuery, tx?: TxContext): Promise<ListHobbiesResult>;
+  findBySlugOrId(slugOrId: string, tx?: TxContext): Promise<Hobby | null>;
+  findAnyById(id: string, tx?: TxContext): Promise<Hobby | null>;
+  findAnyBySlug(slug: string, tx?: TxContext): Promise<Hobby | null>;
+  create(hobby: Hobby, tx?: TxContext): Promise<Hobby>;
+  update(hobby: Hobby, tx?: TxContext): Promise<Hobby>;
 }
 
 export const HOBBY_REPOSITORY = Symbol('HOBBY_REPOSITORY');
