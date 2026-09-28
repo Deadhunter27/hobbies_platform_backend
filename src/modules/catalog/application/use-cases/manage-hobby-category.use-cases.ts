@@ -20,7 +20,7 @@ export interface CreateHobbyCategoryInput {
   sortOrder: number;
 }
 
-export interface UpdateHobbyCategoryInput extends CreateHobbyCategoryInput {}
+export type UpdateHobbyCategoryInput = CreateHobbyCategoryInput;
 
 async function assertValidParent(
   repository: HobbyCategoryRepository,
