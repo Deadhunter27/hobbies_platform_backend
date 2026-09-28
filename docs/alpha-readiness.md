@@ -55,7 +55,7 @@ Acceptance:
 
 Note: strict CORS allowlisting was already implemented before this program. AR1 makes proxy trust and request-size policy explicit, centralizes the HTTP hardening seam, adds behavioral e2e proof, and records the Render deployment/migration contract in `docs/guides/deployment-render.md`.
 
-Current status: implementation complete on the readiness branch; pending CI/CodeQL proof before AR1 is closed.
+Current status: implementation is complete and branch CI + CodeQL are green. AR1 is pending squash merge and green verification on `main` before it is formally closed.
 
 ### AR2 — Redis-backed abuse protection
 
