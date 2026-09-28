@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { Actor } from '@modules/access';
-import { GetHobbyUseCase } from '@modules/catalog';
-import { GetMyHobbyContextUseCase } from '@modules/profile';
-import { ListActivitiesUseCase } from '@modules/activity';
+import { GetHobbyUseCase } from '@modules/catalog/application';
+import { GetMyHobbyContextUseCase } from '@modules/profile/application';
+import { ListActivitiesUseCase } from '@modules/activity/application';
 import { InvalidCursorError } from '@shared/errors';
 import { decodeCursor, encodeCursor, newId } from '@shared/utils';
 import {
