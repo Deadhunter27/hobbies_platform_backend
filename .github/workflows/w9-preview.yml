@@ -5,6 +5,9 @@ on:
     branches:
       - wayfinder-w9-conversations-feed
 
+permissions:
+  contents: write
+
 jobs:
   preview:
     runs-on: ubuntu-latest
@@ -25,6 +28,17 @@ jobs:
       - run: pnpm prisma generate
       - run: pnpm format
       - run: pnpm openapi:generate
+      - name: Commit generated W9 contract
+        run: |
+          if git diff --quiet -- openapi/openapi.json; then
+            echo "OpenAPI contract already current."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add openapi/openapi.json
+            git commit -m "docs(openapi): refresh W9 generated contract"
+            git push
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: w9-preview
