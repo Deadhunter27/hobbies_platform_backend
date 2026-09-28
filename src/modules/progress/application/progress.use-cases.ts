@@ -105,7 +105,10 @@ export class ListMyJourneyUseCase {
 
     return Promise.all(
       reflections.map(async (reflection) => {
-        const activity = await this.getActivity.execute(reflection.activityId, reflection.occurredAt);
+        const activity = await this.getActivity.execute(
+          reflection.activityId,
+          reflection.occurredAt,
+        );
         return {
           reflection,
           activityTitle: activity.activity.title,
