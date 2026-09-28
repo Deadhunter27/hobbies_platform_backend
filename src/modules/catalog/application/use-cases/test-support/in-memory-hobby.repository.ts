@@ -6,6 +6,22 @@ import type {
   ListHobbiesResult,
 } from '../../ports/hobby.repository.port';
 
+function propsOf(hobby: Hobby): HobbyProps {
+  return {
+    id: hobby.id,
+    categoryId: hobby.categoryId,
+    name: hobby.name,
+    slug: hobby.slug,
+    description: hobby.description,
+    difficulty: hobby.difficulty,
+    costLevel: hobby.costLevel,
+    setting: hobby.setting,
+    status: hobby.status,
+    createdAt: hobby.createdAt,
+    updatedAt: hobby.updatedAt,
+  };
+}
+
 export class InMemoryHobbyRepository implements HobbyRepository {
   private readonly records: HobbyProps[] = [];
 
@@ -35,8 +51,6 @@ export class InMemoryHobbyRepository implements HobbyRepository {
 
     if (query.cursor) {
       const { name, id } = query.cursor;
-      // Same comparator as the sort above — mixing localeCompare ordering
-      // with code-point > comparisons would skew pages for non-ASCII names.
       filtered = filtered.filter(
         (record) =>
           record.name.localeCompare(name) > 0 ||
@@ -57,5 +71,26 @@ export class InMemoryHobbyRepository implements HobbyRepository {
       return isValidUlid(slugOrId) ? record.id === slugOrId : record.slug === slugOrId;
     });
     return found ? Hobby.reconstitute(found) : null;
+  }
+
+  async findAnyById(id: string): Promise<Hobby | null> {
+    const found = this.records.find((record) => record.id === id);
+    return found ? Hobby.reconstitute(found) : null;
+  }
+
+  async findAnyBySlug(slug: string): Promise<Hobby | null> {
+    const found = this.records.find((record) => record.slug === slug);
+    return found ? Hobby.reconstitute(found) : null;
+  }
+
+  async create(hobby: Hobby): Promise<Hobby> {
+    this.records.push(propsOf(hobby));
+    return hobby;
+  }
+
+  async update(hobby: Hobby): Promise<Hobby> {
+    const index = this.records.findIndex((record) => record.id === hobby.id);
+    if (index >= 0) this.records[index] = propsOf(hobby);
+    return hobby;
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
-import { PrismaService } from '@infra/database';
+import type { TxContext } from '@shared/application';
+import { PrismaService, prismaClientOf } from '@infra/database';
 import { isValidUlid } from '@shared/utils';
 import type { Hobby } from '../domain';
 import type {
@@ -24,11 +25,12 @@ function escapeLikeWildcards(value: string): string {
 export class PrismaHobbyRepository implements HobbyRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(query: ListHobbiesQuery): Promise<ListHobbiesResult> {
+  async list(query: ListHobbiesQuery, tx?: TxContext): Promise<ListHobbiesResult> {
+    const client = prismaClientOf(this.prisma, tx);
     const where: Prisma.CatalogHobbyWhereInput = { status: 'active' };
 
     if (query.filter.categorySlug) {
-      const category = await this.prisma.catalogHobbyCategory.findUnique({
+      const category = await client.catalogHobbyCategory.findUnique({
         where: { slug: query.filter.categorySlug },
         select: { id: true },
       });
@@ -48,7 +50,7 @@ export class PrismaHobbyRepository implements HobbyRepository {
       where.OR = [{ name: { gt: name } }, { name, id: { gt: id } }];
     }
 
-    const records = await this.prisma.catalogHobby.findMany({
+    const records = await client.catalogHobby.findMany({
       where,
       orderBy: [{ name: 'asc' }, { id: 'asc' }],
       take: query.limit + 1,
@@ -60,13 +62,60 @@ export class PrismaHobbyRepository implements HobbyRepository {
     return { items: page.map(toDomainHobby), hasMore };
   }
 
-  async findBySlugOrId(slugOrId: string): Promise<Hobby | null> {
+  async findBySlugOrId(slugOrId: string, tx?: TxContext): Promise<Hobby | null> {
+    const client = prismaClientOf(this.prisma, tx);
     const record = isValidUlid(slugOrId)
-      ? await this.prisma.catalogHobby.findFirst({ where: { id: slugOrId, status: 'active' } })
-      : await this.prisma.catalogHobby.findFirst({
+      ? await client.catalogHobby.findFirst({ where: { id: slugOrId, status: 'active' } })
+      : await client.catalogHobby.findFirst({
           where: { slug: slugOrId, status: 'active' },
         });
 
     return record ? toDomainHobby(record) : null;
+  }
+
+  async findAnyById(id: string, tx?: TxContext): Promise<Hobby | null> {
+    const record = await prismaClientOf(this.prisma, tx).catalogHobby.findUnique({ where: { id } });
+    return record ? toDomainHobby(record) : null;
+  }
+
+  async findAnyBySlug(slug: string, tx?: TxContext): Promise<Hobby | null> {
+    const record = await prismaClientOf(this.prisma, tx).catalogHobby.findUnique({
+      where: { slug },
+    });
+    return record ? toDomainHobby(record) : null;
+  }
+
+  async create(hobby: Hobby, tx?: TxContext): Promise<Hobby> {
+    const record = await prismaClientOf(this.prisma, tx).catalogHobby.create({
+      data: {
+        id: hobby.id,
+        categoryId: hobby.categoryId,
+        name: hobby.name,
+        slug: hobby.slug,
+        description: hobby.description,
+        difficulty: hobby.difficulty,
+        costLevel: hobby.costLevel,
+        setting: hobby.setting,
+        status: hobby.status,
+      },
+    });
+    return toDomainHobby(record);
+  }
+
+  async update(hobby: Hobby, tx?: TxContext): Promise<Hobby> {
+    const record = await prismaClientOf(this.prisma, tx).catalogHobby.update({
+      where: { id: hobby.id },
+      data: {
+        categoryId: hobby.categoryId,
+        name: hobby.name,
+        slug: hobby.slug,
+        description: hobby.description,
+        difficulty: hobby.difficulty,
+        costLevel: hobby.costLevel,
+        setting: hobby.setting,
+        status: hobby.status,
+      },
+    });
+    return toDomainHobby(record);
   }
 }
