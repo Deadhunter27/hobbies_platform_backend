@@ -1,9 +1,6 @@
 import type { JourneyMoment } from '../../application';
 import type { ProgressReflection } from '../../domain';
-import type {
-  JourneyMomentResponseDto,
-  ProgressReflectionResponseDto,
-} from '../dto/progress.dto';
+import type { JourneyMomentResponseDto, ProgressReflectionResponseDto } from '../dto/progress.dto';
 
 export function toProgressReflectionResponse(
   reflection: ProgressReflection,
