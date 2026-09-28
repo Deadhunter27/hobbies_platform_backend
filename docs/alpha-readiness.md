@@ -82,7 +82,7 @@ Acceptance:
 - a minimal Alpha alerting/escalation rule is documented;
 - observability remains proportionate to Closed Alpha rather than becoming an enterprise monitoring project.
 
-Current status: implementation in progress on `wayfinder-alpha-readiness-ar3`. Sentry is selected for Stage-1 server error tracking only; tracing/metrics remain deferred. The branch requires `SENTRY_DSN` in production, captures only unexpected/5xx failures through the existing global exception boundary, correlates them with safe request-id/method/route/error-code tags, and strips request/user/breadcrumb/extra/context data before transmission. AR3 code still requires CI + CodeQL verification, and the hosted Sentry project/DSN plus one controlled event must be validated before the gate is formally complete.
+Current status: code-side complete and merged. PR #12 was squash-merged to `main` as `110a195d`, and the merged commit passed full CI and CodeQL. Sentry is wired as the Stage-1 server error tracker only, with tracing/metrics deferred; production requires `SENTRY_DSN`, expected 4xx failures are not reported, unexpected/5xx failures retain safe request correlation, and request/user/breadcrumb/extra/context data is removed before transmission. The formal AR3 gate remains open only until a real hosted Sentry backend project/DSN is bound and one controlled event is correlated to the matching Render/Pino request log.
 
 ### AR4 — Staging deployment and real-device smoke test
 
@@ -104,6 +104,8 @@ Acceptance:
   - staff curation/moderation;
 - a deployment rollback/redeploy procedure is proven.
 
+Current status: pre-provision hardening in progress on `wayfinder-alpha-readiness-ar4`. The first audit found that the Docker runtime could run Prisma migrations but the TypeScript Alpha seed depended on development-only `ts-node`. AR4 therefore adds a compiled runtime seed artifact and CI proof that migration + seed both execute from the same production image before any hosted resource is provisioned.
+
 ### AR5 — Closed Alpha launch gate
 
 Acceptance:
@@ -119,7 +121,7 @@ Acceptance:
 
 ## Provisioning boundary
 
-Do not create paid Render resources until the repository-side AR0/AR1 audit determines the minimum required shape and the owner explicitly approves the spend.
+Do not create paid Render resources until the repository-side readiness audit determines the minimum required shape and the owner explicitly approves the spend.
 
 When provisioning begins, create all latency-sensitive resources in Singapore and keep the first environment intentionally small. Scale only from observed Alpha demand.
 
