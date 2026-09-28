@@ -20,7 +20,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 # ---- Build ----
 FROM deps AS build
 COPY . .
-RUN pnpm prisma generate && pnpm build
+RUN pnpm prisma generate && pnpm build && pnpm build:seed
 
 # ---- Production dependencies only ----
 FROM base AS prod-deps
@@ -43,6 +43,9 @@ WORKDIR /app
 RUN addgroup --system app && adduser --system --ingroup app app
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
+# The Alpha seed is compiled during build so release-time reconciliation does
+# not require ts-node or any development dependency in the production image.
+COPY --from=build /app/dist-seed ./dist-seed
 COPY prisma ./prisma
 COPY package.json tsconfig.json ./
 USER app
