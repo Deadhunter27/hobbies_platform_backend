@@ -12,18 +12,18 @@ around the directional real-world loop:
 
 ## Status
 
-| Milestone | Scope                                        | Status         | Version |
-| --------- | -------------------------------------------- | -------------- | ------- |
-| M1        | Platform kernel + catalog (read-only)        | ✅ Complete    | v0.1.0  |
-| M2        | Identity & access + audit trail              | ✅ Complete    | v0.2.0  |
-| W3        | Profile + hobby relationship / context       | ✅ Complete    | —       |
-| W4        | Activities + commitments                     | ✅ Complete    | —       |
-| W5        | What's Next + recovery                       | ✅ Complete    | —       |
-| W6        | Progress + Journey                           | ✅ Complete    | —       |
-| W7        | Communities + people context                 | ✅ Complete    | —       |
-| W8        | Notifications / check-ins                    | ✅ Complete    | —       |
-| W9        | Conversations / feed                         | ✅ Complete    | —       |
-| W10       | Admin / moderation / seeding                 | 🟡 In progress | —       |
+| Milestone | Scope                                        | Status      | Version |
+| --------- | -------------------------------------------- | ----------- | ------- |
+| M1        | Platform kernel + catalog (read-only)        | ✅ Complete | v0.1.0  |
+| M2        | Identity & access + audit trail              | ✅ Complete | v0.2.0  |
+| W3        | Profile + hobby relationship / context       | ✅ Complete | —       |
+| W4        | Activities + commitments                     | ✅ Complete | —       |
+| W5        | What's Next + recovery                       | ✅ Complete | —       |
+| W6        | Progress + Journey                           | ✅ Complete | —       |
+| W7        | Communities + people context                 | ✅ Complete | —       |
+| W8        | Notifications / check-ins                    | ✅ Complete | —       |
+| W9        | Conversations / feed                         | ✅ Complete | —       |
+| W10       | Admin / moderation / seeding                 | ✅ Complete | —       |
 
 ## Completed
 
@@ -115,25 +115,28 @@ reposts, DMs, reputation score, deep reply trees, or algorithmic virality rankin
 The mobile Alpha exposes separate “What’s happening?” and “Conversations” surfaces
 so discussion never replaces the real-world Activity primitive.
 
-## Current
-
 ### W10 — Admin / Moderation / Seeding
 
-ADR-0027 defines the minimum staff-operability layer required to run the Alpha
-without bypassing existing bounded-context ownership or authorization.
+ADR-0027 is implemented as the minimum staff-operability layer required to run the
+Alpha without bypassing bounded-context ownership. Staff operations reuse the
+existing default-deny policy layer: Catalog taxonomy management requires
+`catalog.manage`, while Activity/Community curation and Conversation moderation
+require `platform.manage`.
 
-Acceptance criteria:
+Catalog retains its own validation and persistence for hobby/category mutations.
+Activity and Community expose narrow source-owned lifecycle seams for staff curation,
+and Conversation exposes explicit publish/archive transitions rather than shadow
+moderation copies. Admin orchestration coordinates those source use cases, while
+staff mutations and their audit records commit in the same transaction.
 
-- every W10 operation requires authenticated staff authorization through existing `catalog.manage` or `platform.manage` policy capabilities;
-- staff can perform the minimum Catalog taxonomy writes needed to curate Alpha hobbies while Catalog retains validation/persistence ownership;
-- staff can curate Activity and Community lifecycle state through module-owned seams rather than direct cross-module repository access;
-- staff can archive/publish Conversation content through an explicit moderation path without creating shadow content copies;
-- moderation and curation do not introduce reputation scores, engagement ranking, or automated content judgment;
-- deterministic repository-owned seed scripts remain idempotent and reviewable; W10 exposes no endpoint that remotely executes arbitrary seed code;
-- seeded Activity/Community supply can be reconciled using stable source identifiers where appropriate;
-- protected staff operations default-deny for non-staff actors and remain compatible with the existing audit strategy;
-- all new input boundaries are Zod-validated and staff endpoints are represented in OpenAPI;
-- unit/integration/e2e coverage and CI remain green.
+The staff interface is intentionally narrow and Zod-validated, is represented in
+OpenAPI, and defaults non-staff actors to denied access. W10 adds no reputation or
+engagement scoring, automated content judgment, generic CMS, workflow engine,
+admin frontend framework, or remote seed executor. Repository-owned seed data
+remains deterministic, idempotent, code-reviewed, and uses stable identifiers for
+re-runnable Alpha supply. Unit/integration/e2e coverage proves staff authorization,
+Catalog writes, Activity/Community curation, Conversation archive/publish, source
+state changes, and audit recording; CI and CodeQL are green before merge.
 
 See `docs/wayfinder-v1-backend-plan.md` for the product rationale and sequencing.
 
