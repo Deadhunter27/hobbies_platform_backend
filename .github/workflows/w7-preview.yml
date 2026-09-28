@@ -1,0 +1,42 @@
+name: W7 Preview
+
+on:
+  push:
+    branches:
+      - wayfinder-w7-communities-people
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      PORT: 3000
+      LOG_LEVEL: info
+      DATABASE_URL: postgresql://hobbies:hobbies@localhost:5432/hobbies_dev
+      JWT_SECRET: ci-preview-only-secret-0000000000000000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma generate
+      - run: pnpm exec prettier --write "{src,test,prisma,scripts}/**/*.ts" "docs/**/*.md"
+      - run: pnpm openapi:generate
+      - name: Emit refreshed files
+        run: |
+          tar -czf /tmp/w7-preview.tar.gz \
+            prisma/seed-data/activities.ts \
+            src/modules/community/application/community.use-cases.ts \
+            src/modules/community/application/ports/community.repository.port.ts \
+            src/modules/community/infrastructure/prisma-community.repository.ts \
+            src/modules/community/interface/community.controller.ts \
+            src/modules/community/interface/dto/community.dto.ts \
+            src/modules/community/interface/presenters/community.presenter.ts \
+            openapi/openapi.json
+          echo "W7_PREVIEW_BEGIN"
+          base64 -w 0 /tmp/w7-preview.tar.gz
+          echo
+          echo "W7_PREVIEW_END"
