@@ -61,7 +61,9 @@ export class ListConversationsUseCase {
 
 @Injectable()
 export class GetConversationUseCase {
-  constructor(@Inject(CONVERSATION_REPOSITORY) private readonly repository: ConversationRepository) {}
+  constructor(
+    @Inject(CONVERSATION_REPOSITORY) private readonly repository: ConversationRepository,
+  ) {}
 
   async execute(id: string): Promise<ConversationDetail> {
     const detail = await this.repository.findPublishedById(id);
