@@ -7,6 +7,7 @@ import {
   ForbiddenError,
   DomainRuleViolation,
   InfrastructureError,
+  RateLimitError,
 } from '@shared/errors';
 
 /**
@@ -20,6 +21,7 @@ export function statusForAppError(error: unknown): number {
   if (error instanceof ConflictError) return HttpStatus.CONFLICT;
   if (error instanceof UnauthorizedError) return HttpStatus.UNAUTHORIZED;
   if (error instanceof ForbiddenError) return HttpStatus.FORBIDDEN;
+  if (error instanceof RateLimitError) return HttpStatus.TOO_MANY_REQUESTS;
   if (error instanceof DomainRuleViolation) return HttpStatus.UNPROCESSABLE_ENTITY;
   if (error instanceof InfrastructureError) return HttpStatus.INTERNAL_SERVER_ERROR;
   return HttpStatus.INTERNAL_SERVER_ERROR;
