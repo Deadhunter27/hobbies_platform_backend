@@ -4,7 +4,8 @@ import {
   type Activity as ActivityRecord,
   type ActivityCommitment as CommitmentRecord,
 } from '@prisma/client';
-import { PrismaService } from '@infra/database';
+import { PrismaService, prismaClientOf } from '@infra/database';
+import type { TxContext } from '@shared/application';
 import type { ActivityRepository, ActivitySnapshot } from '../application';
 import {
   Activity,
@@ -93,6 +94,13 @@ export class PrismaActivityRepository implements ActivityRepository {
       : null;
   }
 
+  async findById(activityId: string, tx?: TxContext): Promise<Activity | null> {
+    const record = await prismaClientOf(this.prisma, tx).activity.findUnique({
+      where: { id: activityId },
+    });
+    return record ? toActivity(record) : null;
+  }
+
   async listCommitments(userId: string): Promise<ActivityCommitment[]> {
     const records = await this.prisma.activityCommitment.findMany({
       where: { userId },
@@ -157,6 +165,20 @@ export class PrismaActivityRepository implements ActivityRepository {
       }
     }
     throw new Error('Unreachable activity commitment retry state.');
+  }
+
+  async updateStatus(
+    input: { id: string; status: ActivityStatus; updatedAt: Date },
+    tx?: TxContext,
+  ): Promise<Activity | null> {
+    const client = prismaClientOf(this.prisma, tx);
+    const existing = await client.activity.findUnique({ where: { id: input.id } });
+    if (!existing) return null;
+    const record = await client.activity.update({
+      where: { id: input.id },
+      data: { status: input.status, updatedAt: input.updatedAt },
+    });
+    return toActivity(record);
   }
 
   private upsert(commitment: ActivityCommitment): Promise<CommitmentRecord> {

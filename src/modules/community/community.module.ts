@@ -8,6 +8,7 @@ import {
   GetCommunityUseCase,
   ListMyCommunityMembershipsUseCase,
   ResolveCommunityContextUseCase,
+  SetCommunityStatusUseCase,
   UpsertMyCommunityMembershipUseCase,
 } from './application';
 import { PrismaCommunityRepository } from './infrastructure';
@@ -23,8 +24,14 @@ import { CommunitiesController, MyCommunityMembershipsController } from './inter
     ResolveCommunityContextUseCase,
     ListMyCommunityMembershipsUseCase,
     UpsertMyCommunityMembershipUseCase,
+    SetCommunityStatusUseCase,
     { provide: COMMUNITY_REPOSITORY, useClass: PrismaCommunityRepository },
   ],
-  exports: [GetCommunityUseCase, GetCommunityContextUseCase, ResolveCommunityContextUseCase],
+  exports: [
+    GetCommunityUseCase,
+    GetCommunityContextUseCase,
+    ResolveCommunityContextUseCase,
+    SetCommunityStatusUseCase,
+  ],
 })
 export class CommunityModule {}

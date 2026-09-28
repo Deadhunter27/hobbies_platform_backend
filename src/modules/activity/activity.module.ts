@@ -9,6 +9,7 @@ import {
   GetMyActivityCommitmentUseCase,
   ListActivitiesUseCase,
   ListMyActivityCommitmentsUseCase,
+  SetActivityStatusUseCase,
   UpsertMyActivityCommitmentUseCase,
 } from './application';
 import { PrismaActivityRepository } from './infrastructure';
@@ -24,6 +25,7 @@ import { ActivitiesController, MyActivityCommitmentsController } from './interfa
     ListMyActivityCommitmentsUseCase,
     GetMyActivityCommitmentUseCase,
     UpsertMyActivityCommitmentUseCase,
+    SetActivityStatusUseCase,
     { provide: ACTIVITY_REPOSITORY, useClass: PrismaActivityRepository },
   ],
   exports: [
@@ -32,6 +34,7 @@ import { ActivitiesController, MyActivityCommitmentsController } from './interfa
     ListMyActivityCommitmentsUseCase,
     GetMyActivityCommitmentUseCase,
     UpsertMyActivityCommitmentUseCase,
+    SetActivityStatusUseCase,
   ],
 })
 export class ActivityModule {}
