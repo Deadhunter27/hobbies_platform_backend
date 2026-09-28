@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorEnvelopeDto } from '@infra/http';
 import { CurrentUser, RequiresAuth, type Actor } from '@modules/access';
+import { ResolveCommunityContextUseCase } from '@modules/community';
 import {
   GetActivityUseCase,
   GetMyActivityCommitmentUseCase,
@@ -26,6 +27,7 @@ export class ActivitiesController {
   constructor(
     private readonly listActivities: ListActivitiesUseCase,
     private readonly getActivity: GetActivityUseCase,
+    private readonly resolveCommunityContext: ResolveCommunityContextUseCase,
   ) {}
 
   @Get()
@@ -33,15 +35,27 @@ export class ActivitiesController {
   @ApiOkResponse({ type: ActivityListResponseDto })
   async list(@Query() query: ActivityListQueryDto): Promise<ActivityListResponseDto> {
     const activities = await this.listActivities.execute(query);
-    return { data: activities.map(toActivityResponse) };
+    const data = await Promise.all(
+      activities.map(async (view) => {
+        const communityContext = await this.resolveCommunityContext.execute(
+          view.activity.communityReferenceId,
+        );
+        return toActivityResponse(view, communityContext);
+      }),
+    );
+    return { data };
   }
 
   @Get(':activityId')
-  @ApiOperation({ summary: 'Get one visible activity with current availability' })
+  @ApiOperation({ summary: 'Get one visible activity with current availability and trust context' })
   @ApiOkResponse({ type: ActivityResponseDto })
   @ApiResponse({ status: 404, description: 'ACTIVITY_NOT_FOUND', type: ErrorEnvelopeDto })
   async get(@Param() params: ActivityIdParamDto): Promise<ActivityResponseDto> {
-    return toActivityResponse(await this.getActivity.execute(params.activityId));
+    const view = await this.getActivity.execute(params.activityId);
+    const communityContext = await this.resolveCommunityContext.execute(
+      view.activity.communityReferenceId,
+    );
+    return toActivityResponse(view, communityContext);
   }
 }
 
