@@ -3,11 +3,9 @@ import { Test } from '@nestjs/testing';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
-import { buildOpenApiDocument, configureApp, configureHttpSecurity } from '../../src/bootstrap';
+import { configureApp, configureHttpSecurity } from '../../src/bootstrap';
 import { APP_CONFIG, type AppConfig } from '../../src/config';
 import { describeIfDb } from '../support/db-test.helper';
-
-void buildOpenApiDocument;
 
 describeIfDb('Redis-backed rate limiting e2e', () => {
   let app: NestExpressApplication;
