@@ -22,8 +22,8 @@ around the directional real-world loop:
 | W6        | Progress + Journey                           | ✅ Complete    | —       |
 | W7        | Communities + people context                 | ✅ Complete    | —       |
 | W8        | Notifications / check-ins                    | ✅ Complete    | —       |
-| W9        | Conversations / feed                         | 🟡 In progress | —       |
-| W10       | Admin / moderation / seeding                 | ⬜ Planned     | —       |
+| W9        | Conversations / feed                         | ✅ Complete    | —       |
+| W10       | Admin / moderation / seeding                 | 🟡 In progress | —       |
 
 ## Completed
 
@@ -104,35 +104,36 @@ the existing plan, reflection, or recovery flows. W8 intentionally adds no push,
 email, SMS, delivery-provider, Redis/BullMQ scheduling, or engagement-notification
 surface.
 
-## Current
-
 ### W9 — Conversations / Feed
 
-ADR-0026 defines a deliberately small discussion layer after the directional loop
-is coherent. Conversation is a hobby-scoped discussion object; Feed is a bounded
-read model over useful ecosystem activity, not a generic authored post stream.
+ADR-0026 is implemented on `main`. Conversation is a hobby-scoped discussion object
+with flat replies, while Feed is a bounded read model combining published
+Conversations and upcoming Activities for one hobby. Source type/id is preserved,
+ordering is deterministic/contextual rather than engagement-ranked, and writes are
+protected through the existing default-deny policy layer. W9 adds no likes, follows,
+reposts, DMs, reputation score, deep reply trees, or algorithmic virality ranking.
+The mobile Alpha exposes separate “What’s happening?” and “Conversations” surfaces
+so discussion never replaces the real-world Activity primitive.
+
+## Current
+
+### W10 — Admin / Moderation / Seeding
+
+ADR-0027 defines the minimum staff-operability layer required to run the Alpha
+without bypassing existing bounded-context ownership or authorization.
 
 Acceptance criteria:
 
-- authenticated users can create a hobby-scoped Conversation with title/body and public display-name snapshot;
-- users can read published Conversations for one hobby using bounded keyset pagination;
-- Conversation detail exposes flat chronological replies; authenticated users can add a reply;
-- optional community/activity references remain logical and do not redefine Conversation as an Activity or require community membership by default;
-- Conversation/Reply writes call the existing policy layer explicitly and default-deny;
-- Feed is a read model combining at least published Conversations and upcoming published Activities for one hobby;
-- every Feed item preserves source type/id and enough source context for client routing;
-- Feed ordering is deterministic and contextual/chronological, never engagement-ranked;
-- Feed uses bounded keyset pagination and does not introduce infinite-scroll-oriented ranking semantics;
-- W9 introduces no follows, likes, reactions, reposts, DMs, reputation score, deep reply trees, or algorithmic virality ranking;
-- cross-context user/hobby/community/activity references remain logical; DB relations exist only inside Conversation ownership;
-- persistence is introduced by a reviewed Prisma migration;
-- all input boundaries are Zod-validated and endpoints are represented in OpenAPI;
+- every W10 operation requires authenticated staff authorization through existing `catalog.manage` or `platform.manage` policy capabilities;
+- staff can perform the minimum Catalog taxonomy writes needed to curate Alpha hobbies while Catalog retains validation/persistence ownership;
+- staff can curate Activity and Community lifecycle state through module-owned seams rather than direct cross-module repository access;
+- staff can archive/publish Conversation content through an explicit moderation path without creating shadow content copies;
+- moderation and curation do not introduce reputation scores, engagement ranking, or automated content judgment;
+- deterministic repository-owned seed scripts remain idempotent and reviewable; W10 exposes no endpoint that remotely executes arbitrary seed code;
+- seeded Activity/Community supply can be reconciled using stable source identifiers where appropriate;
+- protected staff operations default-deny for non-staff actors and remain compatible with the existing audit strategy;
+- all new input boundaries are Zod-validated and staff endpoints are represented in OpenAPI;
 - unit/integration/e2e coverage and CI remain green.
-
-## Planned
-
-- **W10 Admin / Moderation / Seeding** — staff tooling, curation, moderation,
-  taxonomy writes, and seeded supply management.
 
 See `docs/wayfinder-v1-backend-plan.md` for the product rationale and sequencing.
 
