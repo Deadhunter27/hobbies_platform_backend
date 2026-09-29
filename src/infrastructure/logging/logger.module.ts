@@ -30,8 +30,15 @@ function resolveRequestId(req: IncomingMessage, res: ServerResponse): string {
           genReqId: resolveRequestId,
           redact: {
             paths: [
-              'req.headers.authorization',
-              'req.headers.cookie',
+              // Do not persist inbound/outbound headers in application logs.
+              // Provider headers can contain credentials (for example Vercel
+              // OIDC tokens) and client headers can contain auth/cookies.
+              'req.headers',
+              'res.headers',
+              // Minimize directly identifying network metadata while keeping
+              // method, route, status, duration, and request correlation.
+              'req.remoteAddress',
+              'req.remotePort',
               '*.password',
               '*.currentPassword',
               '*.newPassword',
