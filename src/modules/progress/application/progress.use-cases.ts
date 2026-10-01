@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { Actor } from '@modules/access';
 import {
   GetActivityUseCase,
-  GetMyActivityCommitmentUseCase,
+  ListMyActivityCommitmentsUseCase,
   UpsertMyActivityCommitmentUseCase,
 } from '@modules/activity';
 import { newId } from '@shared/utils';
@@ -33,7 +33,7 @@ export class SaveMyProgressReflectionUseCase {
   constructor(
     private readonly authorization: ProgressAuthorization,
     private readonly getActivity: GetActivityUseCase,
-    private readonly getCommitment: GetMyActivityCommitmentUseCase,
+    private readonly listCommitments: ListMyActivityCommitmentsUseCase,
     private readonly upsertCommitment: UpsertMyActivityCommitmentUseCase,
     @Inject(PROGRESS_REPOSITORY) private readonly repository: ProgressRepository,
   ) {}
@@ -51,8 +51,13 @@ export class SaveMyProgressReflectionUseCase {
       throw new ProgressActivityMismatchError(activityId, hobbyId);
     }
 
-    const commitment = await this.getCommitment.execute(actor, activityId);
-    if (commitment.state !== 'committed' && commitment.state !== 'completed') {
+    // A reflection is evidence that the activity happened; it is not evidence that the
+    // person committed to it beforehand. Keep those states independent. If a commitment
+    // exists, it still has to represent a valid path into completion. If none exists,
+    // allow a post-hoc reflection once the activity has actually started.
+    const commitments = await this.listCommitments.execute(actor);
+    const commitment = commitments.find((item) => item.activityId === activityId) ?? null;
+    if (commitment && commitment.state !== 'committed' && commitment.state !== 'completed') {
       throw new ProgressCommitmentRequiredError(activityId);
     }
     if (activity.activity.startsAt > now) {
@@ -78,7 +83,7 @@ export class SaveMyProgressReflectionUseCase {
 
     const saved = await this.repository.save(reflection);
 
-    if (commitment.state === 'committed') {
+    if (commitment?.state === 'committed') {
       await this.upsertCommitment.execute(
         actor,
         activityId,
