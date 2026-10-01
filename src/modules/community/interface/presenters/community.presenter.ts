@@ -30,6 +30,11 @@ export function toCommunityContextResponse(context: CommunityContext): Community
         displayName: membership.displayNameSnapshot,
         role: membership.role,
       })),
+      membersPreview: context.people.membersPreview.map((membership) => ({
+        personId: membership.userId,
+        displayName: membership.displayNameSnapshot,
+        role: membership.role,
+      })),
     },
   };
 }
