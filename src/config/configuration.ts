@@ -12,6 +12,12 @@ export interface AppConfig {
   readonly jwtSecret: string;
   readonly accessTokenTtlSeconds: number;
   readonly refreshTokenTtlDays: number;
+  readonly stravaClientId: string | null;
+  readonly stravaClientSecret: string | null;
+  readonly stravaRedirectUri: string | null;
+  readonly stravaWebhookVerifyToken: string | null;
+  readonly integrationTokenEncryptionKey: string | null;
+  readonly wayfinderMobileRedirectUri: string;
   /** Parsed from CORS_ORIGINS (comma-separated). Empty in production means
    * no cross-origin browser access at all — fail-closed, not fail-open. */
   readonly corsOrigins: string[];
@@ -56,6 +62,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     jwtSecret: parsed.JWT_SECRET,
     accessTokenTtlSeconds: parsed.ACCESS_TOKEN_TTL_SECONDS,
     refreshTokenTtlDays: parsed.REFRESH_TOKEN_TTL_DAYS,
+    stravaClientId: parsed.STRAVA_CLIENT_ID ?? null,
+    stravaClientSecret: parsed.STRAVA_CLIENT_SECRET ?? null,
+    stravaRedirectUri: parsed.STRAVA_REDIRECT_URI ?? null,
+    stravaWebhookVerifyToken: parsed.STRAVA_WEBHOOK_VERIFY_TOKEN ?? null,
+    integrationTokenEncryptionKey: parsed.INTEGRATION_TOKEN_ENCRYPTION_KEY ?? null,
+    wayfinderMobileRedirectUri: parsed.WAYFINDER_MOBILE_REDIRECT_URI,
     corsOrigins: (parsed.CORS_ORIGINS ?? '')
       .split(',')
       .map((origin) => origin.trim())

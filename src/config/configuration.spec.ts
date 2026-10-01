@@ -29,6 +29,12 @@ describe('loadConfig', () => {
       jwtSecret: TEST_SECRET,
       accessTokenTtlSeconds: 900,
       refreshTokenTtlDays: 14,
+      stravaClientId: null,
+      stravaClientSecret: null,
+      stravaRedirectUri: null,
+      stravaWebhookVerifyToken: null,
+      integrationTokenEncryptionKey: null,
+      wayfinderMobileRedirectUri: 'wayfinder://strava-connected',
       corsOrigins: [],
       trustProxyHops: 0,
       requestBodyLimitKb: 100,
@@ -76,6 +82,26 @@ describe('loadConfig', () => {
     expect(production.redisUrl).toBe('redis://redis.internal:6379');
     expect(production.sentryDsn).toBe('https://public@example.invalid/1');
     expect(production.sentryRelease).toBe('backend@alpha-1');
+  });
+
+  it('keeps Strava optional and validates integration values when present', () => {
+    const defaults = loadConfig(baseEnv());
+    expect(defaults.stravaClientId).toBeNull();
+    expect(defaults.integrationTokenEncryptionKey).toBeNull();
+
+    const configured = loadConfig(
+      baseEnv({
+        STRAVA_CLIENT_ID: '12345',
+        STRAVA_CLIENT_SECRET: 'client-secret',
+        STRAVA_REDIRECT_URI: 'https://api.example.com/api/v1/integrations/strava/callback',
+        STRAVA_WEBHOOK_VERIFY_TOKEN: 'verify-token-long-enough',
+        INTEGRATION_TOKEN_ENCRYPTION_KEY: 'a'.repeat(64),
+        WAYFINDER_MOBILE_REDIRECT_URI: 'wayfinder://strava-connected',
+      }),
+    );
+    expect(configured.stravaClientId).toBe('12345');
+    expect(configured.stravaRedirectUri).toContain('/integrations/strava/callback');
+    expect(configured.integrationTokenEncryptionKey).toBe('a'.repeat(64));
   });
 
   it('applies token TTL defaults (900s access, 14d refresh)', () => {

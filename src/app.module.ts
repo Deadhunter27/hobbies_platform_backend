@@ -15,6 +15,7 @@ import { AccessModule, AuthGuard } from '@modules/access';
 import { IdentityModule } from '@modules/identity';
 import { ProfileModule } from '@modules/profile';
 import { ActivityModule } from '@modules/activity';
+import { ActivityRecordModule } from '@modules/activity-record';
 import { RecommendationModule } from '@modules/recommendation';
 import { ProgressModule } from '@modules/progress';
 import { CommunityModule } from '@modules/community';
@@ -35,6 +36,7 @@ import { ConversationModule } from '@modules/conversation';
     IdentityModule,
     ProfileModule,
     ActivityModule,
+    ActivityRecordModule,
     RecommendationModule,
     ProgressModule,
     CommunityModule,
