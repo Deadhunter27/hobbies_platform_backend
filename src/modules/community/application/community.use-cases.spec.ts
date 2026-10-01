@@ -35,7 +35,7 @@ function repository(overrides: Partial<CommunityRepository> = {}): CommunityRepo
     findPublishedBySlugOrId: jest.fn().mockResolvedValue(community),
     getContext: jest.fn().mockResolvedValue({
       community,
-      people: { memberCount: 1, hosts: [] },
+      people: { memberCount: 1, hosts: [], membersPreview: [] },
     } satisfies CommunityContext),
     findMembership: jest.fn().mockResolvedValue(null),
     listMembershipsByUser: jest.fn().mockResolvedValue([]),
@@ -60,6 +60,7 @@ describe('W7 community use cases', () => {
 
     expect(result.community.id).toBe(community.id);
     expect(result.people.memberCount).toBe(1);
+    expect(result.people.membersPreview).toEqual([]);
     expect(repo.getContext).toHaveBeenCalledWith(community.id);
   });
 
