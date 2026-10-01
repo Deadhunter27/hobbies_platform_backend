@@ -41,6 +41,7 @@ export const communityContextResponseSchema = z.object({
   people: z.object({
     memberCount: z.number().int().nonnegative(),
     hosts: z.array(communityHostSchema),
+    membersPreview: z.array(communityHostSchema).max(12),
   }),
 });
 export class CommunityContextResponseDto extends createZodDto(communityContextResponseSchema) {}
