@@ -83,6 +83,7 @@ export class PrismaCommunityRepository
         hosts: memberships.filter(
           (membership) => membership.role === 'host' || membership.role === 'organizer',
         ),
+        membersPreview: memberships.slice(0, 12),
       },
     };
   }
