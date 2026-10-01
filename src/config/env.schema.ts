@@ -11,6 +11,17 @@ export const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(900),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(14),
+  // Optional integration configuration. The API remains healthy without these;
+  // the Strava feature reports configured=false until all required values exist.
+  STRAVA_CLIENT_ID: z.string().trim().regex(/^\d+$/).optional(),
+  STRAVA_CLIENT_SECRET: z.string().trim().min(1).optional(),
+  STRAVA_REDIRECT_URI: z.string().url().optional(),
+  STRAVA_WEBHOOK_VERIFY_TOKEN: z.string().trim().min(12).max(200).optional(),
+  INTEGRATION_TOKEN_ENCRYPTION_KEY: z
+    .string()
+    .regex(/^[0-9a-fA-F]{64}$/)
+    .optional(),
+  WAYFINDER_MOBILE_REDIRECT_URI: z.string().trim().min(1).default('wayfinder://strava-connected'),
   // Comma-separated allowlist of browser origins permitted to call this API
   // with credentials (security-guidelines.md: "strict CORS allowlist").
   // Optional and unset by default — see configuration.ts for the fail-closed

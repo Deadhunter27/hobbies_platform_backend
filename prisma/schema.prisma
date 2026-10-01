@@ -364,20 +364,20 @@ model ActivityCommitment {
 // ADR-0022: durable directional decision state. Cross-context references are
 // logical and intentionally do not use foreign keys to Profile/Activity tables.
 model RecommendationDecision {
-  id                 String                          @id @db.Char(26)
-  userId             String                          @db.Char(26)
-  hobbyId            String                          @db.Char(26)
-  activityId         String                          @db.Char(26)
-  title              String                          @db.VarChar(160)
-  rationale          String                          @db.Text
-  fitSignals         String[]                        @default([])
-  intent             String                          @db.VarChar(40)
-  status             RecommendationStatus            @default(active)
+  id                 String                         @id @db.Char(26)
+  userId             String                         @db.Char(26)
+  hobbyId            String                         @db.Char(26)
+  activityId         String                         @db.Char(26)
+  title              String                         @db.VarChar(160)
+  rationale          String                         @db.Text
+  fitSignals         String[]                       @default([])
+  intent             String                         @db.VarChar(40)
+  status             RecommendationStatus           @default(active)
   rejectionReason    RecommendationRejectionReason?
-  rejectionNote      String?                         @db.VarChar(280)
-  selectedActivityId String?                         @db.Char(26)
-  createdAt          DateTime                        @default(now()) @db.Timestamptz(3)
-  updatedAt          DateTime                        @updatedAt @db.Timestamptz(3)
+  rejectionNote      String?                        @db.VarChar(280)
+  selectedActivityId String?                        @db.Char(26)
+  createdAt          DateTime                       @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime                       @updatedAt @db.Timestamptz(3)
 
   @@index([userId, hobbyId, status, updatedAt])
   @@index([activityId])
@@ -462,4 +462,48 @@ model CheckIn {
   @@unique([userId, activityId, kind])
   @@index([userId, status, availableAt, id])
   @@map("check_in")
+}
+
+// Alpha activity history: something the user actually did. This is deliberately
+// separate from Activity, which remains an opportunity/plan that may never happen.
+// Cross-context identity, hobby and opportunity references are logical references.
+model ActivityRecord {
+  id                String   @id @db.Char(26)
+  userId            String   @db.Char(26)
+  hobbyId           String   @db.Char(26)
+  opportunityId     String?  @db.Char(26)
+  sportType         String   @db.VarChar(80)
+  title             String   @db.VarChar(160)
+  startedAt         DateTime @db.Timestamptz(3)
+  durationSeconds   Int
+  distanceMeters    Float?   @db.DoublePrecision
+  notes             String?  @db.Text
+  source            String   @db.VarChar(24)
+  sourceReferenceId String?  @db.VarChar(80)
+  externalUrl       String?  @db.Text
+  visibility        String   @default("private") @db.VarChar(20)
+  createdAt         DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
+
+  @@unique([userId, source, sourceReferenceId], map: "activity_record_external_source_key")
+  @@index([userId, startedAt(sort: Desc), id], map: "activity_record_user_started_idx")
+  @@index([hobbyId, startedAt(sort: Desc), id], map: "activity_record_hobby_started_idx")
+  @@map("activity_record")
+}
+
+// Tokens are encrypted by the application before persistence. Strava is an
+// optional integration and does not replace Wayfinder identity or manual records.
+model StravaConnection {
+  userId                 String    @id @db.Char(26)
+  athleteId              String    @unique(map: "strava_connection_athlete_key") @db.VarChar(32)
+  athleteDisplayName     String?   @db.VarChar(160)
+  accessTokenCiphertext  String    @db.Text
+  refreshTokenCiphertext String    @db.Text
+  accessTokenExpiresAt   DateTime  @db.Timestamptz(3)
+  scopes                 String[]  @default([])
+  lastSyncedAt           DateTime? @db.Timestamptz(3)
+  createdAt              DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt              DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@map("strava_connection")
 }
