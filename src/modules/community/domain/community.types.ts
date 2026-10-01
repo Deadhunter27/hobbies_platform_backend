@@ -36,6 +36,7 @@ export interface CommunityMembership {
 export interface CommunityPeopleContext {
   memberCount: number;
   hosts: CommunityMembership[];
+  membersPreview: CommunityMembership[];
 }
 
 export interface CommunityContext {
