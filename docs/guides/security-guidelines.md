@@ -22,6 +22,6 @@ SECURITY.md covers reporting and posture; this guide is the working checklist en
 
 ## Supply chain
 
-- Dependabot weekly + CodeQL on every PR (ADR-0007).
+- Dependabot weekly; Semgrep, gitleaks and `pnpm audit` on every PR and weekly (ADR-0028).
 - New dependencies need justification in the PR: maintenance health, license, footprint. Prefer the standard library and existing deps over new ones.
 - Lockfile is committed; CI installs with `--frozen-lockfile`.

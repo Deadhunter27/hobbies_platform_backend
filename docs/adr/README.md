@@ -37,6 +37,15 @@ Lightweight Nygard style — see the [template](0000-template.md). Number sequen
 | [0017](0017-authentication-tokens-and-sessions.md) | Authentication — JWT + rotating refresh tokens | Accepted | Token model, session families, argon2id, timing safety |
 | [0018](0018-authorization-policy-layer.md) | Authorization — policy layer, default deny | Accepted | can() entry point, grants table, guard, global roles |
 | [0019](0019-audit-trail.md) | Audit trail — append-only, in-transaction | Accepted | audit_entry table, UnitOfWork, privacy rules |
+| [0020](0020-profile-and-hobby-context.md) | Profile and hobby context | Accepted | Profile/hobby context boundary |
+| [0021](0021-activities-and-commitments.md) | Activities and commitments | Accepted | Activity supply, durable commitments |
+| [0022](0022-whats-next-and-recovery.md) | What's Next and recovery | Accepted | Deterministic explainable recommendation |
+| [0023](0023-progress-and-journey.md) | Progress evidence and Journey | Accepted | Reflection-backed completion, Journey read model |
+| [0024](0024-community-and-people-context.md) | Community membership and people context | Accepted | Membership lifecycle, hosts/organizers |
+| [0025](0025-checkins-and-in-app-reminders.md) | In-app check-ins | Accepted | Check-in lifecycle, no completion side effects |
+| [0026](0026-conversations-and-hobby-feed.md) | Conversations and hobby feed | Accepted | Conversation/reply, bounded feed read model |
+| [0027](0027-admin-moderation-and-seeding.md) | Staff operations and seeding | Accepted | Admin boundary, moderation, repository-owned seed |
+| [0028](0028-private-repository-security-controls.md) | Private repository security controls | Accepted | Semgrep, gitleaks, dependency audit, Dependabot, keep-alive |
 
 > **Numbering note.** Some externally circulated topic lists number these decisions differently (e.g. "ADR-0001 Why NestJS, 0004 Why PostgreSQL"). The numbers above are canonical: 0001–0003 were accepted earlier and ADRs are never renumbered. Every topic from that list is covered — NestJS (0001), modular monolith (0002), PostgreSQL and Redis (0003), Prisma (0004), OpenAPI (0005), Docker (0006), GitHub Actions (0007), configuration (0008), errors (0009), logging (0010), validation (0011), versioning (0012), jobs (0013), observability (0014).
 

@@ -6,6 +6,7 @@ export class Slug {
   private constructor(private readonly value: string) {}
 
   static create(raw: string): Slug {
+    // nosemgrep: detect-redos -- each repetition must start after a literal '-', so matching is linear
     if (!SLUG_REGEX.test(raw)) {
       throw new ValidationError(`"${raw}" is not a valid slug.`, [
         { path: 'slug', message: 'Must be lowercase kebab-case, e.g. "padel".' },

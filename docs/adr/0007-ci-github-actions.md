@@ -1,6 +1,6 @@
 # ADR-0007: GitHub Actions for CI/CD
 
-- **Status:** Accepted
+- **Status:** Accepted — CodeQL requirement amended by [ADR-0028](0028-private-repository-security-controls.md)
 - **Date:** 2026-07-05
 - **Deciders:** Founder
 

@@ -1,6 +1,7 @@
 # CI pipeline (ADR-0007). Required checks per PR: format, lint, typecheck,
 # build, unit tests, DB/Redis-gated integration + e2e tests, OpenAPI staleness
-# gate, commit message linting. CodeQL runs as a separate workflow.
+# gate, commit message linting. Security checks (Semgrep, gitleaks, dependency
+# audit) run in security.yml (ADR-0028).
 name: CI
 
 on:
