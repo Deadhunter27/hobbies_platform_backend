@@ -1,4 +1,4 @@
-import type { HobbyContext, ProfileContext } from '../../domain';
+import type { HobbyContext, ProfileContext, ProfileDetails } from '../../domain';
 
 export interface ProfileRepository {
   findProfile(userId: string): Promise<ProfileContext | null>;
@@ -6,6 +6,9 @@ export interface ProfileRepository {
   listHobbyContexts(userId: string): Promise<HobbyContext[]>;
   findHobbyContext(userId: string, hobbyId: string): Promise<HobbyContext | null>;
   upsertHobbyContext(context: HobbyContext): Promise<HobbyContext>;
+  findDetails(userId: string): Promise<ProfileDetails | null>;
+  /** Persists details; throws HandleTakenError when the handle is already used. */
+  saveDetails(details: ProfileDetails): Promise<ProfileDetails>;
 }
 
 export const PROFILE_REPOSITORY = Symbol('PROFILE_REPOSITORY');

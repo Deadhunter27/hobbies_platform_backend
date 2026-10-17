@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '@infra/database';
 import type { ProfileRepository } from '../application';
-import { HobbyContext, ProfileContext } from '../domain';
+import { HandleTakenError, HobbyContext, ProfileContext, ProfileDetails } from '../domain';
 
 @Injectable()
 export class PrismaProfileRepository implements ProfileRepository {
@@ -67,5 +68,42 @@ export class PrismaProfileRepository implements ProfileRepository {
       },
     });
     return HobbyContext.reconstitute(record);
+  }
+
+  async findDetails(userId: string): Promise<ProfileDetails | null> {
+    const record = await this.prisma.profileUserDetails.findUnique({ where: { userId } });
+    return record ? ProfileDetails.reconstitute(record) : null;
+  }
+
+  async saveDetails(details: ProfileDetails): Promise<ProfileDetails> {
+    const data = {
+      handle: details.handle,
+      birthYear: details.birthYear,
+      gender: details.gender,
+      instagramHandle: details.instagramHandle,
+      tiktokHandle: details.tiktokHandle,
+      acquisitionSource: details.acquisitionSource,
+      acquisitionDetail: details.acquisitionDetail,
+      marketingConsent: details.marketingConsent,
+      marketingConsentUpdatedAt: details.marketingConsentUpdatedAt,
+      introCompletedAt: details.introCompletedAt,
+    };
+    try {
+      const record = await this.prisma.profileUserDetails.upsert({
+        where: { userId: details.userId },
+        create: { userId: details.userId, ...data },
+        update: data,
+      });
+      return ProfileDetails.reconstitute(record);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002' &&
+        details.handle
+      ) {
+        throw new HandleTakenError(details.handle);
+      }
+      throw error;
+    }
   }
 }

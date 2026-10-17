@@ -12,4 +12,11 @@ export type {
   ProfileIntent,
   SocialPreference,
 } from './hobby-context.entity';
-export { HobbyContextNotFoundError } from './errors';
+export { HobbyContextNotFoundError, HandleTakenError } from './errors';
+export { ProfileDetails, PROFILE_GENDERS, ACQUISITION_SOURCES } from './profile-details.entity';
+export type {
+  ProfileDetailsProps,
+  ProfileDetailsPatch,
+  ProfileGender,
+  AcquisitionSource,
+} from './profile-details.entity';
