@@ -31,7 +31,12 @@ This is the scope guard. Profiles, records, activities, communities and conversa
 A user who cannot find their hobby can propose one.
 
 - **Proposed hobby:** a `catalog_hobby` row with a new status `proposed` and `proposedByUserId`. The proposer can use it at once for their own profile and private records, so nobody is blocked.
-- **Not public until reviewed:** a proposed hobby is invisible to everyone else. It is excluded from Explore, search, communities and public content until staff approve it.
+- **Searchable before review, but not promoted:**
+  - Other users can find a proposed hobby in search, clearly labelled "baru diusulkan" (newly proposed), and use it for their own profile and private records.
+  - It stays out of Explore, recommendations and curated lists.
+  - It cannot host communities or activities until staff approve it.
+  - The review queue is ordered by how many people use a proposal, so hobbies other people also want get reviewed first.
+  - Name normalization and a blocklist apply before a proposal becomes searchable.
 - **Staff review** through the ADR-0027 staff boundary, with one of three outcomes, each audited:
   - **Approve** → `active`, with category and facets set by staff.
   - **Merge** into an existing hobby (a duplicate, or a different name for the same thing). The proposer's data is re-pointed to the existing hobby, and the proposed name becomes an alias.
@@ -129,8 +134,8 @@ The work ships in reviewable steps, each with migrations, OpenAPI and tests:
 - **Generic attribute table or JSONB for per-hobby metrics.** Unlimited metric shapes, but rejected by ADR-0016 for the reasons given there. Four profiles cover the known hobbies.
 - **Automatic approval with AI classification.** Faster, but makes trust decisions opaque at a stage with few users. Rejected for the Alpha; it may assist staff review later.
 
-## Open questions for review
+## Review decisions (2026-10-17)
 
-1. Should a proposed hobby become usable by other users who search for it before approval, or stay strictly private to its proposer? This ADR proposes strictly private.
-2. Is the 25-hobby starter list (to be drafted in step 1) the right breadth for a Jakarta Alpha?
-3. Should translations ship now, or should the Alpha keep English canonical names and only add Indonesian aliases?
+1. **Visibility before approval:** middle ground, as described in section 2. Searchable and usable with a "baru diusulkan" label; not promoted and unable to host communities or activities until approved.
+2. **Starter catalog:** around 25 hobbies across sport (running, cycling, swimming, badminton, futsal, padel, gym, yoga, climbing), outdoors (hiking, camping, birdwatching), music (guitar, piano, singing), food (cooking, baking, manual brew coffee), arts and crafts (photography, drawing, pottery, knitting) and other (reading, writing, board games). The final list ships as seed data in step 1.
+3. **Localization:** translations and aliases both ship in step 1. The Alpha UI is Indonesian, so display names need `id` translations, and search needs everyday Indonesian aliases.
