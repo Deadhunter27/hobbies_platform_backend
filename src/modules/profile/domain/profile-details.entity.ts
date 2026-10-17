@@ -23,6 +23,7 @@ export interface ProfileDetailsProps {
   tiktokHandle: string | null;
   acquisitionSource: AcquisitionSource | null;
   acquisitionDetail: string | null;
+  avatarMediaId: string | null;
   marketingConsent: boolean;
   marketingConsentUpdatedAt: Date | null;
   introCompletedAt: Date | null;
@@ -41,6 +42,7 @@ export type ProfileDetailsPatch = Partial<
     | 'tiktokHandle'
     | 'acquisitionSource'
     | 'acquisitionDetail'
+    | 'avatarMediaId'
     | 'marketingConsent'
   >
 > & { introCompleted?: boolean };
@@ -68,6 +70,7 @@ export class ProfileDetails extends Entity {
       tiktokHandle: null,
       acquisitionSource: null,
       acquisitionDetail: null,
+      avatarMediaId: null,
       marketingConsent: false,
       marketingConsentUpdatedAt: null,
       introCompletedAt: null,
@@ -115,6 +118,9 @@ export class ProfileDetails extends Entity {
   }
   get acquisitionDetail(): string | null {
     return this.props.acquisitionDetail;
+  }
+  get avatarMediaId(): string | null {
+    return this.props.avatarMediaId;
   }
   get marketingConsent(): boolean {
     return this.props.marketingConsent;

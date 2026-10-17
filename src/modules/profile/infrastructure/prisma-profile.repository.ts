@@ -84,6 +84,7 @@ export class PrismaProfileRepository implements ProfileRepository {
       tiktokHandle: details.tiktokHandle,
       acquisitionSource: details.acquisitionSource,
       acquisitionDetail: details.acquisitionDetail,
+      avatarMediaId: details.avatarMediaId,
       marketingConsent: details.marketingConsent,
       marketingConsentUpdatedAt: details.marketingConsentUpdatedAt,
       introCompletedAt: details.introCompletedAt,

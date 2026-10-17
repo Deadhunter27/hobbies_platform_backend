@@ -13,6 +13,7 @@ import { AdminModule } from '@modules/admin';
 import { CatalogModule } from '@modules/catalog';
 import { AccessModule, AuthGuard } from '@modules/access';
 import { IdentityModule } from '@modules/identity';
+import { MediaModule } from '@modules/media';
 import { ProfileModule } from '@modules/profile';
 import { ActivityModule } from '@modules/activity';
 import { ActivityRecordModule } from '@modules/activity-record';
@@ -34,6 +35,7 @@ import { ConversationModule } from '@modules/conversation';
     CatalogModule,
     AccessModule,
     IdentityModule,
+    MediaModule,
     ProfileModule,
     ActivityModule,
     ActivityRecordModule,

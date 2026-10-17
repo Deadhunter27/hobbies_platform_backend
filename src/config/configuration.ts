@@ -1,5 +1,13 @@
 import { envSchema } from './env.schema';
 
+export interface MediaStorageConfig {
+  readonly endpoint: string;
+  readonly region: string;
+  readonly accessKeyId: string;
+  readonly secretAccessKey: string;
+  readonly bucket: string;
+}
+
 export interface AppConfig {
   readonly nodeEnv: 'development' | 'test' | 'production';
   readonly port: number;
@@ -18,6 +26,8 @@ export interface AppConfig {
   readonly stravaWebhookVerifyToken: string | null;
   readonly integrationTokenEncryptionKey: string | null;
   readonly wayfinderMobileRedirectUri: string;
+  /** Null until every MEDIA_S3_* credential is configured (ADR-0030). */
+  readonly mediaStorage: MediaStorageConfig | null;
   /** Parsed from CORS_ORIGINS (comma-separated). Empty in production means
    * no cross-origin browser access at all — fail-closed, not fail-open. */
   readonly corsOrigins: string[];
@@ -68,6 +78,19 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     stravaWebhookVerifyToken: parsed.STRAVA_WEBHOOK_VERIFY_TOKEN ?? null,
     integrationTokenEncryptionKey: parsed.INTEGRATION_TOKEN_ENCRYPTION_KEY ?? null,
     wayfinderMobileRedirectUri: parsed.WAYFINDER_MOBILE_REDIRECT_URI,
+    mediaStorage:
+      parsed.MEDIA_S3_ENDPOINT &&
+      parsed.MEDIA_S3_REGION &&
+      parsed.MEDIA_S3_ACCESS_KEY_ID &&
+      parsed.MEDIA_S3_SECRET_ACCESS_KEY
+        ? {
+            endpoint: parsed.MEDIA_S3_ENDPOINT,
+            region: parsed.MEDIA_S3_REGION,
+            accessKeyId: parsed.MEDIA_S3_ACCESS_KEY_ID,
+            secretAccessKey: parsed.MEDIA_S3_SECRET_ACCESS_KEY,
+            bucket: parsed.MEDIA_BUCKET,
+          }
+        : null,
     corsOrigins: (parsed.CORS_ORIGINS ?? '')
       .split(',')
       .map((origin) => origin.trim())

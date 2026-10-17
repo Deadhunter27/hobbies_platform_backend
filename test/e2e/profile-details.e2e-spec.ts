@@ -65,6 +65,8 @@ describeIfDb('Profile details ("Kenalan dulu") e2e', () => {
       tiktokHandle: null,
       acquisitionSource: null,
       acquisitionDetail: null,
+      avatarMediaId: null,
+      avatarUrl: null,
       marketingConsent: false,
       marketingConsentUpdatedAt: null,
       introCompletedAt: null,

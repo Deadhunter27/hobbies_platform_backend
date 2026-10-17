@@ -35,6 +35,7 @@ describe('loadConfig', () => {
       stravaWebhookVerifyToken: null,
       integrationTokenEncryptionKey: null,
       wayfinderMobileRedirectUri: 'wayfinder://strava-connected',
+      mediaStorage: null,
       corsOrigins: [],
       trustProxyHops: 0,
       requestBodyLimitKb: 100,
