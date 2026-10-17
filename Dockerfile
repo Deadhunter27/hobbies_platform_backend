@@ -4,7 +4,7 @@
 # =============================================================================
 
 # ---- Base: pinned Node LTS on slim Debian ----
-FROM node:22-slim AS base
+FROM node:25-slim AS base
 ENV PNPM_HOME="/pnpm" PATH="/pnpm:$PATH"
 RUN corepack enable
 # Prisma engines need OpenSSL at build (generate) and runtime (query engine).
@@ -35,7 +35,7 @@ RUN ./node_modules/.bin/prisma generate \
     && node -e "require('@prisma/client')"
 
 # ---- Runtime: slim, non-root ----
-FROM node:22-slim AS runtime
+FROM node:25-slim AS runtime
 ENV NODE_ENV=production
 # Compiled dist/ mirrors src/, so tsconfig-paths resolves @modules/@shared/
 # @infra/@config aliases against dist at runtime (tsconfig.json baseUrl=./src).
