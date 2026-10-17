@@ -1,8 +1,8 @@
 # ADR-0030: Media platform — photos for profiles, records, posts and communities
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-17
-- **Deciders:** Founder (review pending)
+- **Deciders:** Founder
 - **Builds on:** ADR-0003 (S3-compatible object storage), ADR-0018 (authorization), ADR-0019 (audit), ADR-0027 (moderation)
 
 ## Context
@@ -95,7 +95,7 @@ Attaching media to a domain object happens in the owning module. For example, `a
 - **Separate image service (Cloudinary, etc.).** Strong transformations, but a new vendor, a new cost and a second place where personal photos live. Rejected for Alpha.
 - **Store images in PostgreSQL.** Explicitly rejected by the founder's brief and by ADR-0003.
 
-## Open questions for review
+## Review decisions (2026-10-17)
 
-1. Is an 8 MB / 2048 px limit and 4 photos per record or post right for the Alpha?
-2. Should avatars be visible to everyone (public profile) or only to signed-in users?
+1. **Up to 4 photos** per activity record or post. The 8 MB / 2048 px limit stands.
+2. **Signed-out viewers see a preview only.** When content is shown to someone not signed in (for example a shared link opened in a browser), the API returns signed URLs for only `max(1, round(20% of photos))`, i.e. 1 photo for a 4-photo post. The rest come back as placeholders with a "sign in to see more" hint. Signed-in viewers who are allowed to see the content get every photo. The limit is enforced by the API, never only by the app, so the hidden photos' URLs are never sent.
