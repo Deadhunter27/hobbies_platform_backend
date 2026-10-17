@@ -1,4 +1,5 @@
 import {
+  Logger,
   Body,
   Controller,
   Delete,
@@ -18,6 +19,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { APP_CONFIG, type AppConfig } from '@config/index';
+import { ErrorTrackerService } from '@infra/observability';
+import { AppError } from '@shared/errors';
 import { CurrentUser, RequiresAuth, type Actor } from '@modules/access';
 import { StravaIntegrationService } from '../application/strava-integration.service';
 import {
@@ -72,8 +75,11 @@ export class MyStravaController {
 
 @Controller({ path: 'integrations/strava', version: '1' })
 export class StravaPublicController {
+  private readonly logger = new Logger(StravaPublicController.name);
+
   constructor(
     private readonly strava: StravaIntegrationService,
+    private readonly errors: ErrorTrackerService,
     @Inject(APP_CONFIG) private readonly config: AppConfig,
   ) {}
 
@@ -99,9 +105,24 @@ export class StravaPublicController {
       });
       // nosemgrep: nestjs-open-redirect -- destination is the server-configured mobile deep link; only fixed status params are appended
       return { url: `${redirect}?status=success`, statusCode: 302 };
-    } catch {
+    } catch (error) {
+      const reason = callbackFailureReason(error);
+      this.logger.warn(
+        { reason, details: error instanceof AppError ? error.details : undefined },
+        'Strava OAuth callback failed',
+      );
+      this.errors.captureException(error, {
+        requestId: 'strava-oauth-callback',
+        method: 'GET',
+        route: '/api/v1/integrations/strava/callback',
+        errorCode: reason,
+      });
+      const params = new URLSearchParams({ status: 'failed', reason });
       // nosemgrep: nestjs-open-redirect -- destination is the server-configured mobile deep link; only fixed status params are appended
-      return { url: `${this.config.wayfinderMobileRedirectUri}?status=failed`, statusCode: 302 };
+      return {
+        url: `${this.config.wayfinderMobileRedirectUri}?${params.toString()}`,
+        statusCode: 302,
+      };
     }
   }
 
@@ -122,4 +143,17 @@ export class StravaPublicController {
     await this.strava.handleWebhook(body);
     return { received: true };
   }
+}
+
+const CALLBACK_REASONS = new Set([
+  'STRAVA_STATE_INVALID',
+  'STRAVA_STATE_EXPIRED',
+  'STRAVA_AUTH_FAILED',
+  'STRAVA_ATHLETE_MISSING',
+  'STRAVA_NOT_CONFIGURED',
+]);
+
+/** Only known, non-sensitive error codes are forwarded to the app's deep link. */
+export function callbackFailureReason(error: unknown): string {
+  return error instanceof AppError && CALLBACK_REASONS.has(error.code) ? error.code : 'UNKNOWN';
 }
