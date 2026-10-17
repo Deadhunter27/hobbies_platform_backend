@@ -14,6 +14,25 @@ import { ActivityRecordService } from './activity-record.service';
 
 const GCM_AUTH_TAG_BYTES = 16;
 
+/**
+ * Strava's OAuth errors name the failing resource/field/code (e.g.
+ * "Application.client_secret:invalid") without echoing any secret. Keep only
+ * those descriptors so a failed exchange is diagnosable from logs and Sentry.
+ */
+async function stravaErrorFields(response: Response): Promise<string[]> {
+  try {
+    const body = (await response.json()) as {
+      errors?: Array<{ resource?: unknown; field?: unknown; code?: unknown }>;
+    };
+    return (body.errors ?? [])
+      .slice(0, 5)
+      .map((e) => `${String(e.resource ?? '?')}.${String(e.field ?? '?')}:${String(e.code ?? '?')}`)
+      .map((value) => value.slice(0, 80));
+  } catch {
+    return [];
+  }
+}
+
 interface StravaConnectionRow {
   userId: string;
   athleteId: string;
@@ -405,7 +424,7 @@ export class StravaIntegrationService {
     if (!response.ok) {
       throw new ConflictError(
         'Strava authorization could not be completed.',
-        [],
+        [{ stravaStatus: response.status, stravaErrors: await stravaErrorFields(response) }],
         'STRAVA_AUTH_FAILED',
       );
     }
