@@ -21,7 +21,7 @@ These are non-negotiable engineering standards for this codebase:
 - **Input is untrusted by default.** Every inbound payload is validated and typed at the boundary before entering application logic.
 - **Authorization is checked at the boundary of every protected operation** — never assumed from prior context. Access is relationship-scoped (see the authorization ADR when written).
 - **Least privilege** for database roles, storage credentials, and CI tokens.
-- **Dependencies are monitored** (Dependabot) and **code is scanned** (CodeQL) on every PR and weekly.
+- **Dependencies are monitored** (Dependabot alerts, security updates and weekly update PRs) and **every PR and a weekly run** scan code (Semgrep), the full git history for secrets (gitleaks), and production dependencies (`pnpm audit`, critical fails the build). See ADR-0028.
 - **No secrets or real user data in logs.** Logs are structured and redact sensitive fields.
 
 ## Handling of user data

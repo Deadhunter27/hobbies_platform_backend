@@ -85,6 +85,7 @@ export class StravaPublicController {
   ): Promise<{ url: string; statusCode: number }> {
     if (query.error || !query.code || !query.state) {
       const params = new URLSearchParams({ status: query.error ? 'cancelled' : 'failed' });
+      // nosemgrep: nestjs-open-redirect -- destination is the server-configured mobile deep link; only fixed status params are appended
       return {
         url: `${this.config.wayfinderMobileRedirectUri}?${params.toString()}`,
         statusCode: 302,
@@ -96,8 +97,10 @@ export class StravaPublicController {
         state: query.state,
         grantedScope: query.scope,
       });
+      // nosemgrep: nestjs-open-redirect -- destination is the server-configured mobile deep link; only fixed status params are appended
       return { url: `${redirect}?status=success`, statusCode: 302 };
     } catch {
+      // nosemgrep: nestjs-open-redirect -- destination is the server-configured mobile deep link; only fixed status params are appended
       return { url: `${this.config.wayfinderMobileRedirectUri}?status=failed`, statusCode: 302 };
     }
   }

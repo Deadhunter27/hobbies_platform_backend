@@ -12,6 +12,8 @@ import type { Actor } from '@modules/access';
 import { ConflictError, NotFoundError, UnauthorizedError } from '@shared/errors';
 import { ActivityRecordService } from './activity-record.service';
 
+const GCM_AUTH_TAG_BYTES = 16;
+
 interface StravaConnectionRow {
   userId: string;
   athleteId: string;
@@ -102,7 +104,9 @@ export class StravaIntegrationService {
 
   private encrypt(value: string): string {
     const iv = randomBytes(12);
-    const cipher = createCipheriv('aes-256-gcm', this.encryptionKey(), iv);
+    const cipher = createCipheriv('aes-256-gcm', this.encryptionKey(), iv, {
+      authTagLength: GCM_AUTH_TAG_BYTES,
+    });
     const encrypted = Buffer.concat([cipher.update(value, 'utf8'), cipher.final()]);
     const tag = cipher.getAuthTag();
     return `${iv.toString('base64url')}.${tag.toString('base64url')}.${encrypted.toString('base64url')}`;
@@ -113,12 +117,18 @@ export class StravaIntegrationService {
     if (!ivPart || !tagPart || !encryptedPart) {
       throw new Error('Invalid encrypted integration token.');
     }
+    const tag = Buffer.from(tagPart, 'base64url');
+    // Reject truncated tags explicitly: GCM verifies whatever length it is given.
+    if (tag.length !== GCM_AUTH_TAG_BYTES) {
+      throw new Error('Invalid encrypted integration token.');
+    }
     const decipher = createDecipheriv(
       'aes-256-gcm',
       this.encryptionKey(),
       Buffer.from(ivPart, 'base64url'),
+      { authTagLength: GCM_AUTH_TAG_BYTES },
     );
-    decipher.setAuthTag(Buffer.from(tagPart, 'base64url'));
+    decipher.setAuthTag(tag);
     return Buffer.concat([
       decipher.update(Buffer.from(encryptedPart, 'base64url')),
       decipher.final(),
