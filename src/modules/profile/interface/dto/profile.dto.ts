@@ -106,6 +106,11 @@ export const updateProfileDetailsSchema = z
       .optional(),
     acquisitionSource: z.enum(ACQUISITION_SOURCES).nullable().optional(),
     acquisitionDetail: z.string().trim().min(1).max(120).nullable().optional(),
+    avatarMediaId: z
+      .string()
+      .regex(/^[0-9A-HJKMNP-TV-Z]{26}$/)
+      .nullable()
+      .optional(),
     marketingConsent: z.boolean().optional(),
     introCompleted: z.boolean().optional(),
   })
@@ -121,6 +126,9 @@ export const profileDetailsResponseSchema = z.object({
   tiktokHandle: z.string().nullable(),
   acquisitionSource: z.enum(ACQUISITION_SOURCES).nullable(),
   acquisitionDetail: z.string().nullable(),
+  avatarMediaId: z.string().nullable(),
+  /** Short-lived signed URL (15 min); refetch details to refresh it. */
+  avatarUrl: z.string().nullable(),
   marketingConsent: z.boolean(),
   marketingConsentUpdatedAt: z.string().nullable(),
   introCompletedAt: z.string().nullable(),

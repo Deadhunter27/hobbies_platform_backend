@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { PrismaModule } from '@infra/database';
 import { AccessModule } from '@modules/access';
 import { CatalogModule } from '@modules/catalog';
+import { MediaModule } from '@modules/media';
 import {
   GetMyHobbyContextUseCase,
   GetMyProfileContextUseCase,
@@ -12,12 +13,13 @@ import {
   UpsertMyProfileContextUseCase,
   GetMyProfileDetailsUseCase,
   UpdateMyProfileDetailsUseCase,
+  ProfileAvatarUrlResolver,
 } from './application';
 import { PrismaProfileRepository } from './infrastructure';
 import { ProfileController } from './interface';
 
 @Module({
-  imports: [PrismaModule, AccessModule, CatalogModule],
+  imports: [PrismaModule, AccessModule, CatalogModule, MediaModule],
   controllers: [ProfileController],
   providers: [
     ProfileAuthorization,
@@ -28,6 +30,7 @@ import { ProfileController } from './interface';
     UpsertMyHobbyContextUseCase,
     GetMyProfileDetailsUseCase,
     UpdateMyProfileDetailsUseCase,
+    ProfileAvatarUrlResolver,
     { provide: PROFILE_REPOSITORY, useClass: PrismaProfileRepository },
   ],
   exports: [GetMyHobbyContextUseCase],

@@ -21,6 +21,13 @@ export const envSchema = z.object({
     .string()
     .regex(/^[0-9a-fA-F]{64}$/)
     .optional(),
+  // Media storage (ADR-0030): S3-compatible API of Supabase Storage. Photo
+  // features report MEDIA_NOT_CONFIGURED until all credentials exist.
+  MEDIA_S3_ENDPOINT: z.string().url().optional(),
+  MEDIA_S3_REGION: z.string().trim().min(1).max(64).optional(),
+  MEDIA_S3_ACCESS_KEY_ID: z.string().trim().min(1).optional(),
+  MEDIA_S3_SECRET_ACCESS_KEY: z.string().trim().min(1).optional(),
+  MEDIA_BUCKET: z.string().trim().min(1).max(63).default('media'),
   WAYFINDER_MOBILE_REDIRECT_URI: z.string().trim().min(1).default('wayfinder://strava-connected'),
   // Comma-separated allowlist of browser origins permitted to call this API
   // with credentials (security-guidelines.md: "strict CORS allowlist").

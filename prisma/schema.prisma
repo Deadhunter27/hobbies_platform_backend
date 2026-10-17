@@ -322,6 +322,7 @@ model ProfileUserDetails {
   tiktokHandle              String?                   @db.VarChar(24)
   acquisitionSource         ProfileAcquisitionSource?
   acquisitionDetail         String?                   @db.VarChar(120)
+  avatarMediaId             String?                   @db.Char(26)
   marketingConsent          Boolean                   @default(false)
   marketingConsentUpdatedAt DateTime?                 @db.Timestamptz(3)
   introCompletedAt          DateTime?                 @db.Timestamptz(3)
@@ -546,4 +547,41 @@ model StravaConnection {
   updatedAt              DateTime  @updatedAt @db.Timestamptz(3)
 
   @@map("strava_connection")
+}
+
+enum MediaPurpose {
+  avatar
+  activity_record
+  conversation
+  community_cover
+  activity_cover
+
+  @@map("media_purpose")
+}
+
+enum MediaStatus {
+  pending
+  ready
+  deleted
+
+  @@map("media_status")
+}
+
+/// Uploaded file metadata (ADR-0030). Bytes live in object storage, never here.
+model MediaAsset {
+  id          String       @id @db.Char(26)
+  ownerUserId String       @db.Char(26)
+  purpose     MediaPurpose
+  status      MediaStatus  @default(pending)
+  objectKey   String       @unique(map: "media_asset_object_key_key") @db.VarChar(200)
+  mimeType    String       @db.VarChar(40)
+  sizeBytes   Int
+  hidden      Boolean      @default(false)
+  createdAt   DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime     @updatedAt @db.Timestamptz(3)
+  deletedAt   DateTime?    @db.Timestamptz(3)
+
+  @@index([ownerUserId, createdAt(sort: Desc)], map: "media_asset_owner_created_idx")
+  @@index([status, createdAt], map: "media_asset_status_created_idx")
+  @@map("media_asset")
 }

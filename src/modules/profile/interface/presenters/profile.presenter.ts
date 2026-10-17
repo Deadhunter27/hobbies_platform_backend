@@ -32,7 +32,10 @@ export function toHobbyContextResponse(context: HobbyContext): HobbyContextRespo
   };
 }
 
-export function toProfileDetailsResponse(details: ProfileDetails): ProfileDetailsResponseDto {
+export function toProfileDetailsResponse(
+  details: ProfileDetails,
+  avatarUrl: string | null,
+): ProfileDetailsResponseDto {
   return {
     handle: details.handle,
     birthYear: details.birthYear,
@@ -41,6 +44,8 @@ export function toProfileDetailsResponse(details: ProfileDetails): ProfileDetail
     tiktokHandle: details.tiktokHandle,
     acquisitionSource: details.acquisitionSource,
     acquisitionDetail: details.acquisitionDetail,
+    avatarMediaId: details.avatarMediaId,
+    avatarUrl,
     marketingConsent: details.marketingConsent,
     marketingConsentUpdatedAt: details.marketingConsentUpdatedAt?.toISOString() ?? null,
     introCompletedAt: details.introCompletedAt?.toISOString() ?? null,

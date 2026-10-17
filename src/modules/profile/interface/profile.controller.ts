@@ -11,6 +11,7 @@ import {
   UpsertMyProfileContextUseCase,
   GetMyProfileDetailsUseCase,
   UpdateMyProfileDetailsUseCase,
+  ProfileAvatarUrlResolver,
 } from '../application';
 import {
   HobbyContextListResponseDto,
@@ -41,6 +42,7 @@ export class ProfileController {
     private readonly upsertHobbyContext: UpsertMyHobbyContextUseCase,
     private readonly getDetails: GetMyProfileDetailsUseCase,
     private readonly updateDetails: UpdateMyProfileDetailsUseCase,
+    private readonly avatarUrls: ProfileAvatarUrlResolver,
   ) {}
 
   @Get('profile-details')
@@ -53,7 +55,8 @@ export class ProfileController {
     type: ErrorEnvelopeDto,
   })
   async getProfileDetails(@CurrentUser() actor: Actor): Promise<ProfileDetailsResponseDto> {
-    return toProfileDetailsResponse(await this.getDetails.execute(actor));
+    const details = await this.getDetails.execute(actor);
+    return toProfileDetailsResponse(details, await this.avatarUrls.resolve(details));
   }
 
   @Patch('profile-details')
@@ -69,13 +72,23 @@ export class ProfileController {
     description: 'USER_SUSPENDED or PROFILE_ACCESS_DENIED',
     type: ErrorEnvelopeDto,
   })
-  @ApiResponse({ status: 409, description: 'HANDLE_TAKEN', type: ErrorEnvelopeDto })
+  @ApiResponse({
+    status: 409,
+    description: 'HANDLE_TAKEN',
+    type: ErrorEnvelopeDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'MEDIA_NOT_FOUND (avatarMediaId)',
+    type: ErrorEnvelopeDto,
+  })
   @ApiResponse({ status: 429, description: 'RATE_LIMIT_EXCEEDED', type: ErrorEnvelopeDto })
   async patchProfileDetails(
     @CurrentUser() actor: Actor,
     @Body() body: UpdateProfileDetailsDto,
   ): Promise<ProfileDetailsResponseDto> {
-    return toProfileDetailsResponse(await this.updateDetails.execute(actor, body));
+    const details = await this.updateDetails.execute(actor, body);
+    return toProfileDetailsResponse(details, await this.avatarUrls.resolve(details));
   }
 
   @Get('profile-context')

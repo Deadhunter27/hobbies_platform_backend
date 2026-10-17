@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { GetHobbyUseCase } from '@modules/catalog';
 import type { Actor } from '@modules/access';
+import { MediaService } from '@modules/media';
 import { newId } from '@shared/utils';
 import {
   HobbyContext,
@@ -128,12 +129,30 @@ export class GetMyProfileDetailsUseCase {
 export class UpdateMyProfileDetailsUseCase {
   constructor(
     private readonly authorization: ProfileAuthorization,
+    private readonly media: MediaService,
     @Inject(PROFILE_REPOSITORY) private readonly repository: ProfileRepository,
   ) {}
 
   async execute(actor: Actor, patch: ProfileDetailsPatch): Promise<ProfileDetails> {
     await this.authorization.assertCanUpdate(actor);
     const current = (await this.repository.findDetails(actor.id)) ?? ProfileDetails.empty(actor.id);
-    return this.repository.saveDetails(current.apply(patch));
+    const avatarChanges =
+      patch.avatarMediaId !== undefined && patch.avatarMediaId !== current.avatarMediaId;
+    if (avatarChanges && patch.avatarMediaId) {
+      await this.media.assertAttachable(actor.id, patch.avatarMediaId, 'avatar');
+    }
+    const saved = await this.repository.saveDetails(current.apply(patch));
+    // Replaced or removed avatar: delete the old photo so it never lingers in storage.
+    if (avatarChanges) await this.media.discard(current.avatarMediaId);
+    return saved;
+  }
+}
+
+@Injectable()
+export class ProfileAvatarUrlResolver {
+  constructor(private readonly media: MediaService) {}
+
+  resolve(details: ProfileDetails): Promise<string | null> {
+    return this.media.signedUrl(details.avatarMediaId);
   }
 }
