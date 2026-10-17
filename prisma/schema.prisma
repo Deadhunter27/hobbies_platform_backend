@@ -291,6 +291,46 @@ model ProfileUserContext {
 
 // ADR-0020: one evolving relationship/context record per user + hobby.
 // userId/hobbyId are logical cross-context references, deliberately not DB FKs.
+enum ProfileGender {
+  female
+  male
+  nonbinary
+  prefer_not_to_say
+
+  @@map("profile_gender")
+}
+
+enum ProfileAcquisitionSource {
+  instagram
+  tiktok
+  friend
+  community
+  search
+  event
+  other
+
+  @@map("profile_acquisition_source")
+}
+
+/// Optional "get to know you" details collected after registration (ADR-0031).
+model ProfileUserDetails {
+  userId                    String                    @id @db.Char(26)
+  handle                    String?                   @unique(map: "profile_user_details_handle_key") @db.VarChar(30)
+  birthYear                 Int?                      @db.SmallInt
+  gender                    ProfileGender?
+  instagramHandle           String?                   @db.VarChar(30)
+  tiktokHandle              String?                   @db.VarChar(24)
+  acquisitionSource         ProfileAcquisitionSource?
+  acquisitionDetail         String?                   @db.VarChar(120)
+  marketingConsent          Boolean                   @default(false)
+  marketingConsentUpdatedAt DateTime?                 @db.Timestamptz(3)
+  introCompletedAt          DateTime?                 @db.Timestamptz(3)
+  createdAt                 DateTime                  @default(now()) @db.Timestamptz(3)
+  updatedAt                 DateTime                  @updatedAt @db.Timestamptz(3)
+
+  @@map("profile_user_details")
+}
+
 model ProfileHobbyContext {
   id               String                  @id @db.Char(26)
   userId           String                  @db.Char(26)

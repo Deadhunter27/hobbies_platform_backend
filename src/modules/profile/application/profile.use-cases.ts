@@ -6,6 +6,8 @@ import {
   HobbyContext,
   HobbyContextNotFoundError,
   ProfileContext,
+  ProfileDetails,
+  type ProfileDetailsPatch,
   type ExperienceLevel,
   type ProfileIntent,
   type SocialPreference,
@@ -106,5 +108,32 @@ export class UpsertMyHobbyContextUseCase {
       ...input,
     });
     return this.repository.upsertHobbyContext(context);
+  }
+}
+
+@Injectable()
+export class GetMyProfileDetailsUseCase {
+  constructor(
+    private readonly authorization: ProfileAuthorization,
+    @Inject(PROFILE_REPOSITORY) private readonly repository: ProfileRepository,
+  ) {}
+
+  async execute(actor: Actor): Promise<ProfileDetails> {
+    await this.authorization.assertCanRead(actor);
+    return (await this.repository.findDetails(actor.id)) ?? ProfileDetails.empty(actor.id);
+  }
+}
+
+@Injectable()
+export class UpdateMyProfileDetailsUseCase {
+  constructor(
+    private readonly authorization: ProfileAuthorization,
+    @Inject(PROFILE_REPOSITORY) private readonly repository: ProfileRepository,
+  ) {}
+
+  async execute(actor: Actor, patch: ProfileDetailsPatch): Promise<ProfileDetails> {
+    await this.authorization.assertCanUpdate(actor);
+    const current = (await this.repository.findDetails(actor.id)) ?? ProfileDetails.empty(actor.id);
+    return this.repository.saveDetails(current.apply(patch));
   }
 }

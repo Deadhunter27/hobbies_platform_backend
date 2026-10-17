@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Put } from '@nestjs/common';
+import { RateLimit } from '@infra/rate-limit';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorEnvelopeDto } from '@infra/http';
 import { CurrentUser, RequiresAuth, type Actor } from '@modules/access';
@@ -8,6 +9,8 @@ import {
   ListMyHobbyContextsUseCase,
   UpsertMyHobbyContextUseCase,
   UpsertMyProfileContextUseCase,
+  GetMyProfileDetailsUseCase,
+  UpdateMyProfileDetailsUseCase,
 } from '../application';
 import {
   HobbyContextListResponseDto,
@@ -16,8 +19,14 @@ import {
   ProfileContextResponseDto,
   UpsertHobbyContextDto,
   UpsertProfileContextDto,
+  ProfileDetailsResponseDto,
+  UpdateProfileDetailsDto,
 } from './dto/profile.dto';
-import { toHobbyContextResponse, toProfileContextResponse } from './presenters/profile.presenter';
+import {
+  toHobbyContextResponse,
+  toProfileContextResponse,
+  toProfileDetailsResponse,
+} from './presenters/profile.presenter';
 
 @ApiTags('profile')
 @ApiBearerAuth()
@@ -30,7 +39,44 @@ export class ProfileController {
     private readonly listHobbyContexts: ListMyHobbyContextsUseCase,
     private readonly getHobbyContext: GetMyHobbyContextUseCase,
     private readonly upsertHobbyContext: UpsertMyHobbyContextUseCase,
+    private readonly getDetails: GetMyProfileDetailsUseCase,
+    private readonly updateDetails: UpdateMyProfileDetailsUseCase,
   ) {}
+
+  @Get('profile-details')
+  @ApiOperation({ summary: 'Get the optional personal details the user chose to share' })
+  @ApiOkResponse({ type: ProfileDetailsResponseDto })
+  @ApiResponse({ status: 401, description: 'UNAUTHORIZED', type: ErrorEnvelopeDto })
+  @ApiResponse({
+    status: 403,
+    description: 'USER_SUSPENDED or PROFILE_ACCESS_DENIED',
+    type: ErrorEnvelopeDto,
+  })
+  async getProfileDetails(@CurrentUser() actor: Actor): Promise<ProfileDetailsResponseDto> {
+    return toProfileDetailsResponse(await this.getDetails.execute(actor));
+  }
+
+  @Patch('profile-details')
+  @RateLimit('sensitive-write')
+  @ApiOperation({
+    summary: 'Partially update optional personal details; omitted fields are unchanged',
+  })
+  @ApiOkResponse({ type: ProfileDetailsResponseDto })
+  @ApiResponse({ status: 400, description: 'VALIDATION_FAILED', type: ErrorEnvelopeDto })
+  @ApiResponse({ status: 401, description: 'UNAUTHORIZED', type: ErrorEnvelopeDto })
+  @ApiResponse({
+    status: 403,
+    description: 'USER_SUSPENDED or PROFILE_ACCESS_DENIED',
+    type: ErrorEnvelopeDto,
+  })
+  @ApiResponse({ status: 409, description: 'HANDLE_TAKEN', type: ErrorEnvelopeDto })
+  @ApiResponse({ status: 429, description: 'RATE_LIMIT_EXCEEDED', type: ErrorEnvelopeDto })
+  async patchProfileDetails(
+    @CurrentUser() actor: Actor,
+    @Body() body: UpdateProfileDetailsDto,
+  ): Promise<ProfileDetailsResponseDto> {
+    return toProfileDetailsResponse(await this.updateDetails.execute(actor, body));
+  }
 
   @Get('profile-context')
   @ApiOperation({ summary: 'Get private Wayfinder profile context for the authenticated user' })

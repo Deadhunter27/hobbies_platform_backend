@@ -7,5 +7,7 @@ export {
   ListMyHobbyContextsUseCase,
   GetMyHobbyContextUseCase,
   UpsertMyHobbyContextUseCase,
+  GetMyProfileDetailsUseCase,
+  UpdateMyProfileDetailsUseCase,
 } from './profile.use-cases';
 export type { UpsertMyProfileContextInput, UpsertMyHobbyContextInput } from './profile.use-cases';

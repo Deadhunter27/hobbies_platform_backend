@@ -1,6 +1,12 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
-import { EXPERIENCE_LEVELS, PROFILE_INTENTS, SOCIAL_PREFERENCES } from '../../domain';
+import {
+  ACQUISITION_SOURCES,
+  EXPERIENCE_LEVELS,
+  PROFILE_GENDERS,
+  PROFILE_INTENTS,
+  SOCIAL_PREFERENCES,
+} from '../../domain';
 
 export const upsertProfileContextSchema = z
   .object({
@@ -65,3 +71,59 @@ export const hobbyContextListResponseSchema = z.object({
   data: z.array(hobbyContextResponseSchema),
 });
 export class HobbyContextListResponseDto extends createZodDto(hobbyContextListResponseSchema) {}
+
+/** Accepts "@Name" or "name", stores lowercase without the "@". */
+const socialHandle = (pattern: RegExp, max: number) =>
+  z
+    .string()
+    .trim()
+    .transform((value) => value.replace(/^@+/, '').toLowerCase())
+    .pipe(z.string().min(1).max(max).regex(pattern));
+
+/** Minimum age 13 (app-store and data-protection norm); the year is optional. */
+export const MIN_USER_AGE = 13;
+
+export const updateProfileDetailsSchema = z
+  .object({
+    handle: socialHandle(/^(?![._])(?!.*[._]{2})[a-z0-9._]{3,30}(?<![._])$/, 30)
+      .nullable()
+      .optional(),
+    birthYear: z
+      .number()
+      .int()
+      .min(1900)
+      .refine((year) => year <= new Date().getUTCFullYear() - MIN_USER_AGE, {
+        message: `You must be at least ${MIN_USER_AGE} years old.`,
+      })
+      .nullable()
+      .optional(),
+    gender: z.enum(PROFILE_GENDERS).nullable().optional(),
+    instagramHandle: socialHandle(/^[a-z0-9._]{1,30}$/, 30)
+      .nullable()
+      .optional(),
+    tiktokHandle: socialHandle(/^[a-z0-9._]{2,24}$/, 24)
+      .nullable()
+      .optional(),
+    acquisitionSource: z.enum(ACQUISITION_SOURCES).nullable().optional(),
+    acquisitionDetail: z.string().trim().min(1).max(120).nullable().optional(),
+    marketingConsent: z.boolean().optional(),
+    introCompleted: z.boolean().optional(),
+  })
+  .strict();
+
+export class UpdateProfileDetailsDto extends createZodDto(updateProfileDetailsSchema) {}
+
+export const profileDetailsResponseSchema = z.object({
+  handle: z.string().nullable(),
+  birthYear: z.number().int().nullable(),
+  gender: z.enum(PROFILE_GENDERS).nullable(),
+  instagramHandle: z.string().nullable(),
+  tiktokHandle: z.string().nullable(),
+  acquisitionSource: z.enum(ACQUISITION_SOURCES).nullable(),
+  acquisitionDetail: z.string().nullable(),
+  marketingConsent: z.boolean(),
+  marketingConsentUpdatedAt: z.string().nullable(),
+  introCompletedAt: z.string().nullable(),
+});
+
+export class ProfileDetailsResponseDto extends createZodDto(profileDetailsResponseSchema) {}

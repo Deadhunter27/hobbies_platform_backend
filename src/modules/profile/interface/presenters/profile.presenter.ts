@@ -1,5 +1,9 @@
-import type { HobbyContext, ProfileContext } from '../../domain';
-import type { HobbyContextResponseDto, ProfileContextResponseDto } from '../dto/profile.dto';
+import type { HobbyContext, ProfileContext, ProfileDetails } from '../../domain';
+import type {
+  HobbyContextResponseDto,
+  ProfileContextResponseDto,
+  ProfileDetailsResponseDto,
+} from '../dto/profile.dto';
 
 export function toProfileContextResponse(
   context: ProfileContext | null,
@@ -25,5 +29,20 @@ export function toHobbyContextResponse(context: HobbyContext): HobbyContextRespo
     socialPreference: context.socialPreference,
     createdAt: context.createdAt.toISOString(),
     updatedAt: context.updatedAt.toISOString(),
+  };
+}
+
+export function toProfileDetailsResponse(details: ProfileDetails): ProfileDetailsResponseDto {
+  return {
+    handle: details.handle,
+    birthYear: details.birthYear,
+    gender: details.gender,
+    instagramHandle: details.instagramHandle,
+    tiktokHandle: details.tiktokHandle,
+    acquisitionSource: details.acquisitionSource,
+    acquisitionDetail: details.acquisitionDetail,
+    marketingConsent: details.marketingConsent,
+    marketingConsentUpdatedAt: details.marketingConsentUpdatedAt?.toISOString() ?? null,
+    introCompletedAt: details.introCompletedAt?.toISOString() ?? null,
   };
 }

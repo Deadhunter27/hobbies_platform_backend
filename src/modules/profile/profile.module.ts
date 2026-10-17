@@ -10,6 +10,8 @@ import {
   ProfileAuthorization,
   UpsertMyHobbyContextUseCase,
   UpsertMyProfileContextUseCase,
+  GetMyProfileDetailsUseCase,
+  UpdateMyProfileDetailsUseCase,
 } from './application';
 import { PrismaProfileRepository } from './infrastructure';
 import { ProfileController } from './interface';
@@ -24,6 +26,8 @@ import { ProfileController } from './interface';
     ListMyHobbyContextsUseCase,
     GetMyHobbyContextUseCase,
     UpsertMyHobbyContextUseCase,
+    GetMyProfileDetailsUseCase,
+    UpdateMyProfileDetailsUseCase,
     { provide: PROFILE_REPOSITORY, useClass: PrismaProfileRepository },
   ],
   exports: [GetMyHobbyContextUseCase],
