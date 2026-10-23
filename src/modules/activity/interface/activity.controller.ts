@@ -52,11 +52,8 @@ export class ActivitiesController {
     description: 'Allowed by the platform setting event.creationPolicy (ADR-0035).',
   })
   @ApiCreatedResponse({ type: ActivityResponseDto })
-  @ApiResponse({
-    status: 400,
-    description: 'VALIDATION_FAILED or ACTIVITY_START_IN_PAST',
-    type: ErrorEnvelopeDto,
-  })
+  @ApiResponse({ status: 400, description: 'VALIDATION_FAILED', type: ErrorEnvelopeDto })
+  @ApiResponse({ status: 422, description: 'ACTIVITY_START_IN_PAST', type: ErrorEnvelopeDto })
   @ApiResponse({ status: 401, description: 'UNAUTHORIZED', type: ErrorEnvelopeDto })
   @ApiResponse({
     status: 403,

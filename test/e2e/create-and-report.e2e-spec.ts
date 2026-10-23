@@ -125,7 +125,7 @@ describeIfDb('Communities, events and reports e2e (ADR-0035/0036)', () => {
       .post('/api/v1/activities')
       .set(auth(0))
       .send({ hobbyId, title: 'Too late', startsAt: inDays(-1), placeName: 'GBK' })
-      .expect(400);
+      .expect(422);
 
     const event = await http()
       .post('/api/v1/activities')
