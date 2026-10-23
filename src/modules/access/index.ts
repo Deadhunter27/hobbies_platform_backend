@@ -1,7 +1,7 @@
 export { AccessModule } from './access.module';
 export { PolicyService } from './application/policy.service';
 export { AuthGuard } from './interface/auth.guard';
-export { RequiresAuth, CurrentUser } from './interface/auth.decorators';
+export { RequiresAuth, CurrentUser, OptionalAuth, OptionalUser } from './interface/auth.decorators';
 export type { RequestWithActor } from './interface/auth.decorators';
 export { TOKEN_VERIFIER } from './application/ports/token-verifier.port';
 export type { TokenVerifier, VerifiedTokenClaims } from './application/ports/token-verifier.port';

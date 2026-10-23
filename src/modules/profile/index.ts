@@ -1,3 +1,4 @@
 export { ProfileModule } from './profile.module';
-export { GetMyHobbyContextUseCase } from './application';
+export { GetMyHobbyContextUseCase, PublicProfileService } from './application';
+export type { PublicPersonSummary } from './application';
 export type { HobbyContext } from './domain';

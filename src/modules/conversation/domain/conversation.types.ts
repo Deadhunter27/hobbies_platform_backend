@@ -1,4 +1,4 @@
-export const CONVERSATION_STATUSES = ['published', 'archived'] as const;
+export const CONVERSATION_STATUSES = ['published', 'archived', 'deleted'] as const;
 export type ConversationStatus = (typeof CONVERSATION_STATUSES)[number];
 
 export interface Conversation {

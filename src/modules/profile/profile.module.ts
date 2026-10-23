@@ -14,6 +14,7 @@ import {
   GetMyProfileDetailsUseCase,
   UpdateMyProfileDetailsUseCase,
   ProfileAvatarUrlResolver,
+  PublicProfileService,
 } from './application';
 import { PrismaProfileRepository } from './infrastructure';
 import { ProfileController } from './interface';
@@ -31,8 +32,9 @@ import { ProfileController } from './interface';
     GetMyProfileDetailsUseCase,
     UpdateMyProfileDetailsUseCase,
     ProfileAvatarUrlResolver,
+    PublicProfileService,
     { provide: PROFILE_REPOSITORY, useClass: PrismaProfileRepository },
   ],
-  exports: [GetMyHobbyContextUseCase],
+  exports: [GetMyHobbyContextUseCase, PublicProfileService],
 })
 export class ProfileModule {}

@@ -8,7 +8,7 @@ export class AdminConversationIdParamDto extends createZodDto(adminConversationI
 
 export const adminConversationStatusResponseSchema = z.object({
   id: ulid,
-  status: z.enum(['published', 'archived']),
+  status: z.enum(['published', 'archived', 'deleted']),
   updatedAt: z.string(),
 });
 export class AdminConversationStatusResponseDto extends createZodDto(

@@ -1,6 +1,7 @@
 import type { ExecutionContext } from '@nestjs/common';
 import type { Reflector } from '@nestjs/core';
 import { AuthGuard } from './auth.guard';
+import { OPTIONAL_AUTH_KEY } from './auth.decorators';
 import type { TokenVerifier, VerifiedTokenClaims } from '../application/ports/token-verifier.port';
 import type { ActorDirectory, ActorRecord } from '../application/ports/actor-directory.port';
 import { UnauthorizedError } from '@shared/errors';
@@ -24,7 +25,11 @@ class FakeDirectory implements ActorDirectory {
   }
 }
 
-function makeContext(options: { requiresAuth: boolean; authorization?: string }): {
+function makeContext(options: {
+  requiresAuth: boolean;
+  optionalAuth?: boolean;
+  authorization?: string;
+}): {
   context: ExecutionContext;
   reflector: Reflector;
   request: { headers: Record<string, string>; actor?: unknown };
@@ -38,7 +43,8 @@ function makeContext(options: { requiresAuth: boolean; authorization?: string })
     switchToHttp: () => ({ getRequest: () => request }),
   } as unknown as ExecutionContext;
   const reflector = {
-    getAllAndOverride: () => options.requiresAuth,
+    getAllAndOverride: (key: string) =>
+      key === OPTIONAL_AUTH_KEY ? Boolean(options.optionalAuth) : options.requiresAuth,
   } as unknown as Reflector;
   return { context, reflector, request };
 }
@@ -140,5 +146,47 @@ describe('AuthGuard', () => {
     );
 
     await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedError);
+  });
+
+  describe('@OptionalAuth routes', () => {
+    it('lets an anonymous caller through without an actor', async () => {
+      const verifier = new FakeVerifier(null);
+      const { context, reflector, request } = makeContext({
+        requiresAuth: false,
+        optionalAuth: true,
+      });
+      const guard = new AuthGuard(reflector, verifier, new FakeDirectory(null));
+
+      await expect(guard.canActivate(context)).resolves.toBe(true);
+      expect(request.actor).toBeUndefined();
+      expect(verifier.seen).toHaveLength(0);
+    });
+
+    it('attaches the actor when a valid token is sent', async () => {
+      const { context, reflector, request } = makeContext({
+        requiresAuth: false,
+        optionalAuth: true,
+        authorization: 'Bearer good-token',
+      });
+      const guard = new AuthGuard(
+        reflector,
+        new FakeVerifier({ sub: USER_ID, sid: SESSION_ID } as VerifiedTokenClaims),
+        new FakeDirectory(activeActor()),
+      );
+
+      await expect(guard.canActivate(context)).resolves.toBe(true);
+      expect(request.actor).toMatchObject({ id: USER_ID, sessionId: SESSION_ID });
+    });
+
+    it('still rejects an invalid token so the client refreshes instead of downgrading', async () => {
+      const { context, reflector } = makeContext({
+        requiresAuth: false,
+        optionalAuth: true,
+        authorization: 'Bearer bad-token',
+      });
+      const guard = new AuthGuard(reflector, new FakeVerifier(null), new FakeDirectory(null));
+
+      await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedError);
+    });
   });
 });

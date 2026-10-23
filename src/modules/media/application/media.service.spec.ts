@@ -19,6 +19,8 @@ function setup(
   const repository: MediaRepository = {
     create: async (a) => (rows.set(a.id, a), a),
     findById: async (id) => rows.get(id) ?? null,
+    findMany: async (ids) =>
+      ids.map((id) => rows.get(id)).filter((a): a is MediaAsset => Boolean(a)),
     save: async (a) => (rows.set(a.id, a), a),
   };
   const storage: ObjectStorage = {
@@ -145,5 +147,23 @@ describe('MediaService', () => {
     await service.discard(media.id);
     expect(deleted).toEqual([media.objectKey]);
     expect(await service.signedUrl(media.id)).toBeNull();
+  });
+
+  it('returns signed URLs only for viewable media in a batch', async () => {
+    const { service } = setup();
+    const first = await service.initiate(owner, {
+      purpose: 'avatar',
+      mimeType: 'image/jpeg',
+      sizeBytes: 1000,
+    });
+    const second = await service.initiate(owner, {
+      purpose: 'avatar',
+      mimeType: 'image/jpeg',
+      sizeBytes: 1000,
+    });
+    await service.complete(owner, first.media.id);
+    const map = await service.viewable([first.media.id, second.media.id, 'missing']);
+    expect([...map.keys()]).toEqual([first.media.id]);
+    expect(map.get(first.media.id)?.url).toContain('/read/');
   });
 });

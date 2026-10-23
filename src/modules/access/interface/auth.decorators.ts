@@ -14,6 +14,15 @@ export function RequiresAuth(): CustomDecorator<string> {
   return SetMetadata(REQUIRES_AUTH_KEY, true);
 }
 
+export const OPTIONAL_AUTH_KEY = 'access:optional_auth';
+
+/** Public route that also recognises a signed-in caller: a valid bearer token
+ * attaches the actor, no token means anonymous, an invalid token is still 401
+ * (so clients refresh instead of silently seeing the signed-out view). */
+export function OptionalAuth(): CustomDecorator<string> {
+  return SetMetadata(OPTIONAL_AUTH_KEY, true);
+}
+
 export interface RequestWithActor {
   actor?: Actor;
 }
@@ -29,5 +38,13 @@ export const CurrentUser = createParamDecorator(
       );
     }
     return request.actor;
+  },
+);
+
+/** The caller on an @OptionalAuth() route, or null when signed out. */
+export const OptionalUser = createParamDecorator(
+  (_data: unknown, context: ExecutionContext): Actor | null => {
+    const request = context.switchToHttp().getRequest<RequestWithActor>();
+    return request.actor ?? null;
   },
 );

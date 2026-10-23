@@ -33,6 +33,12 @@ export class PrismaMediaRepository implements MediaRepository {
     return row ? toDomain(row) : null;
   }
 
+  async findMany(ids: string[]): Promise<MediaAsset[]> {
+    if (ids.length === 0) return [];
+    const rows = await this.prisma.mediaAsset.findMany({ where: { id: { in: ids } } });
+    return rows.map(toDomain);
+  }
+
   async save(asset: MediaAsset): Promise<MediaAsset> {
     const row = await this.prisma.mediaAsset.update({
       where: { id: asset.id },
