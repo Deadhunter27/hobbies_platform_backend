@@ -64,7 +64,7 @@ export class PrismaConversationRepository implements ConversationRepository {
     const rows = await this.prisma.$queryRaw<ConversationRow[]>(Prisma.sql`
       SELECT
         "id", "hobbyId", "communityReferenceId", "activityReferenceId",
-        "authorId", "authorDisplayName", "title", "body", "status"::text AS "status",
+        "authorId", "authorDisplayName", COALESCE("title", LEFT("body", 120)) AS "title", "body", "status"::text AS "status",
         "createdAt", "updatedAt"
       FROM "conversation"
       WHERE "hobbyId" = ${input.hobbyId}
@@ -88,7 +88,7 @@ export class PrismaConversationRepository implements ConversationRepository {
     const rows = await this.prisma.$queryRaw<ConversationRow[]>(Prisma.sql`
       SELECT
         "id", "hobbyId", "communityReferenceId", "activityReferenceId",
-        "authorId", "authorDisplayName", "title", "body", "status"::text AS "status",
+        "authorId", "authorDisplayName", COALESCE("title", LEFT("body", 120)) AS "title", "body", "status"::text AS "status",
         "createdAt", "updatedAt"
       FROM "conversation"
       WHERE "id" = ${id}
@@ -102,6 +102,7 @@ export class PrismaConversationRepository implements ConversationRepository {
       SELECT "id", "conversationId", "authorId", "authorDisplayName", "body", "createdAt", "updatedAt"
       FROM "conversation_reply"
       WHERE "conversationId" = ${id}
+        AND "status" = 'published'::"conversation_status"
       ORDER BY "createdAt" ASC, "id" ASC
     `);
 
@@ -115,7 +116,7 @@ export class PrismaConversationRepository implements ConversationRepository {
     const rows = await prismaClientOf(this.prisma, tx).$queryRaw<ConversationRow[]>(Prisma.sql`
       SELECT
         "id", "hobbyId", "communityReferenceId", "activityReferenceId",
-        "authorId", "authorDisplayName", "title", "body", "status"::text AS "status",
+        "authorId", "authorDisplayName", COALESCE("title", LEFT("body", 120)) AS "title", "body", "status"::text AS "status",
         "createdAt", "updatedAt"
       FROM "conversation"
       WHERE "id" = ${id}
@@ -136,7 +137,7 @@ export class PrismaConversationRepository implements ConversationRepository {
       )
       RETURNING
         "id", "hobbyId", "communityReferenceId", "activityReferenceId",
-        "authorId", "authorDisplayName", "title", "body", "status"::text AS "status",
+        "authorId", "authorDisplayName", COALESCE("title", LEFT("body", 120)) AS "title", "body", "status"::text AS "status",
         "createdAt", "updatedAt"
     `);
     return conversationFromRow(rows[0]!);
@@ -165,7 +166,7 @@ export class PrismaConversationRepository implements ConversationRepository {
       WHERE "id" = ${input.id}
       RETURNING
         "id", "hobbyId", "communityReferenceId", "activityReferenceId",
-        "authorId", "authorDisplayName", "title", "body", "status"::text AS "status",
+        "authorId", "authorDisplayName", COALESCE("title", LEFT("body", 120)) AS "title", "body", "status"::text AS "status",
         "createdAt", "updatedAt"
     `);
     return rows[0] ? conversationFromRow(rows[0]) : null;

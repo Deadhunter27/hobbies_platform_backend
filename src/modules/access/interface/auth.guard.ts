@@ -5,7 +5,7 @@ import { UnauthorizedError } from '@shared/errors';
 import { SuspendedActorError, type Actor } from '../domain';
 import { TOKEN_VERIFIER, type TokenVerifier } from '../application/ports/token-verifier.port';
 import { ACTOR_DIRECTORY, type ActorDirectory } from '../application/ports/actor-directory.port';
-import { REQUIRES_AUTH_KEY, type RequestWithActor } from './auth.decorators';
+import { OPTIONAL_AUTH_KEY, REQUIRES_AUTH_KEY, type RequestWithActor } from './auth.decorators';
 
 /**
  * ADR-0017/0018: verifies the JWT statelessly, then loads the actor LIVE —
@@ -25,13 +25,18 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    if (!requiresAuth) {
+    const optionalAuth = this.reflector.getAllAndOverride<boolean>(OPTIONAL_AUTH_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (!requiresAuth && !optionalAuth) {
       return true;
     }
 
     const request = context.switchToHttp().getRequest<Request & RequestWithActor>();
     const token = this.extractBearer(request);
     if (!token) {
+      if (!requiresAuth) return true;
       throw new UnauthorizedError('Missing bearer token.');
     }
 

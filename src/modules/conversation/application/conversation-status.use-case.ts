@@ -19,7 +19,10 @@ export class SetConversationStatusUseCase {
     tx?: TxContext,
   ): Promise<Conversation> {
     const existing = await this.repository.findById(conversationId, tx);
-    if (!existing) throw new ConversationNotFoundError(conversationId);
+    // A post its author deleted stays deleted; moderation cannot bring it back.
+    if (!existing || existing.status === 'deleted') {
+      throw new ConversationNotFoundError(conversationId);
+    }
     if (existing.status === status) return existing;
 
     const updated = await this.repository.updateStatus(

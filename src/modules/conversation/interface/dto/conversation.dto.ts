@@ -40,7 +40,7 @@ export const conversationResponseSchema = z.object({
   author: z.object({ personId: ulid, displayName: z.string() }),
   title: z.string(),
   body: z.string(),
-  status: z.enum(['published', 'archived']),
+  status: z.enum(['published', 'archived', 'deleted']),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

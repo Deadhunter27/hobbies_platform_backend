@@ -585,3 +585,15 @@ model MediaAsset {
   @@index([status, createdAt], map: "media_asset_status_created_idx")
   @@map("media_asset")
 }
+
+/// Runtime platform rules (ADR-0033): who may create what, visibility ratios,
+/// moderation thresholds. Values are validated against the registry in code.
+model PlatformSetting {
+  key         String   @id @db.VarChar(80)
+  value       Json
+  updatedBy   String?  @db.Char(26)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("platform_setting")
+}

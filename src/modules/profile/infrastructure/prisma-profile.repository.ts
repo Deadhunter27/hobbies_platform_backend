@@ -75,6 +75,14 @@ export class PrismaProfileRepository implements ProfileRepository {
     return record ? ProfileDetails.reconstitute(record) : null;
   }
 
+  async findDetailsMany(userIds: string[]): Promise<ProfileDetails[]> {
+    if (userIds.length === 0) return [];
+    const records = await this.prisma.profileUserDetails.findMany({
+      where: { userId: { in: userIds } },
+    });
+    return records.map((record) => ProfileDetails.reconstitute(record));
+  }
+
   async saveDetails(details: ProfileDetails): Promise<ProfileDetails> {
     const data = {
       handle: details.handle,

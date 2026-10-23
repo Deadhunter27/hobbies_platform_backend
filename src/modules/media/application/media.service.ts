@@ -24,6 +24,12 @@ export const READ_URL_TTL_SECONDS = 15 * 60;
 /** EXIF lives in the first segments; 128 KB covers any realistic APP1 block. */
 const METADATA_SCAN_BYTES = 128 * 1024;
 
+export interface ViewableMedia {
+  id: string;
+  mimeType: string;
+  url: string;
+}
+
 export interface UploadTicket {
   media: MediaAsset;
   uploadUrl: string;
@@ -125,6 +131,22 @@ export class MediaService {
     const media = await this.repository.findById(mediaId);
     if (!media || !media.isViewable) return null;
     return this.storage.presignDownload(media.objectKey, READ_URL_TTL_SECONDS);
+  }
+
+  /**
+   * Signed read URLs for many items at once (feeds). Missing, hidden or
+   * deleted items are simply absent from the result.
+   */
+  async viewable(mediaIds: string[]): Promise<Map<string, ViewableMedia>> {
+    const result = new Map<string, ViewableMedia>();
+    if (mediaIds.length === 0 || !this.storage.configured) return result;
+    const assets = await this.repository.findMany([...new Set(mediaIds)]);
+    for (const media of assets) {
+      if (!media.isViewable) continue;
+      const url = await this.storage.presignDownload(media.objectKey, READ_URL_TTL_SECONDS);
+      result.set(media.id, { id: media.id, mimeType: media.mimeType, url });
+    }
+    return result;
   }
 
   async delete(actor: Actor, mediaId: string): Promise<void> {

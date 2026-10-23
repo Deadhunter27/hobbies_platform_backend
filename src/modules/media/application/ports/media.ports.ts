@@ -3,6 +3,7 @@ import type { MediaAsset } from '../../domain';
 export interface MediaRepository {
   create(asset: MediaAsset): Promise<MediaAsset>;
   findById(id: string): Promise<MediaAsset | null>;
+  findMany(ids: string[]): Promise<MediaAsset[]>;
   save(asset: MediaAsset): Promise<MediaAsset>;
 }
 
