@@ -6,7 +6,11 @@ export interface ActivitySnapshot {
 }
 
 export interface ActivityRepository {
-  listPublished(now: Date, hobbyId?: string): Promise<ActivitySnapshot[]>;
+  listPublished(
+    now: Date,
+    filter?: { hobbyId?: string; communityId?: string; hostId?: string },
+  ): Promise<ActivitySnapshot[]>;
+  create(activity: Activity): Promise<void>;
   findVisibleById(activityId: string): Promise<ActivitySnapshot | null>;
   listCommitments(userId: string): Promise<ActivityCommitment[]>;
   findCommitment(userId: string, activityId: string): Promise<ActivityCommitment | null>;

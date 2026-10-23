@@ -10,4 +10,6 @@ export {
   ActivityCommitmentNotFoundError,
   ActivityUnavailableError,
   ActivityCapacityFullError,
+  CommunityHostRequiredError,
+  NotActivityHostError,
 } from './errors';

@@ -1,14 +1,15 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { configureApp } from '../../src/bootstrap';
 import { newId } from '../../src/shared/utils/id';
 import { describeIfDb } from '../support/db-test.helper';
+import { useIsolatedClientIp } from '../support/e2e-client';
 
 describeIfDb('Conversation + hobby feed e2e', () => {
   let app: INestApplication;
+  const client = useIsolatedClientIp(() => app);
   const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL });
   const run = newId().toLowerCase();
   const email = `e2e-conversation-${run}@example.com`;
@@ -70,19 +71,16 @@ describeIfDb('Conversation + hobby feed e2e', () => {
     configureApp(app);
     await app.init();
 
-    const created = await request(app.getHttpServer())
+    const created = await client()
       .post('/api/v1/auth/register')
       .send({ email, password, displayName: 'Conversation Runner' })
       .expect(201);
     userId = created.body.id;
 
-    const login = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
-      .send({ email, password })
-      .expect(200);
+    const login = await client().post('/api/v1/auth/login').send({ email, password }).expect(200);
     accessToken = login.body.accessToken;
 
-    await request(app.getHttpServer())
+    await client()
       .put(`/api/v1/me/hobby-contexts/${hobbyId}`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
@@ -110,12 +108,12 @@ describeIfDb('Conversation + hobby feed e2e', () => {
   });
 
   it('requires an authenticated active hobby context to create a conversation', async () => {
-    await request(app.getHttpServer())
+    await client()
       .post(`/api/v1/hobbies/${hobbyId}/conversations`)
       .send({ title: 'Can I ask this?', body: 'This should require authentication.' })
       .expect(401);
 
-    const first = await request(app.getHttpServer())
+    const first = await client()
       .post(`/api/v1/hobbies/${hobbyId}/conversations`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
@@ -128,7 +126,7 @@ describeIfDb('Conversation + hobby feed e2e', () => {
     expect(first.body.hobbyId).toBe(hobbyId);
     firstConversationId = first.body.id;
 
-    const second = await request(app.getHttpServer())
+    const second = await client()
       .post(`/api/v1/hobbies/${hobbyId}/conversations`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
@@ -141,14 +139,14 @@ describeIfDb('Conversation + hobby feed e2e', () => {
   });
 
   it('lists published conversations with a bounded keyset cursor', async () => {
-    const firstPage = await request(app.getHttpServer())
+    const firstPage = await client()
       .get(`/api/v1/hobbies/${hobbyId}/conversations?limit=1`)
       .expect(200);
 
     expect(firstPage.body.data).toHaveLength(1);
     expect(firstPage.body.nextCursor).toEqual(expect.any(String));
 
-    const secondPage = await request(app.getHttpServer())
+    const secondPage = await client()
       .get(
         `/api/v1/hobbies/${hobbyId}/conversations?limit=1&cursor=${encodeURIComponent(firstPage.body.nextCursor)}`,
       )
@@ -159,7 +157,7 @@ describeIfDb('Conversation + hobby feed e2e', () => {
   });
 
   it('returns flat chronological replies on conversation detail', async () => {
-    const reply = await request(app.getHttpServer())
+    const reply = await client()
       .post(`/api/v1/conversations/${firstConversationId}/replies`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ body: 'Starting slower than expected helped me keep showing up.' })
@@ -167,9 +165,7 @@ describeIfDb('Conversation + hobby feed e2e', () => {
 
     expect(reply.body.author.displayName).toBe('Conversation Runner');
 
-    const detail = await request(app.getHttpServer())
-      .get(`/api/v1/conversations/${firstConversationId}`)
-      .expect(200);
+    const detail = await client().get(`/api/v1/conversations/${firstConversationId}`).expect(200);
 
     expect(detail.body.id).toBe(firstConversationId);
     expect(detail.body.replies).toHaveLength(1);
@@ -177,9 +173,7 @@ describeIfDb('Conversation + hobby feed e2e', () => {
   });
 
   it('builds a source-preserving hobby feed from conversations and upcoming activities', async () => {
-    const feed = await request(app.getHttpServer())
-      .get(`/api/v1/hobbies/${hobbyId}/feed?limit=10`)
-      .expect(200);
+    const feed = await client().get(`/api/v1/hobbies/${hobbyId}/feed?limit=10`).expect(200);
 
     expect(feed.body.data).toEqual(
       expect.arrayContaining([

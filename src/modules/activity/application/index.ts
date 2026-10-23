@@ -16,3 +16,4 @@ export type {
   ActivityAvailability,
   UpsertMyActivityCommitmentInput,
 } from './activity.use-cases';
+export * from './event-creation.use-cases';

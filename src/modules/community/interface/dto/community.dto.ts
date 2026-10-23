@@ -71,3 +71,34 @@ export const communityMembershipListResponseSchema = z.object({
 export class CommunityMembershipListResponseDto extends createZodDto(
   communityMembershipListResponseSchema,
 ) {}
+
+export const createCommunitySchema = z
+  .object({
+    hobbyId: ulid,
+    name: z.string().trim().min(3).max(80),
+    description: z.string().trim().max(2000).nullable().default(null),
+    city: z.string().trim().max(120).nullable().default(null),
+  })
+  .strict();
+export class CreateCommunityDto extends createZodDto(createCommunitySchema) {}
+
+export const listCommunitiesQuerySchema = z
+  .object({
+    hobbyId: ulid.optional(),
+    q: z.string().trim().min(2).max(60).optional(),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
+    cursor: z.string().min(1).optional(),
+  })
+  .strict();
+export class ListCommunitiesQueryDto extends createZodDto(listCommunitiesQuerySchema) {}
+
+export const communitySummarySchema = z.object({
+  ...communityResponseSchema.shape,
+  memberCount: z.number().int().nonnegative(),
+});
+
+export const communityPageResponseSchema = z.object({
+  data: z.array(communitySummarySchema),
+  nextCursor: z.string().nullable(),
+});
+export class CommunityPageResponseDto extends createZodDto(communityPageResponseSchema) {}

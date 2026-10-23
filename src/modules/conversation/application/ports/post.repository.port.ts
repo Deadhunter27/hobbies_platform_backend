@@ -36,6 +36,7 @@ export interface ReplyRef {
 export interface PostRepository {
   listPosts(input: {
     hobbyId: string | null;
+    communityId: string | null;
     authorId: string | null;
     /** Restrict to these authors (the Following feed); null = everyone. */
     authorIds: string[] | null;
@@ -53,4 +54,6 @@ export interface PostRepository {
   /** Soft-deletes; returns the attached media ids so storage can be released. */
   deletePost(id: string, now: Date): Promise<string[]>;
   deleteReply(id: string, now: Date): Promise<string[]>;
+  /** Moderation: hide (archived) or restore (published) one reply. False if not found. */
+  setReplyVisibility(id: string, visible: boolean, now: Date): Promise<boolean>;
 }

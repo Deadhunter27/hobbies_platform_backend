@@ -1,11 +1,11 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { configureApp } from '../../src/bootstrap';
 import { newId } from '../../src/shared/utils/id';
 import { describeIfDb } from '../support/db-test.helper';
+import { useIsolatedClientIp } from '../support/e2e-client';
 
 /**
  * Full auth lifecycle (M2 acceptance): register -> login -> /me ->
@@ -15,6 +15,7 @@ import { describeIfDb } from '../support/db-test.helper';
  */
 describeIfDb('Auth e2e', () => {
   let app: INestApplication;
+  const client = useIsolatedClientIp(() => app);
   const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL });
 
   const run = newId().toLowerCase();
@@ -38,7 +39,7 @@ describeIfDb('Auth e2e', () => {
   });
 
   function api() {
-    return request(app.getHttpServer());
+    return client();
   }
 
   it('registers, rejects the duplicate, and enforces the password policy', async () => {

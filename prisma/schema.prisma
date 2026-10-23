@@ -380,6 +380,8 @@ model Activity {
 
   @@index([status, startsAt, id])
   @@index([hobbyId, status, startsAt])
+  @@index([communityReferenceId, status, startsAt], map: "activity_communityReferenceId_status_startsAt_idx")
+  @@index([hostReferenceId, status, startsAt], map: "activity_hostReferenceId_status_startsAt_idx")
   @@map("activity")
 }
 
@@ -609,4 +611,54 @@ model PersonFollow {
   @@index([followeeId, createdAt(sort: Desc)], map: "person_follow_followee_created_idx")
   @@index([followerId, createdAt(sort: Desc)], map: "person_follow_follower_created_idx")
   @@map("person_follow")
+}
+
+enum ReportTargetType {
+  post
+  reply
+  community
+  event
+  person
+
+  @@map("report_target_type")
+}
+
+enum ReportReason {
+  spam
+  inappropriate
+  harassment
+  scam
+  dangerous
+  off_topic
+  other
+
+  @@map("report_reason")
+}
+
+enum ReportStatus {
+  open
+  dismissed
+  actioned
+
+  @@map("report_status")
+}
+
+/// ADR-0036: one person's report about one piece of content or a person.
+model ContentReport {
+  id         String           @id @db.Char(26)
+  reporterId String           @db.Char(26)
+  targetType ReportTargetType
+  targetId   String           @db.Char(26)
+  reason     ReportReason
+  note       String?          @db.VarChar(500)
+  status     ReportStatus     @default(open)
+  autoHidden Boolean          @default(false)
+  createdAt  DateTime         @default(now()) @db.Timestamptz(3)
+  resolvedAt DateTime?        @db.Timestamptz(3)
+  resolvedBy String?          @db.Char(26)
+
+  @@unique([reporterId, targetType, targetId], map: "content_report_reporter_target_key")
+  @@index([status, targetType, targetId], map: "content_report_status_target_idx")
+  @@index([status, createdAt(sort: Desc)], map: "content_report_status_created_idx")
+  @@map("content_report")
 }

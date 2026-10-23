@@ -13,3 +13,4 @@ export {
 } from './profile.use-cases';
 export type { UpsertMyProfileContextInput, UpsertMyHobbyContextInput } from './profile.use-cases';
 export * from './public-profile.service';
+export * from './creator-eligibility.service';

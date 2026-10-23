@@ -68,13 +68,19 @@ function toCommitment(record: CommitmentRecord): ActivityCommitment {
 export class PrismaActivityRepository implements ActivityRepository, ActivityLifecycleRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listPublished(now: Date, hobbyId?: string): Promise<ActivitySnapshot[]> {
+  async listPublished(
+    now: Date,
+    filter: { hobbyId?: string; communityId?: string; hostId?: string } = {},
+  ): Promise<ActivitySnapshot[]> {
     const records = await this.prisma.activity.findMany({
       where: {
         status: 'published',
         startsAt: { gt: now },
-        ...(hobbyId ? { hobbyId } : {}),
+        ...(filter.hobbyId ? { hobbyId: filter.hobbyId } : {}),
+        ...(filter.communityId ? { communityReferenceId: filter.communityId } : {}),
+        ...(filter.hostId ? { hostReferenceId: filter.hostId } : {}),
       },
+      take: 200,
       include: {
         _count: { select: { commitments: { where: { state: 'committed' } } } },
       },
@@ -84,6 +90,10 @@ export class PrismaActivityRepository implements ActivityRepository, ActivityLif
       activity: toActivity(record),
       committedCount: record._count.commitments,
     }));
+  }
+
+  async create(activity: Activity): Promise<void> {
+    await this.prisma.activity.create({ data: activity.toProps() });
   }
 
   async findVisibleById(activityId: string): Promise<ActivitySnapshot | null> {

@@ -69,6 +69,20 @@ export class Activity extends Entity {
     super(props.id);
   }
 
+  /** A new, published event created by a person (ADR-0035). */
+  static createByPerson(props: Omit<ActivityProps, 'status'>, now: Date): Activity {
+    if (props.startsAt <= now) {
+      throw new DomainRuleViolation(
+        'An event must start in the future.',
+        undefined,
+        'ACTIVITY_START_IN_PAST',
+      );
+    }
+    const activity = new Activity({ ...props, status: 'published' });
+    assertActivityRules(activity.props);
+    return activity;
+  }
+
   static reconstitute(props: ActivityProps): Activity {
     assertActivityRules(props);
     return new Activity(props);
@@ -143,5 +157,9 @@ export class Activity extends Entity {
 
   canAcceptCommitment(now = new Date()): boolean {
     return this.status === 'published' && this.startsAt > now;
+  }
+
+  toProps(): ActivityProps {
+    return { ...this.props };
   }
 }

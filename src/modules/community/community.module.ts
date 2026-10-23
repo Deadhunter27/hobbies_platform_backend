@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '@infra/database';
 import { AccessModule } from '@modules/access';
+import { CatalogModule } from '@modules/catalog';
+import { ProfileModule } from '@modules/profile';
 import {
   COMMUNITY_LIFECYCLE_REPOSITORY,
   COMMUNITY_REPOSITORY,
@@ -11,12 +13,15 @@ import {
   ResolveCommunityContextUseCase,
   SetCommunityStatusUseCase,
   UpsertMyCommunityMembershipUseCase,
+  CreateCommunityUseCase,
+  ListCommunitiesUseCase,
+  GetCommunityRoleUseCase,
 } from './application';
 import { PrismaCommunityRepository } from './infrastructure';
 import { CommunitiesController, MyCommunityMembershipsController } from './interface';
 
 @Module({
-  imports: [PrismaModule, AccessModule],
+  imports: [PrismaModule, AccessModule, CatalogModule, ProfileModule],
   controllers: [CommunitiesController, MyCommunityMembershipsController],
   providers: [
     CommunityAuthorization,
@@ -26,6 +31,9 @@ import { CommunitiesController, MyCommunityMembershipsController } from './inter
     ListMyCommunityMembershipsUseCase,
     UpsertMyCommunityMembershipUseCase,
     SetCommunityStatusUseCase,
+    CreateCommunityUseCase,
+    ListCommunitiesUseCase,
+    GetCommunityRoleUseCase,
     PrismaCommunityRepository,
     { provide: COMMUNITY_REPOSITORY, useExisting: PrismaCommunityRepository },
     { provide: COMMUNITY_LIFECYCLE_REPOSITORY, useExisting: PrismaCommunityRepository },
@@ -35,6 +43,7 @@ import { CommunitiesController, MyCommunityMembershipsController } from './inter
     GetCommunityContextUseCase,
     ResolveCommunityContextUseCase,
     SetCommunityStatusUseCase,
+    GetCommunityRoleUseCase,
   ],
 })
 export class CommunityModule {}

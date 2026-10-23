@@ -5,5 +5,6 @@ export {
   ListMyActivityCommitmentsUseCase,
   GetMyActivityCommitmentUseCase,
   UpsertMyActivityCommitmentUseCase,
+  SetActivityStatusUseCase,
 } from './application';
 export type { ActivityView, ActivityAvailability } from './application';

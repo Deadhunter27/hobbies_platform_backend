@@ -1,4 +1,20 @@
-import { ConflictError, NotFoundError } from '@shared/errors';
+import { ConflictError, ForbiddenError, NotFoundError } from '@shared/errors';
+
+export class CommunityHostRequiredError extends ForbiddenError {
+  constructor() {
+    super(
+      'Only organizers and hosts of this community can create its events.',
+      undefined,
+      'COMMUNITY_HOST_REQUIRED',
+    );
+  }
+}
+
+export class NotActivityHostError extends ForbiddenError {
+  constructor() {
+    super('Only the host can change this event.', undefined, 'NOT_ACTIVITY_HOST');
+  }
+}
 
 export class ActivityNotFoundError extends NotFoundError {
   constructor(activityId: string) {

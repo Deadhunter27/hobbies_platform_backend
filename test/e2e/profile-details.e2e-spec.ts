@@ -1,14 +1,15 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { configureApp } from '../../src/bootstrap';
 import { newId } from '../../src/shared/utils/id';
 import { describeIfDb } from '../support/db-test.helper';
+import { useIsolatedClientIp } from '../support/e2e-client';
 
 describeIfDb('Profile details ("Kenalan dulu") e2e', () => {
   let app: INestApplication;
+  const client = useIsolatedClientIp(() => app);
   const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL });
   const run = newId().toLowerCase();
   const handle = `e2e_${run.slice(-10)}`;
@@ -17,14 +18,11 @@ describeIfDb('Profile details ("Kenalan dulu") e2e', () => {
   async function signUp(label: string) {
     const email = `e2e-details-${label}-${run}@example.com`;
     const password = 'details-password-1';
-    const created = await request(app.getHttpServer())
+    const created = await client()
       .post('/api/v1/auth/register')
       .send({ email, password, displayName: `Details ${label}` })
       .expect(201);
-    const login = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
-      .send({ email, password })
-      .expect(200);
+    const login = await client().post('/api/v1/auth/login').send({ email, password }).expect(200);
     const user = { id: created.body.id as string, token: login.body.accessToken as string };
     users.push(user);
     return user;
@@ -48,12 +46,12 @@ describeIfDb('Profile details ("Kenalan dulu") e2e', () => {
   });
 
   it('requires authentication', async () => {
-    await request(app.getHttpServer()).get('/api/v1/me/profile-details').expect(401);
+    await client().get('/api/v1/me/profile-details').expect(401);
   });
 
   it('returns empty details with marketing consent off for a new user', async () => {
     const user = await signUp('empty');
-    const res = await request(app.getHttpServer())
+    const res = await client()
       .get('/api/v1/me/profile-details')
       .set('Authorization', `Bearer ${user.token}`)
       .expect(200);
@@ -75,12 +73,12 @@ describeIfDb('Profile details ("Kenalan dulu") e2e', () => {
 
   it('saves a partial update, normalizes handles and keeps omitted fields', async () => {
     const user = await signUp('owner');
-    await request(app.getHttpServer())
+    await client()
       .patch('/api/v1/me/profile-details')
       .set('Authorization', `Bearer ${user.token}`)
       .send({ handle: `@${handle.toUpperCase()}`, birthYear: 2003, gender: 'male' })
       .expect(200);
-    const res = await request(app.getHttpServer())
+    const res = await client()
       .patch('/api/v1/me/profile-details')
       .set('Authorization', `Bearer ${user.token}`)
       .send({
@@ -104,7 +102,7 @@ describeIfDb('Profile details ("Kenalan dulu") e2e', () => {
 
   it('rejects a handle already used by someone else with HANDLE_TAKEN', async () => {
     const other = await signUp('other');
-    const res = await request(app.getHttpServer())
+    const res = await client()
       .patch('/api/v1/me/profile-details')
       .set('Authorization', `Bearer ${other.token}`)
       .send({ handle })
@@ -114,7 +112,7 @@ describeIfDb('Profile details ("Kenalan dulu") e2e', () => {
 
   it('rejects invalid input', async () => {
     const user = users[0]!;
-    await request(app.getHttpServer())
+    await client()
       .patch('/api/v1/me/profile-details')
       .set('Authorization', `Bearer ${user.token}`)
       .send({ birthYear: new Date().getUTCFullYear() - 5 })

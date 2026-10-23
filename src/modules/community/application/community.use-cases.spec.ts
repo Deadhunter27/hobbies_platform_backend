@@ -40,6 +40,8 @@ function repository(overrides: Partial<CommunityRepository> = {}): CommunityRepo
     findMembership: jest.fn().mockResolvedValue(null),
     listMembershipsByUser: jest.fn().mockResolvedValue([]),
     saveMembership: jest.fn(async (input) => input satisfies CommunityMembership),
+    createWithOrganizer: jest.fn().mockResolvedValue(undefined),
+    listPublished: jest.fn().mockResolvedValue([]),
     ...overrides,
   };
 }
