@@ -23,6 +23,7 @@ import { CommunityModule } from '@modules/community';
 import { CheckInModule } from '@modules/checkin';
 import { ConversationModule } from '@modules/conversation';
 import { PeopleModule } from '@modules/people';
+import { ModerationModule } from '@modules/moderation';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { PeopleModule } from '@modules/people';
     CheckInModule,
     ConversationModule,
     PeopleModule,
+    ModerationModule,
     AdminModule,
   ],
   providers: [

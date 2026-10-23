@@ -53,4 +53,6 @@ export interface PostRepository {
   /** Soft-deletes; returns the attached media ids so storage can be released. */
   deletePost(id: string, now: Date): Promise<string[]>;
   deleteReply(id: string, now: Date): Promise<string[]>;
+  /** Moderation: hide (archived) or restore (published) one reply. False if not found. */
+  setReplyVisibility(id: string, visible: boolean, now: Date): Promise<boolean>;
 }

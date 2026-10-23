@@ -3,6 +3,7 @@ import { PrismaModule } from '@infra/database';
 import { AccessModule } from '@modules/access';
 import { CatalogModule } from '@modules/catalog';
 import { MediaModule } from '@modules/media';
+import { SettingsModule } from '@modules/settings';
 import {
   GetMyHobbyContextUseCase,
   GetMyProfileContextUseCase,
@@ -15,12 +16,13 @@ import {
   UpdateMyProfileDetailsUseCase,
   ProfileAvatarUrlResolver,
   PublicProfileService,
+  CreatorEligibilityService,
 } from './application';
 import { PrismaProfileRepository } from './infrastructure';
 import { ProfileController } from './interface';
 
 @Module({
-  imports: [PrismaModule, AccessModule, CatalogModule, MediaModule],
+  imports: [PrismaModule, AccessModule, CatalogModule, MediaModule, SettingsModule],
   controllers: [ProfileController],
   providers: [
     ProfileAuthorization,
@@ -33,8 +35,9 @@ import { ProfileController } from './interface';
     UpdateMyProfileDetailsUseCase,
     ProfileAvatarUrlResolver,
     PublicProfileService,
+    CreatorEligibilityService,
     { provide: PROFILE_REPOSITORY, useClass: PrismaProfileRepository },
   ],
-  exports: [GetMyHobbyContextUseCase, PublicProfileService],
+  exports: [GetMyHobbyContextUseCase, PublicProfileService, CreatorEligibilityService],
 })
 export class ProfileModule {}

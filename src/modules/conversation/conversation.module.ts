@@ -24,6 +24,7 @@ import {
   PostViewAssembler,
   ReplyToPostUseCase,
   SetLikeUseCase,
+  ConversationModerationSeam,
 } from './application';
 import { PrismaConversationRepository, PrismaPostRepository } from './infrastructure';
 import { ConversationController, PostController } from './interface';
@@ -55,9 +56,10 @@ import { ConversationController, PostController } from './interface';
     ReplyToPostUseCase,
     SetLikeUseCase,
     DeleteOwnContentUseCase,
+    ConversationModerationSeam,
     { provide: CONVERSATION_REPOSITORY, useClass: PrismaConversationRepository },
     { provide: POST_REPOSITORY, useClass: PrismaPostRepository },
   ],
-  exports: [SetConversationStatusUseCase],
+  exports: [SetConversationStatusUseCase, ConversationModerationSeam],
 })
 export class ConversationModule {}

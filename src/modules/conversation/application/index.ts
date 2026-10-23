@@ -6,3 +6,4 @@ export * from './ports/conversation.repository.port';
 export * from './post.use-cases';
 export * from './post-view.assembler';
 export * from './ports/post.repository.port';
+export { ConversationModerationSeam } from './content-moderation.seam';

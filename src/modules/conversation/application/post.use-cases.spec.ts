@@ -66,6 +66,12 @@ class MemoryPosts implements PostRepository {
     post.deleted = true;
     return post.mediaIds;
   }
+  async setReplyVisibility(id: string, visible: boolean) {
+    const reply = this.replies.get(id);
+    if (!reply) return false;
+    reply.deleted = !visible;
+    return true;
+  }
   async deleteReply(id: string) {
     for (const reply of this.replies.values()) {
       if (reply.id === id || reply.parentReplyId === id) reply.deleted = true;

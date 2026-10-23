@@ -238,6 +238,17 @@ export class PrismaPostRepository implements PostRepository {
     });
   }
 
+  async setReplyVisibility(id: string, visible: boolean, now: Date): Promise<boolean> {
+    // Never resurrect a reply its author deleted.
+    const changed = await this.prisma.$executeRaw(Prisma.sql`
+      UPDATE "conversation_reply"
+      SET "status" = ${visible ? PUBLISHED : Prisma.sql`'archived'::"conversation_status"`},
+          "updatedAt" = ${now}
+      WHERE "id" = ${id} AND "status" <> 'deleted'::"conversation_status"
+    `);
+    return changed > 0;
+  }
+
   private async attach(
     tx: Prisma.TransactionClient,
     conversationId: string,

@@ -10,7 +10,13 @@ import type {
   CommunityRepository,
   SaveCommunityMembershipInput,
 } from '../application';
-import type { Community, CommunityContext, CommunityMembership, CommunityStatus } from '../domain';
+import type {
+  Community,
+  CommunityContext,
+  CommunityMembership,
+  CommunityStatus,
+  CommunitySummary,
+} from '../domain';
 
 function toCommunity(record: CommunityRecord): Community {
   return {
@@ -122,6 +128,70 @@ export class PrismaCommunityRepository
       },
     });
     return toMembership(record);
+  }
+
+  async createWithOrganizer(
+    community: Community,
+    organizer: SaveCommunityMembershipInput,
+  ): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      await tx.community.create({
+        data: {
+          id: community.id,
+          hobbyId: community.hobbyId,
+          name: community.name,
+          slug: community.slug,
+          description: community.description,
+          city: community.city,
+          countryCode: community.countryCode,
+          status: community.status,
+          createdAt: community.createdAt,
+          updatedAt: community.updatedAt,
+        },
+      });
+      await tx.communityMembership.create({ data: organizer });
+    });
+  }
+
+  async listPublished(input: {
+    hobbyId: string | null;
+    query: string | null;
+    limit: number;
+    cursor: { name: string; id: string } | null;
+  }): Promise<CommunitySummary[]> {
+    const records = await this.prisma.community.findMany({
+      where: {
+        status: 'published',
+        ...(input.hobbyId ? { hobbyId: input.hobbyId } : {}),
+        ...(input.query
+          ? {
+              OR: [
+                { name: { contains: input.query, mode: 'insensitive' } },
+                { city: { contains: input.query, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+        ...(input.cursor
+          ? {
+              AND: [
+                {
+                  OR: [
+                    { name: { gt: input.cursor.name } },
+                    { name: input.cursor.name, id: { gt: input.cursor.id } },
+                  ],
+                },
+              ],
+            }
+          : {}),
+      },
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
+      take: input.limit,
+      include: { _count: { select: { memberships: { where: { state: 'active' } } } } },
+    });
+    return records.map((record) => ({
+      community: toCommunity(record),
+      memberCount: record._count.memberships,
+    }));
   }
 
   async updateStatus(

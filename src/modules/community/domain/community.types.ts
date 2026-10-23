@@ -43,3 +43,20 @@ export interface CommunityContext {
   community: Community;
   people: CommunityPeopleContext;
 }
+
+/** URL slug from a community name plus a short unique suffix. */
+export function communitySlug(name: string, uniqueSuffix: string): string {
+  const base = name
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+  return `${base || 'community'}-${uniqueSuffix.toLowerCase()}`;
+}
+
+export interface CommunitySummary {
+  community: Community;
+  memberCount: number;
+}

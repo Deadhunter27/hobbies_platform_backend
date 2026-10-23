@@ -50,8 +50,11 @@ function toView(snapshot: ActivitySnapshot, now = new Date()): ActivityView {
 export class ListActivitiesUseCase {
   constructor(@Inject(ACTIVITY_REPOSITORY) private readonly repository: ActivityRepository) {}
 
-  async execute(input: { hobbyId?: string }, now = new Date()): Promise<ActivityView[]> {
-    const activities = await this.repository.listPublished(now, input.hobbyId);
+  async execute(
+    input: { hobbyId?: string; communityId?: string; hostId?: string },
+    now = new Date(),
+  ): Promise<ActivityView[]> {
+    const activities = await this.repository.listPublished(now, input);
     return activities.map((snapshot) => toView(snapshot, now));
   }
 }
