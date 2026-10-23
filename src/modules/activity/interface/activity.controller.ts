@@ -69,7 +69,11 @@ export class ActivitiesController {
     @CurrentUser() actor: Actor,
     @Body() body: CreateEventDto,
   ): Promise<ActivityResponseDto> {
-    const view = await this.createEvent.execute(actor, body);
+    const view = await this.createEvent.execute(actor, {
+      ...body,
+      startsAt: new Date(body.startsAt),
+      endsAt: body.endsAt ? new Date(body.endsAt) : null,
+    });
     return toActivityResponse(
       view,
       await this.resolveCommunityContext.execute(view.activity.communityReferenceId),

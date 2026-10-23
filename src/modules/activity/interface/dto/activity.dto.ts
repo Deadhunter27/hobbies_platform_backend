@@ -118,8 +118,8 @@ export const createEventSchema = z
       .trim()
       .regex(/^[a-z0-9_-]{2,40}$/)
       .default('meetup'),
-    startsAt: z.coerce.date(),
-    endsAt: z.coerce.date().nullable().default(null),
+    startsAt: z.iso.datetime({ offset: true }),
+    endsAt: z.iso.datetime({ offset: true }).nullable().default(null),
     timezone: z.string().trim().refine(isTimeZone, 'Unknown time zone.').default('Asia/Jakarta'),
     placeName: z.string().trim().min(2).max(160),
     addressLabel: z.string().trim().max(240).nullable().default(null),
@@ -131,11 +131,11 @@ export const createEventSchema = z
     expectations: z.string().trim().max(2000).default(''),
   })
   .strict()
-  .refine((event) => !event.endsAt || event.endsAt > event.startsAt, {
+  .refine((event) => !event.endsAt || new Date(event.endsAt) > new Date(event.startsAt), {
     message: 'The end must be after the start.',
     path: ['endsAt'],
   })
-  .refine((event) => event.startsAt.getTime() < Date.now() + 366 * 24 * 60 * 60 * 1000, {
+  .refine((event) => new Date(event.startsAt).getTime() < Date.now() + 366 * 24 * 60 * 60 * 1000, {
     message: 'Events can be scheduled up to a year ahead.',
     path: ['startsAt'],
   });
