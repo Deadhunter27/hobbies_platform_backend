@@ -15,6 +15,11 @@ export const feedQuerySchema = z
   .object({
     hobbyId: ulid.optional(),
     authorId: ulid.optional(),
+    following: z
+      .enum(['true', 'false'])
+      .transform((value) => value === 'true')
+      .optional()
+      .describe('Only posts by people you follow (requires sign-in).'),
     limit: z.coerce.number().int().min(1).max(50).default(20),
     cursor: z.string().min(1).optional(),
   })

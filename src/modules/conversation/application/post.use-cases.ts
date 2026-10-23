@@ -2,7 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { Actor } from '@modules/access';
 import { GetHobbyUseCase } from '@modules/catalog/application/use-cases/get-hobby.use-case';
 import { MediaService } from '@modules/media';
-import { InvalidCursorError } from '@shared/errors';
+import { FollowGraph } from '@modules/people';
+import { InvalidCursorError, UnauthorizedError } from '@shared/errors';
 import { decodeCursor, newId } from '@shared/utils';
 import {
   NotContentAuthorError,
@@ -34,16 +35,29 @@ export class ListPostFeedUseCase {
     @Inject(POST_REPOSITORY) private readonly repository: PostRepository,
     private readonly assembler: PostViewAssembler,
     private readonly getHobby: GetHobbyUseCase,
+    private readonly follows: FollowGraph,
   ) {}
 
   async execute(
     viewer: Actor | null,
-    input: { hobbyId?: string; authorId?: string; limit: number; cursor?: string },
+    input: {
+      hobbyId?: string;
+      authorId?: string;
+      following?: boolean;
+      limit: number;
+      cursor?: string;
+    },
   ): Promise<FeedPage> {
     if (input.hobbyId) await this.getHobby.execute({ slugOrId: input.hobbyId });
+    let authorIds: string[] | null = null;
+    if (input.following) {
+      if (!viewer) throw new UnauthorizedError('Sign in to see posts from people you follow.');
+      authorIds = await this.follows.followeeIds(viewer.id);
+    }
     const page = await this.repository.listPosts({
       hobbyId: input.hobbyId ?? null,
       authorId: input.authorId ?? null,
+      authorIds,
       viewerId: viewer?.id ?? null,
       limit: input.limit,
       cursor: pageCursor(input.cursor),

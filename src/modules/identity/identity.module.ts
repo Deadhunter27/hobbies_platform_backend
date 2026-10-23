@@ -19,6 +19,7 @@ import {
   PrismaUserRepository,
 } from './infrastructure';
 import { IdentityActorDirectory } from './infrastructure/identity-actor.directory';
+import { PublicIdentityService } from './infrastructure/public-identity.service';
 import { AuthController } from './interface/auth.controller';
 import { MeController } from './interface/me.controller';
 
@@ -43,7 +44,8 @@ import { MeController } from './interface/me.controller';
     { provide: TOKEN_SIGNER, useExisting: JwtTokenService },
     { provide: TOKEN_VERIFIER, useExisting: JwtTokenService },
     { provide: ACTOR_DIRECTORY, useClass: IdentityActorDirectory },
+    PublicIdentityService,
   ],
-  exports: [TOKEN_VERIFIER, ACTOR_DIRECTORY],
+  exports: [TOKEN_VERIFIER, ACTOR_DIRECTORY, PublicIdentityService],
 })
 export class IdentityModule {}

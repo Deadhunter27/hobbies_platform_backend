@@ -4,6 +4,7 @@ import { AccessModule } from '@modules/access';
 import { ActivityModule } from '@modules/activity';
 import { CatalogModule } from '@modules/catalog';
 import { MediaModule } from '@modules/media';
+import { PeopleModule } from '@modules/people';
 import { ProfileModule } from '@modules/profile';
 import { SettingsModule } from '@modules/settings';
 import {
@@ -36,6 +37,7 @@ import { ConversationController, PostController } from './interface';
     ActivityModule,
     MediaModule,
     SettingsModule,
+    PeopleModule,
   ],
   controllers: [ConversationController, PostController],
   providers: [

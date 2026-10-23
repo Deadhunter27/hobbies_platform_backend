@@ -49,7 +49,7 @@ export class PostController {
   @OptionalAuth()
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Chronological post feed, optionally for one hobby or one author',
+    summary: 'Chronological post feed: everyone, one hobby, one author, or people you follow',
     description:
       'Public. Signed-out viewers see a share of each post’s photos (platform setting media.signedOutVisibleRatio); the rest are returned locked.',
   })

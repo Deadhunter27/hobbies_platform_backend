@@ -83,6 +83,37 @@ export class PrismaProfileRepository implements ProfileRepository {
     return records.map((record) => ProfileDetails.reconstitute(record));
   }
 
+  async findDetailsByHandle(handle: string): Promise<ProfileDetails | null> {
+    const record = await this.prisma.profileUserDetails.findUnique({
+      where: { handle: handle.toLowerCase() },
+    });
+    return record ? ProfileDetails.reconstitute(record) : null;
+  }
+
+  async searchHandles(query: string, limit: number): Promise<string[]> {
+    const records = await this.prisma.profileUserDetails.findMany({
+      where: { handle: { contains: query.toLowerCase() } },
+      select: { userId: true },
+      orderBy: { handle: 'asc' },
+      take: limit,
+    });
+    return records.map((record) => record.userId);
+  }
+
+  async listUsersInHobby(
+    hobbyId: string,
+    limit: number,
+    excludeUserIds: string[],
+  ): Promise<string[]> {
+    const records = await this.prisma.profileHobbyContext.findMany({
+      where: { hobbyId, userId: { notIn: excludeUserIds } },
+      select: { userId: true },
+      orderBy: { updatedAt: 'desc' },
+      take: limit,
+    });
+    return records.map((record) => record.userId);
+  }
+
   async saveDetails(details: ProfileDetails): Promise<ProfileDetails> {
     const data = {
       handle: details.handle,

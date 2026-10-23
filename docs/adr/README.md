@@ -50,6 +50,7 @@ Lightweight Nygard style — see the [template](0000-template.md). Number sequen
 | [0031](0031-progressive-profile-details-and-consent.md) | Progressive profile details and consent | Accepted | Optional "Kenalan dulu" fields, handle, marketing consent |
 | [0032](0032-threads-style-posts.md) | Threads-style posts | Accepted | Optional title, 4 photos, likes, one-level replies, signed-out photo preview |
 | [0033](0033-platform-settings.md) | Runtime platform settings | Accepted | DB-backed, registry-validated rules editable without a deploy |
+| [0034](0034-people-follows-and-public-profiles.md) | People, follows and public profiles | Accepted | One-way public follows, @handle profiles, people search, Following feed |
 
 > **Numbering note.** Some externally circulated topic lists number these decisions differently (e.g. "ADR-0001 Why NestJS, 0004 Why PostgreSQL"). The numbers above are canonical: 0001–0003 were accepted earlier and ADRs are never renumbered. Every topic from that list is covered — NestJS (0001), modular monolith (0002), PostgreSQL and Redis (0003), Prisma (0004), OpenAPI (0005), Docker (0006), GitHub Actions (0007), configuration (0008), errors (0009), logging (0010), validation (0011), versioning (0012), jobs (0013), observability (0014).
 

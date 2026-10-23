@@ -346,6 +346,7 @@ model ProfileHobbyContext {
 
   @@unique([userId, hobbyId])
   @@index([userId, updatedAt])
+  @@index([hobbyId, updatedAt(sort: Desc)], map: "profile_hobby_context_hobbyId_updatedAt_idx")
   @@map("profile_hobby_context")
 }
 
@@ -596,4 +597,16 @@ model PlatformSetting {
   updatedAt   DateTime @updatedAt @db.Timestamptz(3)
 
   @@map("platform_setting")
+}
+
+/// ADR-0034: who follows whom. Logical user references (no FK to identity).
+model PersonFollow {
+  followerId String   @db.Char(26)
+  followeeId String   @db.Char(26)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@id([followerId, followeeId])
+  @@index([followeeId, createdAt(sort: Desc)], map: "person_follow_followee_created_idx")
+  @@index([followerId, createdAt(sort: Desc)], map: "person_follow_follower_created_idx")
+  @@map("person_follow")
 }
