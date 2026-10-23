@@ -14,6 +14,7 @@ export class ReplyIdParamDto extends createZodDto(replyIdParamSchema) {}
 export const feedQuerySchema = z
   .object({
     hobbyId: ulid.optional(),
+    communityId: ulid.optional(),
     authorId: ulid.optional(),
     following: z
       .enum(['true', 'false'])

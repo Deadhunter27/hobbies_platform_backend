@@ -63,6 +63,7 @@ export class PrismaPostRepository implements PostRepository {
 
   async listPosts(input: {
     hobbyId: string | null;
+    communityId: string | null;
     authorId: string | null;
     authorIds: string[] | null;
     viewerId: string | null;
@@ -72,6 +73,9 @@ export class PrismaPostRepository implements PostRepository {
     const filters: Prisma.Sql[] = [Prisma.sql`c."status" = ${PUBLISHED}`];
     if (input.hobbyId) filters.push(Prisma.sql`c."hobbyId" = ${input.hobbyId}`);
     if (input.authorId) filters.push(Prisma.sql`c."authorId" = ${input.authorId}`);
+    if (input.communityId) {
+      filters.push(Prisma.sql`c."communityReferenceId" = ${input.communityId}`);
+    }
     if (input.authorIds) {
       if (input.authorIds.length === 0) return { data: [], nextCursor: null };
       filters.push(Prisma.sql`c."authorId" IN (${Prisma.join(input.authorIds)})`);

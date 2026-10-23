@@ -42,6 +42,7 @@ export class ListPostFeedUseCase {
     viewer: Actor | null,
     input: {
       hobbyId?: string;
+      communityId?: string;
       authorId?: string;
       following?: boolean;
       limit: number;
@@ -56,6 +57,7 @@ export class ListPostFeedUseCase {
     }
     const page = await this.repository.listPosts({
       hobbyId: input.hobbyId ?? null,
+      communityId: input.communityId ?? null,
       authorId: input.authorId ?? null,
       authorIds,
       viewerId: viewer?.id ?? null,

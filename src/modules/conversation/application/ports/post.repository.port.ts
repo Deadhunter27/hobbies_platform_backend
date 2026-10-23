@@ -36,6 +36,7 @@ export interface ReplyRef {
 export interface PostRepository {
   listPosts(input: {
     hobbyId: string | null;
+    communityId: string | null;
     authorId: string | null;
     /** Restrict to these authors (the Following feed); null = everyone. */
     authorIds: string[] | null;
