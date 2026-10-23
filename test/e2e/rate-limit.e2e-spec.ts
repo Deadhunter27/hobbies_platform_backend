@@ -1,13 +1,14 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
-import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { configureApp } from '../../src/bootstrap';
 import { newId } from '../../src/shared/utils/id';
 import { describeIfDb } from '../support/db-test.helper';
+import { useIsolatedClientIp } from '../support/e2e-client';
 
 describeIfDb('Redis-backed rate limiting e2e', () => {
   let app: INestApplication;
+  const client = useIsolatedClientIp(() => app);
   const targetEmail = `rate-limit-${newId().toLowerCase()}@example.com`;
 
   beforeAll(async () => {
@@ -22,7 +23,7 @@ describeIfDb('Redis-backed rate limiting e2e', () => {
   });
 
   function api() {
-    return request(app.getHttpServer());
+    return client();
   }
 
   it('returns the stable 429 envelope after the auth-login target budget is exhausted', async () => {

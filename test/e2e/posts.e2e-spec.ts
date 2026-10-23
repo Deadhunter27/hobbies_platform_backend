@@ -1,11 +1,11 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { configureApp } from '../../src/bootstrap';
 import { newId } from '../../src/shared/utils/id';
 import { describeIfDb } from '../support/db-test.helper';
+import { useIsolatedClientIp } from '../support/e2e-client';
 
 describeIfDb('Threads-style posts e2e (ADR-0032)', () => {
   let app: INestApplication;
@@ -16,8 +16,7 @@ describeIfDb('Threads-style posts e2e (ADR-0032)', () => {
   const users: Array<{ id: string; token: string }> = [];
   let postId: string;
   let topReplyId: string;
-
-  const http = () => request(app.getHttpServer());
+  const http = useIsolatedClientIp(() => app);
   const auth = (index: number) => ({ Authorization: `Bearer ${users[index]!.token}` });
 
   beforeAll(async () => {
@@ -41,7 +40,6 @@ describeIfDb('Threads-style posts e2e (ADR-0032)', () => {
         status: 'active',
       },
     });
-
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleRef.createNestApplication();
     configureApp(app);

@@ -1,14 +1,15 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { configureApp } from '../../src/bootstrap';
 import { newId } from '../../src/shared/utils/id';
 import { describeIfDb } from '../support/db-test.helper';
+import { useIsolatedClientIp } from '../support/e2e-client';
 
 describeIfDb('Community e2e', () => {
   let app: INestApplication;
+  const client = useIsolatedClientIp(() => app);
   const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL });
   const run = newId().toLowerCase();
   const email = `e2e-community-${run}@example.com`;
@@ -93,15 +94,12 @@ describeIfDb('Community e2e', () => {
     configureApp(app);
     await app.init();
 
-    const created = await request(app.getHttpServer())
+    const created = await client()
       .post('/api/v1/auth/register')
       .send({ email, password, displayName: 'E2E Runner' })
       .expect(201);
     userId = created.body.id;
-    const login = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
-      .send({ email, password })
-      .expect(200);
+    const login = await client().post('/api/v1/auth/login').send({ email, password }).expect(200);
     accessToken = login.body.accessToken;
   });
 
@@ -120,9 +118,7 @@ describeIfDb('Community e2e', () => {
   });
 
   it('exposes published community trust context without private identity fields', async () => {
-    const res = await request(app.getHttpServer())
-      .get(`/api/v1/communities/${communitySlug}`)
-      .expect(200);
+    const res = await client().get(`/api/v1/communities/${communitySlug}`).expect(200);
 
     expect(res.body.id).toBe(communityId);
     expect(res.body.people.memberCount).toBe(1);
@@ -137,19 +133,17 @@ describeIfDb('Community e2e', () => {
   });
 
   it('enriches Activity with community context but does not require membership to commit', async () => {
-    const detail = await request(app.getHttpServer())
-      .get(`/api/v1/activities/${activityId}`)
-      .expect(200);
+    const detail = await client().get(`/api/v1/activities/${activityId}`).expect(200);
     expect(detail.body.communityContext.id).toBe(communityId);
     expect(detail.body.communityContext.memberCount).toBe(1);
 
-    const before = await request(app.getHttpServer())
+    const before = await client()
       .get('/api/v1/me/community-memberships')
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200);
     expect(before.body.data).toEqual([]);
 
-    await request(app.getHttpServer())
+    await client()
       .put(`/api/v1/me/activity-commitments/${activityId}`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ state: 'committed', note: null })
@@ -157,7 +151,7 @@ describeIfDb('Community e2e', () => {
   });
 
   it('persists join and leave state for the authenticated user', async () => {
-    const joined = await request(app.getHttpServer())
+    const joined = await client()
       .put(`/api/v1/me/community-memberships/${communityId}`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ state: 'active' })
@@ -166,13 +160,13 @@ describeIfDb('Community e2e', () => {
     expect(joined.body.state).toBe('active');
     expect(joined.body.displayName).toBe('E2E Runner');
 
-    const listed = await request(app.getHttpServer())
+    const listed = await client()
       .get('/api/v1/me/community-memberships')
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200);
     expect(listed.body.data).toHaveLength(1);
 
-    const left = await request(app.getHttpServer())
+    const left = await client()
       .put(`/api/v1/me/community-memberships/${communityId}`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ state: 'left' })
@@ -182,6 +176,6 @@ describeIfDb('Community e2e', () => {
   });
 
   it('requires authentication for own membership operations', async () => {
-    await request(app.getHttpServer()).get('/api/v1/me/community-memberships').expect(401);
+    await client().get('/api/v1/me/community-memberships').expect(401);
   });
 });

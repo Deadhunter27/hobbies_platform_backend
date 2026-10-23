@@ -1,11 +1,11 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { configureApp } from '../../src/bootstrap';
 import { newId } from '../../src/shared/utils/id';
 import { describeIfDb } from '../support/db-test.helper';
+import { useIsolatedClientIp } from '../support/e2e-client';
 
 describeIfDb('People, follows and the Following feed e2e (ADR-0034)', () => {
   let app: INestApplication;
@@ -14,7 +14,7 @@ describeIfDb('People, follows and the Following feed e2e (ADR-0034)', () => {
   const categoryId = newId();
   const hobbyId = newId();
   const users: Array<{ id: string; token: string; handle: string }> = [];
-  const http = () => request(app.getHttpServer());
+  const http = useIsolatedClientIp(() => app);
   const auth = (index: number) => ({ Authorization: `Bearer ${users[index]!.token}` });
 
   beforeAll(async () => {

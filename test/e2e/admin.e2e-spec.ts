@@ -1,14 +1,15 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { configureApp } from '../../src/bootstrap';
 import { newId } from '../../src/shared/utils/id';
 import { describeIfDb } from '../support/db-test.helper';
+import { useIsolatedClientIp } from '../support/e2e-client';
 
 describeIfDb('W10 admin operability e2e', () => {
   let app: INestApplication;
+  const client = useIsolatedClientIp(() => app);
   const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL });
   const run = newId().toLowerCase();
   const email = `e2e-admin-${run}@example.com`;
@@ -27,16 +28,13 @@ describeIfDb('W10 admin operability e2e', () => {
     configureApp(app);
     await app.init();
 
-    const created = await request(app.getHttpServer())
+    const created = await client()
       .post('/api/v1/auth/register')
       .send({ email, password, displayName: 'W10 Operator' })
       .expect(201);
     userId = created.body.id;
 
-    const login = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
-      .send({ email, password })
-      .expect(200);
+    const login = await client().post('/api/v1/auth/login').send({ email, password }).expect(200);
     accessToken = login.body.accessToken;
   });
 
@@ -64,19 +62,16 @@ describeIfDb('W10 admin operability e2e', () => {
       sortOrder: 999,
     };
 
-    await request(app.getHttpServer())
-      .post('/api/v1/admin/catalog/categories')
-      .send(payload)
-      .expect(401);
+    await client().post('/api/v1/admin/catalog/categories').send(payload).expect(401);
 
-    const denied = await request(app.getHttpServer())
+    const denied = await client()
       .post('/api/v1/admin/catalog/categories')
       .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(403);
     expect(denied.body.error.code).toBe('ADMIN_ACCESS_DENIED');
 
-    const moderationDenied = await request(app.getHttpServer())
+    const moderationDenied = await client()
       .post(`/api/v1/admin/conversations/${conversationId}/archive`)
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
@@ -86,7 +81,7 @@ describeIfDb('W10 admin operability e2e', () => {
   it('lets live staff operate the minimum W10 Catalog + curation + moderation surfaces', async () => {
     await prisma.identityUser.update({ where: { id: userId }, data: { globalRole: 'staff' } });
 
-    const category = await request(app.getHttpServer())
+    const category = await client()
       .post('/api/v1/admin/catalog/categories')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
@@ -99,7 +94,7 @@ describeIfDb('W10 admin operability e2e', () => {
       .expect(201);
     categoryId = category.body.id;
 
-    const hobby = await request(app.getHttpServer())
+    const hobby = await client()
       .post('/api/v1/admin/catalog/hobbies')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
@@ -115,7 +110,7 @@ describeIfDb('W10 admin operability e2e', () => {
     hobbyId = hobby.body.id;
     expect(hobby.body.status).toBe('draft');
 
-    const activated = await request(app.getHttpServer())
+    const activated = await client()
       .put(`/api/v1/admin/catalog/hobbies/${hobbyId}`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
@@ -174,17 +169,17 @@ describeIfDb('W10 admin operability e2e', () => {
       )
     `;
 
-    await request(app.getHttpServer())
+    await client()
       .put(`/api/v1/admin/activities/${activityId}/status`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ status: 'published' })
       .expect(200);
-    await request(app.getHttpServer())
+    await client()
       .put(`/api/v1/admin/communities/${communityId}/status`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ status: 'published' })
       .expect(200);
-    await request(app.getHttpServer())
+    await client()
       .post(`/api/v1/admin/conversations/${conversationId}/archive`)
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200);
@@ -200,7 +195,7 @@ describeIfDb('W10 admin operability e2e', () => {
     `;
     expect(archived[0]?.status).toBe('archived');
 
-    await request(app.getHttpServer())
+    await client()
       .post(`/api/v1/admin/conversations/${conversationId}/publish`)
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200);
