@@ -22,6 +22,7 @@ import { ProgressModule } from '@modules/progress';
 import { CommunityModule } from '@modules/community';
 import { CheckInModule } from '@modules/checkin';
 import { ConversationModule } from '@modules/conversation';
+import { PeopleModule } from '@modules/people';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ConversationModule } from '@modules/conversation';
     CommunityModule,
     CheckInModule,
     ConversationModule,
+    PeopleModule,
     AdminModule,
   ],
   providers: [

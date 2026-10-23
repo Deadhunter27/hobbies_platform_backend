@@ -9,6 +9,16 @@ export interface PublicPersonSummary {
   avatarUrl: string | null;
 }
 
+/** The public part of a profile page (ADR-0034): never birth year, gender or consent. */
+export interface PublicProfileDetails {
+  userId: string;
+  handle: string | null;
+  avatarUrl: string | null;
+  instagramHandle: string | null;
+  tiktokHandle: string | null;
+  hobbyIds: string[];
+}
+
 /**
  * Public, read-only view of people for other modules (feeds, replies,
  * communities). Only the handle and avatar leave the profile module; birth
@@ -42,5 +52,33 @@ export class PublicProfileService {
         ];
       }),
     );
+  }
+
+  async details(userId: string): Promise<PublicProfileDetails> {
+    const [details, contexts] = await Promise.all([
+      this.repository.findDetails(userId),
+      this.repository.listHobbyContexts(userId),
+    ]);
+    return {
+      userId,
+      handle: details?.handle ?? null,
+      avatarUrl: await this.media.signedUrl(details?.avatarMediaId ?? null),
+      instagramHandle: details?.instagramHandle ?? null,
+      tiktokHandle: details?.tiktokHandle ?? null,
+      hobbyIds: contexts.map((context) => context.hobbyId),
+    };
+  }
+
+  async userIdForHandle(handle: string): Promise<string | null> {
+    const details = await this.repository.findDetailsByHandle(handle.replace(/^@/, ''));
+    return details?.userId ?? null;
+  }
+
+  searchHandles(query: string, limit: number): Promise<string[]> {
+    return this.repository.searchHandles(query.replace(/^@/, ''), limit);
+  }
+
+  usersInHobby(hobbyId: string, limit: number, excludeUserIds: string[]): Promise<string[]> {
+    return this.repository.listUsersInHobby(hobbyId, limit, excludeUserIds);
   }
 }
